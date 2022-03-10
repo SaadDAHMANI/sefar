@@ -6,6 +6,6 @@
 
  Sefar supports currently : 
 
-- [X] Particle Swarm Optimization (PSO);   
-- [X] Equilibrium optimizer (EO);
+- [] Particle Swarm Optimization (PSO);   
+- [] Equilibrium optimizer (EO);
 
