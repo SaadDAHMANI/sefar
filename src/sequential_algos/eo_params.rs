@@ -52,6 +52,34 @@ impl<'a> Parameters for EOparams<'a> {
     }        
 }
 
+#[cfg(test)]
+mod eo_params_tests {
+    
+    use super::*;
 
+    #[test]
+    fn test_1(){
+        let d : usize = 5;
+        let n : usize =10;
+        let k : usize = 100;
+        
+        let ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
+        let lb = ub.clone();
+        
+        let params = EOparams{
+            population_size : n,
+            max_iterations : k,
+            dimensions : d,
+            lower_bounds : lb.as_slice(),
+            upper_bounds : ub.as_slice(),
+            a1 : 2.0f64,
+            a2 : 1.0f64,
+            gp : 0.5f64,
+        };
+
+        let slice_ub = ub.as_slice();
+        assert_eq!(params.upper_bounds, slice_ub);
+    }
+}
 
 
