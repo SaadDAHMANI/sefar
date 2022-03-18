@@ -58,7 +58,7 @@ mod eo_params_tests {
     use super::*;
 
     #[test]
-    fn test_1(){
+    fn test_ub_slice(){
         let d : usize = 5;
         let n : usize =10;
         let k : usize = 100;
@@ -77,7 +77,9 @@ mod eo_params_tests {
             gp : 0.5f64,
         };
 
-        let slice_ub = ub.as_slice();
+        let sl_ub =  vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
+        let slice_ub = sl_ub.as_slice();
+        
         assert_eq!(params.upper_bounds, slice_ub);
     }
 }
