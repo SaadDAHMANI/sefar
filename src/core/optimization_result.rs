@@ -2,7 +2,8 @@ use std::fmt::Display;
 use std::time::Duration;
 use crate::core::genome::Genome;
 
-pub struct OptimizationResult{
+#[derive(Debug, Clone)]
+pub struct OptimizationResult {
     pub best_genome : Option<Genome>,
     pub best_fitness : Option<f64>,
     pub convergence_trend : Option<Vec<f64>>,
