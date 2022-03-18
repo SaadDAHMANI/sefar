@@ -43,13 +43,15 @@ impl<'a> Parameters for EOparams<'a> {
         self.max_iterations
     }
 
-    fn get_lower_bounds(&self)-> &[f64]{
-        self.lower_bounds
+    fn get_lower_bounds(&self)-> Vec<f64>{
+        self.lower_bounds.to_vec()
     }
 
-    fn get_upper_bounds(&self)-> &[f64]{
-        self.upper_bounds
+    fn get_upper_bounds(&self)-> Vec<f64>{
+        self.upper_bounds.to_vec()
     }        
 }
+
+
 
 
