@@ -22,8 +22,9 @@ pub struct EO<'a, T : Problem> {
 }
 
 impl<'a, T : Problem> EO<'a, T>{
+
     pub fn new(settings :&'a EOparams, problem : &'a mut T )->Self{
-        
+       
         let result = OptimizationResult{
             best_genome : None,
             best_fitness :None,

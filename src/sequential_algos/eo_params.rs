@@ -26,7 +26,39 @@ impl<'a> EOparams<'a>{
             a2,
             gp,
         }
-    }    
+    }
+    
+    ///
+    /// Return default values of parameters, as following :
+    /// 
+    /// ~~~
+    /// 
+    ///  use sefar::sequential_algos::eo_params::EOparams;
+    /// 
+    ///  EOparams{
+    ///     population_size : 10,
+    ///     dimensions : 3,
+    ///     max_iterations : 100,
+    ///     lower_bounds : &[100.0f64, 100.0, 100.0],
+    ///     upper_bounds : &[-100.0f64, -100.0, -100.0],
+    ///     a1 : 2.0f64,
+    ///     a2 : 1.0f64,
+    ///     gp : 0.5f64,
+    /// };
+    /// ~~~
+    /// 
+    pub fn default()->Self{
+        EOparams{
+            population_size : 10,
+            dimensions : 3,
+            max_iterations : 100,
+            lower_bounds : &[100.0f64, 100.0, 100.0],
+            upper_bounds : &[-100.0f64, -100.0, -100.0],
+            a1 : 2.0f64,
+            a2 : 1.0f64,
+            gp : 0.5f64,
+        }
+    }
 }
 
 impl<'a> Parameters for EOparams<'a> {
@@ -81,6 +113,14 @@ mod eo_params_tests {
         let slice_ub = sl_ub.as_slice();
         
         assert_eq!(params.upper_bounds, slice_ub);
+    }
+
+
+    #[test]
+    fn test_default_fn(){
+        let p = EOparams::default();
+        assert_eq!(p.a1, 2.0f64);
+        assert_eq!(p.a2, 1.0f64);
     }
 }
 

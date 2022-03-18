@@ -1,5 +1,6 @@
 
 pub trait Parameters {
+   
     fn get_population_size(&self)->usize {
           10usize
     }
