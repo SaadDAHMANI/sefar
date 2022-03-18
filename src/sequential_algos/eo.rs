@@ -13,7 +13,9 @@ use crate::core::problem::Problem;
 use crate::core::optimization_result::OptimizationResult;
 use crate::common::*;
 
-
+///
+/// Sequential Equilibrium Optimizer (EO)
+/// 
 #[derive(Debug)]
 pub struct EO<'a, T : Problem> {
      pub problem : &'a mut T,
@@ -44,6 +46,11 @@ impl<'a, T : Problem> EO<'a, T>{
 impl<'a, T: Problem> EOA for EO<'a, T> {
     
     fn run(&mut self)-> OptimizationResult{
+
+
+
+
+
 
         let result = OptimizationResult{
             best_genome : None,
