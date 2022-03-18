@@ -1,3 +1,5 @@
+use core::slice::SlicePattern;
+
 
 pub trait Parameters {
     fn get_population_size(&self)->usize {
@@ -12,21 +14,39 @@ pub trait Parameters {
         1usize
     }
 
-    fn get_lower_bounds(&self)->Vec<f64>{
+    fn get_lower_bounds(&self)->&[f64]{
         let d = self.get_dimensions();
         let mut lb = Vec::new();
         for _i in 0..d{
-            lb.push(-100.0f64);
+           lb.push(-100.0f64);
         } 
-        lb
+        lb.as_slice()
     }
 
-    fn get_upper_bounds(&self)->Vec<f64>{
+    //fn get_lower_bounds(&self)->Vec<f64>{
+    //    let d = self.get_dimensions();
+    //    let mut lb = Vec::new();
+    //    for _i in 0..d{
+    //        lb.push(-100.0f64);
+    //    } 
+    //    lb
+    //}
+
+    fn get_upper_bounds(&self)->&[f64]{
         let d = self.get_dimensions();
         let mut ub = Vec::new();
         for _i in 0..d{
             ub.push(100.0f64);
         } 
-        ub
-    }   
+        ub.as_slice()
+    }       
+
+    //fn get_upper_bounds(&self)->Vec<f64>{
+    //    let d = self.get_dimensions();
+    //    let mut ub = Vec::new();
+    //    for _i in 0..d{
+    //        ub.push(100.0f64);
+    //    } 
+    //    ub
+    //}   
 }  

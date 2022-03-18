@@ -27,21 +27,21 @@ impl Genome {
             fitness : Some(f64::MAX),        
         };
 
-        return genom;
+        genom
     }
 
     pub fn get_dimensions(&self)->usize{
         self.genes.len()
     }
 
-    pub fn from(the_id : usize, solution : &Vec<f64>, fitnes : f64)->Genome{
+    pub fn from(the_id : usize, solution : &[f64], fitnes : f64)->Genome{
        let genom = Genome{
             id : the_id,
-            genes : solution.clone(), 
+            genes : solution.to_owned(), 
             fitness : Some(fitnes),        
         };
 
-        return genom;
+        genom
     }
 
 
@@ -73,7 +73,7 @@ pub fn cmp_genome(a: &Genome, b: &Genome) -> Ordering {
             return Ordering::Greater;
         }
 
-     return Ordering::Equal;
+     Ordering::Equal
     }
 
 }

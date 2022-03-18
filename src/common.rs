@@ -6,7 +6,7 @@ use crate::core::parameters::Parameters;
 use crate::core::genome::Genome;
 
 
-
+#[allow(dead_code)]
 pub fn initialize<P: Parameters>(params: &P)-> Vec<Genome>{
 
     let n: usize = params.get_population_size();
@@ -41,6 +41,7 @@ pub fn copy_genome(source : &Genome, destination : &mut Genome){
     }
 }
 
+#[allow(dead_code)]
 pub fn randomize(randvect : &mut Vec<f64>) {    
     let between = Uniform::from(0.0..=1.0);
     let mut rng = rand::thread_rng();
@@ -50,18 +51,21 @@ pub fn randomize(randvect : &mut Vec<f64>) {
     }
 }
 
+#[allow(dead_code)]
 pub fn copy_vector(source : & Vec<f64>, destination : &mut Vec<f64>){
     for i in 0..source.len() {
         destination[i]=source[i];
     }
 }
 
+#[allow(dead_code)]
 pub fn copy_vector2genome(source : & Vec<f64>, destination : &mut Genome){
     for i in 0..source.len() {
         destination.genes[i]=source[i];
     }
 }
 
+#[allow(dead_code)]
 pub fn copy_matrix(source : & Vec<Genome>, destination : &mut Vec<Vec<f64>>) {
         
     let ni = source.len();
@@ -74,6 +78,7 @@ pub fn copy_matrix(source : & Vec<Genome>, destination : &mut Vec<Vec<f64>>) {
      }
 }
 
+#[allow(dead_code)]
 pub fn check_parameters<P: Parameters>(params : &P)-> Result<(), String> {
     
     let mut errors : usize = 0;

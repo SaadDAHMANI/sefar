@@ -16,7 +16,7 @@ pub trait EOA {
              computation_time : None,
              err_report : None, 
         };
-        return result; 
+        result 
     }
 
     ///

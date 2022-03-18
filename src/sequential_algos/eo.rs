@@ -24,7 +24,7 @@ pub struct EO<'a, T : Problem> {
 impl<'a, T : Problem> EO<'a, T>{
     pub fn new(settings :&'a EOparams, problem : &'a mut T )->Self{
         
-        let mut result = OptimizationResult{
+        let result = OptimizationResult{
             best_genome : None,
             best_fitness :None,
             convergence_trend : None,
@@ -33,7 +33,7 @@ impl<'a, T : Problem> EO<'a, T>{
         };
 
         EO { 
-             problem: problem,
+             problem,
              params: settings,
              optimization_result: result, 
            }
@@ -44,7 +44,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
     
     fn run(&mut self)-> OptimizationResult{
 
-        let mut result = OptimizationResult{
+        let result = OptimizationResult{
             best_genome : None,
             best_fitness :None,
             convergence_trend : None,
