@@ -136,11 +136,14 @@ impl<'a, T : Problem> EO<'a, T>{
 impl<'a, T: Problem> EOA for EO<'a, T> {
     
     fn run(&mut self)-> OptimizationResult{
+        
+        let mut iter : usize = 0;
+
+        while iter < self.params.max_iterations {
 
 
-
-
-
+             iter +=1;  
+        }
 
         let result = OptimizationResult{
             best_genome : None,
