@@ -18,9 +18,5 @@ pub trait EOA {
         };
         result 
     }
-
-    ///
-    /// Run algorithm for one epoch ()
-    ///
-    fn run_epoch(&mut self) {}   
+    
 }
