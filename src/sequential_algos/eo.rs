@@ -274,7 +274,10 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 computation_time : Some(duration),
                 err_report : None,
             };
-            return result;
+
+            // copy result to EO struct
+            self.optimization_result = result.clone();
+            result
       
          }
 
@@ -318,7 +321,7 @@ impl<'a> EOparams<'a>{
     /// 
     /// ~~~
     /// 
-    ///  use sefar::sequential_algos::eo_params::EOparams;
+    ///  use sefar::sequential_algos::eo::*;
     /// 
     ///  EOparams{
     ///     population_size : 10,
@@ -337,8 +340,8 @@ impl<'a> EOparams<'a>{
             population_size : 10,
             dimensions : 3,
             max_iterations : 100,
-            lower_bounds : &[100.0f64, 100.0, 100.0],
-            upper_bounds : &[-100.0f64, -100.0, -100.0],
+            lower_bounds : &[-100.0f64, -100.0, -100.0],
+            upper_bounds : &[100.0f64, 100.0, 100.0],
             a1 : 2.0f64,
             a2 : 1.0f64,
             gp : 0.5f64,

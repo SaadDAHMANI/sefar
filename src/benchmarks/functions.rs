@@ -2,7 +2,12 @@ use crate::core::problem::Problem;
 //use crate::core::genome::Genome;
 
 #[derive(Debug,Clone)]
+
+///
+/// Sphere enchmark function
+/// 
 pub struct F1{}
+
 impl Problem for F1{
     fn objectivefunction(&mut self, genome : &[f64]) ->f64 {
         let fitness = genome.iter().fold(0.0f64, |sum, g| sum + g.powi(2));
