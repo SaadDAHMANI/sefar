@@ -15,13 +15,6 @@ mod tests {
     //use super::*;
 
     #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
-    }
-
-
-    #[test]
     fn eo_f1_test1(){
         let settings : EOparams = EOparams::default();
         //settings.population_size = 20;
@@ -33,10 +26,9 @@ mod tests {
         
         let result = eo.run();
 
-        let bestfit = result.best_fitness.unwrap();
+        //let bestfit = result.best_fitness.unwrap();
 
-
-        assert_eq!(result.best_fitness, Some(0.0001));
+        assert_ne!(result.best_fitness, None);
         
      }
 }
