@@ -21,13 +21,11 @@ impl Genome {
             gens.push(0.0f64);
         };
         
-       let genom = Genome{
+        Genome{
             id : genome_id,
             genes : gens, 
             fitness : Some(f64::MAX),        
-        };
-
-        genom
+        }
     }
 
     pub fn get_dimensions(&self)->usize{

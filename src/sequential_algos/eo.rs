@@ -155,22 +155,28 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                     if fitness[i] < ceq1_fit {
                         ceq1_index = i;
                         ceq1_fit= fitness[i];
-                        copy_vector(&c[i].genes, &mut ceq1);
+                        //copy_vector(&c[i].genes, &mut ceq1);
+                        ceq1[..dim].clone_from_slice(&c[i].genes[..dim]);                        
                     }
                     else if (fitness[i] < ceq2_fit) & (fitness[i] > ceq1_fit) {
                         //ceq2_index = i;
                         ceq2_fit= fitness[i];
-                        copy_vector(&c[i].genes, &mut ceq2);            
+                        //copy_vector(&c[i].genes, &mut ceq2);
+                        ceq2[..dim].clone_from_slice(&c[i].genes[..dim]);            
                     }
                     else if (fitness[i] < ceq3_fit) & (fitness[i] > ceq2_fit) & (fitness[i] > ceq1_fit) {
                         //ceq3_index = i;
                         ceq3_fit= fitness[i];
-                        copy_vector(&c[i].genes, &mut ceq3);
+                        //copy_vector(&c[i].genes, &mut ceq3);
+                        ceq3[..dim].clone_from_slice(&c[i].genes[..dim]);
+
                     }
                     else if (fitness[i] < ceq4_fit) & (fitness[i] > ceq3_fit) & (fitness[i] > ceq2_fit) & (fitness[i] > ceq1_fit) {
                         //ceq4_index = i;
                         ceq4_fit= fitness[i];
-                        copy_vector(&c[i].genes, &mut ceq4);
+                        //copy_vector(&c[i].genes, &mut ceq4);
+                        ceq4[..dim].clone_from_slice(&c[i].genes[..dim]);
+                        
                     }
                 }
 
@@ -188,34 +194,35 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 //-- Memory saving---
             
                 if iter == 0 {
-                    copy_vector(&fitness, &mut fit_old);
+                    //copy_vector(&fitness, &mut fit_old);
+                    fit_old[..particles_no].clone_from_slice(&fitness[..particles_no]);
                     copy_matrix(&c, &mut c_old);
                 }
             
                 for i in 0..particles_no {
                     if fit_old[i] < fitness[i] {
-                        fitness[i]=fit_old[i];
-                        copy_vector2genome(&c_old[i], &mut c[i]);
+                        fitness[i] = fit_old[i];
+                        //copy_vector2genome(&c_old[i], &mut c[i]);
+                        c[i].genes[..dim].clone_from_slice(&c_old[i][..dim]);
                     }
                 }
             
                 copy_matrix(&c, &mut c_old);
-                copy_vector(&fitness, &mut fit_old);
-            
+                //copy_vector(&fitness, &mut fit_old);
+                fit_old[..particles_no].clone_from_slice(&fitness[..particles_no]);
                 // compute averaged candidate Ceq_ave 
                 for i in 0..dim {
                     ceq_ave[i] = (ceq1[i] + ceq2[i] + ceq3[i] + ceq4[i])/4.0;    
                 }
             
                 //Equilibrium pool
-                for i in 0..dim {
-                    c_pool[0][i] = ceq1[i];
-                    c_pool[1][i] = ceq2[i];
-                    c_pool[2][i] = ceq3[i];
-                    c_pool[3][i] = ceq4[i];
-                    c_pool[4][i] = ceq_ave[i];
-                }
-            
+                c_pool[0][..dim].clone_from_slice(&ceq1[..dim]);
+                c_pool[1][..dim].clone_from_slice(&ceq2[..dim]);
+                c_pool[2][..dim].clone_from_slice(&ceq3[..dim]);
+                c_pool[3][..dim].clone_from_slice(&ceq4[..dim]);
+                c_pool[4][..dim].clone_from_slice(&ceq_ave[..dim]);
+
+
                 // comput t using Eq 09
                 let tmpt = (iter / max_iter) as f64;
                 let t : f64 = (1.0 - tmpt).powf(a2*tmpt);
@@ -231,7 +238,9 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                     // Ceq=C_pool(randi(size(C_pool,1)),:); 
                     // random selection of one candidate from the pool
                     _index = interval.sample(&mut rng);
-                    copy_vector(&c_pool[_index], &mut ceq);
+                    
+                    //copy_vector(&c_pool[_index], &mut ceq);
+                    ceq[..dim].clone_from_slice(&c_pool[_index][..dim]);
                     //--------------------------------------------------------
                     // compute F using Eq(11) 
                     for j in 0..dim {

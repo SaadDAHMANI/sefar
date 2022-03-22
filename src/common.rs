@@ -46,23 +46,13 @@ pub fn randomize(randvect : &mut Vec<f64>) {
     let between = Uniform::from(0.0..=1.0);
     let mut rng = rand::thread_rng();
             
-    for i in 0..randvect.len() {
-        randvect[i]=between.sample(&mut rng);
-    }
-}
+    for item in randvect.into_iter() {
+        *item = between.sample(&mut rng);
+    } 
 
-#[allow(dead_code)]
-pub fn copy_vector(source : & Vec<f64>, destination : &mut Vec<f64>){
-    for i in 0..source.len() {
-        destination[i]=source[i];
-    }
-}
-
-#[allow(dead_code)]
-pub fn copy_vector2genome(source : & Vec<f64>, destination : &mut Genome){
-    for i in 0..source.len() {
-        destination.genes[i]=source[i];
-    }
+    //for i in 0..randvect.len() {
+    //    randvect[i]=between.sample(&mut rng);
+    //}
 }
 
 #[allow(dead_code)]
