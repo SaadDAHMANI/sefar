@@ -46,7 +46,7 @@ pub fn randomize(randvect : &mut Vec<f64>) {
     let between = Uniform::from(0.0..=1.0);
     let mut rng = rand::thread_rng();
             
-    for item in randvect.into_iter() {
+    for item in randvect.iter_mut() {
         *item = between.sample(&mut rng);
     } 
 
@@ -56,7 +56,7 @@ pub fn randomize(randvect : &mut Vec<f64>) {
 }
 
 #[allow(dead_code)]
-pub fn copy_matrix(source : & Vec<Genome>, destination : &mut Vec<Vec<f64>>) {
+pub fn copy_matrix(source : &[Genome], destination : &mut Vec<Vec<f64>>) {
         
     let ni = source.len();
     let nj = source[0].get_dimensions();
@@ -89,12 +89,12 @@ pub fn check_parameters<P: Parameters>(params : &P)-> Result<(), String> {
         errors +=1;
     }
 
-    if params.get_lower_bounds().len() == 0 {
+    if params.get_lower_bounds().is_empty() {
         msg = format!("{} Lower_bounds length must be greater than 0!; \n", msg);
         errors +=1;
     }
 
-    if params.get_upper_bounds().len() == 0 {
+    if params.get_upper_bounds().is_empty() {
         msg = format!("{} Upper_bounds length must be greater than 0!; \n", msg);
         errors +=1;
     }

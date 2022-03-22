@@ -33,13 +33,11 @@ impl Genome {
     }
 
     pub fn from(the_id : usize, solution : &[f64], fitnes : f64)->Genome{
-       let genom = Genome{
+       Genome{
             id : the_id,
             genes : solution.to_owned(), 
             fitness : Some(fitnes),        
-        };
-
-        genom
+        }
     }
 
 
