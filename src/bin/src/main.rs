@@ -6,16 +6,7 @@ use sefar::core::eoa::EOA;
 
 fn main() {
     println!("Hello, sefar !");
-     
-    fn f1(x : i32)-> i32 {
-        x+10i32
-    }
-
-    let a : i32 = 23;
-    let b = f1(a);
-    println!("b : {:?}", b);
-
-    //eo_f1_test1();
+    eo_f1_test1();
 }
 
 #[allow(dead_code)]
