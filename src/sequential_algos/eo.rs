@@ -44,10 +44,25 @@ impl<'a, T : Problem> EO<'a, T>{
              params: settings,
              optimization_result: result,            
         }
-    } 
+    }
+
+    fn randomize(&self, randvect : &mut Vec<f64>) {    
+        let between = Uniform::from(0.0..=1.0);
+        let mut rng = rand::thread_rng();
+                
+        for item in randvect.iter_mut() {
+            *item = between.sample(&mut rng);
+        }     
+    }
+ 
 }
 
 impl<'a, T: Problem> EOA for EO<'a, T> {
+
+    fn get_parameters<P: Parameters>(&self)->Option<P> {
+         //Some(*self.params.clone().to_owned())
+        None    
+    }
     
     fn run(&mut self)-> OptimizationResult{
         
@@ -56,7 +71,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
     //check paramaters
     //let params = self.params.clone();
     
-    match check_parameters(self.params) {
+    match EO::<'a, T>::check_parameters(self.params) {
 
         Err(error) => OptimizationResult::get_none(error),
         Ok(()) =>
@@ -133,7 +148,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
             //let chronos = Instant::now();
             
             //C=initialization(Particles_no,dim,ub,lb);
-            let mut c =initialize(self.params);
+            let mut c = self.initialize(self.params);
     
             // the main loop of EO
             while iter < max_iter {
@@ -231,8 +246,8 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 
                 for i in 0..particles_no {
             
-                    randomize(&mut lambda);        //  lambda=rand(1,dim);  lambda in Eq(11)
-                    randomize(&mut r);             //  r=rand(1,dim);  r in Eq(11  
+                    self.randomize(&mut lambda);        //  lambda=rand(1,dim);  lambda in Eq(11)
+                    self.randomize(&mut r);             //  r=rand(1,dim);  r in Eq(11  
                             
                     //-------------------------------------------------------
                     // Ceq=C_pool(randi(size(C_pool,1)),:); 
@@ -248,8 +263,8 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 }
             
                 // r1 and r2 to use them in Eq(15)
-                    randomize(&mut r1);
-                    randomize(&mut r2);
+                    self.randomize(&mut r1);
+                    self.randomize(&mut r2);
             
                 for j in 0..dim {
                     // Eq. 15

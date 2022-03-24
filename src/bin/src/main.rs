@@ -18,6 +18,7 @@ fn main() {
     //eo_f1_test1();
 }
 
+#[allow(dead_code)]
 fn eo_f1_test1(){
     
     let dim : usize =30;
