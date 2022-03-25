@@ -278,7 +278,6 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 computation_time : Some(duration),
                 err_report : None,
             };
-
             // copy result to EO struct
             self.optimization_result = result.clone();
             result

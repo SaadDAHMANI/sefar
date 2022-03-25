@@ -2,11 +2,18 @@
 use sefar::benchmarks::functions::F1;
 use sefar::sequential_algos::eo::EO;
 use sefar::sequential_algos::eo::EOparams;
+use sefar::sequential_algos::pso::PSO;
+use sefar::sequential_algos::pso::PSOparams;
 use sefar::core::eoa::EOA;
 
 fn main() {
     println!("Hello, sefar !");
+    
     eo_f1_test1();
+
+    println!("_______________________________________________");
+
+    peo_f1_test1();
 }
 
 #[allow(dead_code)]
@@ -36,5 +43,35 @@ fn eo_f1_test1(){
     println!("Computation time : {:?}", result.computation_time);
     println!("Err : {:?}", result.err_report);
 }
+
+
+#[allow(dead_code)]
+fn peo_f1_test1(){
+    
+    let dim : usize =30;
+
+    let mut settings : PSOparams = PSOparams::default();
+    
+    settings.population_size = 30;
+    settings.dimensions = dim;    
+    settings.max_iterations = 500; 
+    
+    let lb =vec![-100.0f64; dim];
+    let ub =vec![100.0f64; dim];
+
+    settings.lower_bounds = lb.as_slice();
+    settings.upper_bounds = ub.as_slice();    
+
+    let mut fo = F1 {};
+
+    let mut eo : PSO<F1> = PSO::new(&settings, &mut fo);
+    
+    let result = eo.run();
+       
+    println!("PSO result : \n best fitness : {:?} \n best genome : {:?}", result.best_fitness, result.best_genome);
+    println!("Computation time : {:?}", result.computation_time);
+    println!("Err : {:?}", result.err_report);
+}
+
 
 
