@@ -93,4 +93,15 @@ pub trait EOA {
             Ok(())
         }      
     }
+
+    fn randomize(randvect : &mut Vec<f64>) {    
+        let between = Uniform::from(0.0..=1.0);
+        let mut rng = rand::thread_rng();
+                
+        for item in randvect.iter_mut() {
+            *item = between.sample(&mut rng);
+        }     
+    }
+
+
 }

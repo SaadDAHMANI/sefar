@@ -3,7 +3,7 @@
 // 
  
 extern crate rand;
-use rand::distributions::{Distribution, Uniform};
+//use rand::distributions::{Distribution, Uniform};
 //use rand::prelude::ThreadRng;
 use std::time::Instant;
 
@@ -12,7 +12,7 @@ use crate::core::genome::Genome;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
 use crate::core::optimization_result::OptimizationResult;
-use crate::common::*;
+//use crate::common::*;
 
 pub struct PSO<'a, T: Problem> {
     pub problem : &'a mut T,
@@ -22,15 +22,20 @@ pub struct PSO<'a, T: Problem> {
 
 impl<'a, T : Problem> PSO<'a, T> {
 
-
-
-    fn randomize(&self, randvect : &mut Vec<f64>) {    
-        let between = Uniform::from(0.0..=1.0);
-        let mut rng = rand::thread_rng();
-                
-        for item in randvect.iter_mut() {
-            *item = between.sample(&mut rng);
-        }     
+    pub fn new(settings :&'a PSOparams, problem : &'a mut T )->Self{       
+        let result = OptimizationResult{
+            best_genome : None,
+            best_fitness :None,
+            convergence_trend : None,
+            computation_time : None,
+            err_report : None, 
+        };
+       
+        PSO{ 
+             problem,
+             params: settings,
+             optimization_result: result,            
+        }
     }
 } 
 
@@ -119,8 +124,8 @@ impl<'a, T: Problem> EOA for PSO <'a, T> {
                     let w = w_max - ((tf64*(w_max - w_min))/ max_iterf64);
                 
                     for k in 0..nop {
-                        self.randomize(&mut rand1);
-                        self.randomize(&mut rand2);
+                        PSO::<'a, T>::randomize(&mut rand1);
+                        PSO::<'a, T>::randomize(&mut rand2);
 
                         for j in 0..dim {
                             v[k][j] = (w*v[k][j]) + (c1*rand1[j]*(pbest_x[k].genes[j]-particles[k].genes[j])) 

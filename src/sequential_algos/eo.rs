@@ -26,8 +26,7 @@ pub struct EO<'a, T : Problem> {
 
 impl<'a, T : Problem> EO<'a, T>{
 
-    pub fn new(settings :&'a EOparams, problem : &'a mut T )->Self{
-       
+    pub fn new(settings :&'a EOparams, problem : &'a mut T )->Self{       
         let result = OptimizationResult{
             best_genome : None,
             best_fitness :None,
@@ -41,17 +40,7 @@ impl<'a, T : Problem> EO<'a, T>{
              params: settings,
              optimization_result: result,            
         }
-    }
-
-    fn randomize(&self, randvect : &mut Vec<f64>) {    
-        let between = Uniform::from(0.0..=1.0);
-        let mut rng = rand::thread_rng();
-                
-        for item in randvect.iter_mut() {
-            *item = between.sample(&mut rng);
-        }     
-    }
- 
+    }   
 }
 
 impl<'a, T: Problem> EOA for EO<'a, T> {
@@ -237,8 +226,8 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 
                 for i in 0..particles_no {
             
-                    self.randomize(&mut lambda);        //  lambda=rand(1,dim);  lambda in Eq(11)
-                    self.randomize(&mut r);             //  r=rand(1,dim);  r in Eq(11  
+                    EO::<'a, T>::randomize(&mut lambda);        //  lambda=rand(1,dim);  lambda in Eq(11)
+                    EO::<'a, T>::randomize(&mut r);             //  r=rand(1,dim);  r in Eq(11  
                             
                     //-------------------------------------------------------
                     // Ceq=C_pool(randi(size(C_pool,1)),:); 
@@ -254,8 +243,8 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 }
             
                 // r1 and r2 to use them in Eq(15)
-                    self.randomize(&mut r1);
-                    self.randomize(&mut r2);
+                EO::<'a, T>::randomize(&mut r1);
+                EO::<'a, T>::randomize(&mut r2);
             
                 for j in 0..dim {
                     // Eq. 15
