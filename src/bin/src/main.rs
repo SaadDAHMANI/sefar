@@ -1,5 +1,5 @@
 
-use sefar::benchmarks::functions::F1;
+use sefar::benchmarks::functions::Sphere;
 use sefar::sequential_algos::eo::EO;
 use sefar::sequential_algos::eo::EOparams;
 use sefar::sequential_algos::pso::PSO;
@@ -33,9 +33,9 @@ fn eo_f1_test1(){
     settings.lower_bounds = lb.as_slice();
     settings.upper_bounds = ub.as_slice();    
 
-    let mut fo = F1 {};
+    let mut fo = Sphere{};
 
-    let mut eo : EO<F1> = EO::new(&settings, &mut fo);
+    let mut eo : EO<Sphere> = EO::new(&settings, &mut fo);
     
     let result = eo.run();
        
@@ -62,9 +62,9 @@ fn peo_f1_test1(){
     settings.lower_bounds = lb.as_slice();
     settings.upper_bounds = ub.as_slice();    
 
-    let mut fo = F1 {};
+    let mut fo = Sphere{};
 
-    let mut eo : PSO<F1> = PSO::new(&settings, &mut fo);
+    let mut eo : PSO<Sphere> = PSO::new(&settings, &mut fo);
     
     let result = eo.run();
        
