@@ -1,5 +1,5 @@
 //
-// Implementation of Equilibrium Optimizer
+// Implementation of Equilibrium Optimizer (EO)
 // 
  
 extern crate rand;
@@ -22,9 +22,6 @@ pub struct EO<'a, T : Problem> {
      pub problem : &'a mut T,
      pub params : &'a EOparams<'a>,
      pub optimization_result : OptimizationResult,
-
-    
-
 }
 
 impl<'a, T : Problem> EO<'a, T>{
@@ -58,12 +55,7 @@ impl<'a, T : Problem> EO<'a, T>{
 }
 
 impl<'a, T: Problem> EOA for EO<'a, T> {
-
-    fn get_parameters<P: Parameters>(&self)->Option<P> {
-         //Some(*self.params.clone().to_owned())
-        None    
-    }
-    
+   
     fn run(&mut self)-> OptimizationResult{
         
         let chronos = Instant::now();

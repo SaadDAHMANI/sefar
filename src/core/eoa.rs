@@ -7,10 +7,6 @@ use rand::distributions::{Distribution, Uniform};
 /// Public trait for Evolutionary Optimization Algorithms
 /// 
 pub trait EOA {
-
-    fn get_parameters<P: Parameters>(&self)-> Option<P>{
-        None
-    }
     
     fn initialize<P: Parameters>(&self, params: &P)-> Vec<Genome>{
 
