@@ -66,8 +66,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
     match EO::<'a, T>::check_parameters(self.params) {
 
         Err(error) => OptimizationResult::get_none(error),
-        Ok(()) =>
-        {
+        Ok(()) =>{
 
             let dim = self.params.dimensions; //self.params.get_dimensions(); 
             let particles_no = self.params.population_size; //self.params.get_population_size();

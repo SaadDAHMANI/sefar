@@ -31,8 +31,9 @@ pub trait EOA {
         }        
         positions
     }    
+    
     ///
-    /// Run algorithm until reach stopping criterion
+    /// Run algorithm until reach stopping criterion and return optiization result
     /// 
     fn run(&mut self)-> OptimizationResult {
         OptimizationResult {
@@ -91,7 +92,5 @@ pub trait EOA {
         else {
             Ok(())
         }      
-    }   
-
-
+    }
 }

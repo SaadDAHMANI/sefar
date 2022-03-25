@@ -15,12 +15,165 @@ use crate::core::optimization_result::OptimizationResult;
 use crate::common::*;
 
 pub struct PSO<'a, T: Problem> {
-    problem : &'a mut T,
-     
+    pub problem : &'a mut T,
+    pub params : &'a PSOparams<'a>,
+    pub optimization_result : OptimizationResult, 
 }
 
+impl<'a, T : Problem> PSO<'a, T> {
 
 
+
+    fn randomize(&self, randvect : &mut Vec<f64>) {    
+        let between = Uniform::from(0.0..=1.0);
+        let mut rng = rand::thread_rng();
+                
+        for item in randvect.iter_mut() {
+            *item = between.sample(&mut rng);
+        }     
+    }
+} 
+
+impl<'a, T: Problem> EOA for PSO <'a, T> {
+    fn run(&mut self)-> OptimizationResult {
+        
+        // start time computation
+        let chronos = Instant::now();
+
+         //check paramaters
+         //let params = self.clone();
+  
+         match PSO::<'a, T>::check_parameters(self.params) {
+             Err(error) => OptimizationResult::get_none(error), 
+             Ok(()) => {     
+                let dim = self.params.dimensions;
+                let ub = self.params.upper_bounds;
+                let lb = self.params.lower_bounds;
+                let max_iter = self.params.max_iterations;
+                let nop = self.params.population_size;
+
+                // Define the PSO's paramters
+                let c1 :f64 = self.params.c1;
+                let c2 :f64 = self.params.c2;
+            
+                let w_max : f64 = 0.9;
+                let w_min : f64 = 0.2;
+
+                let mut v_max = Vec::new();
+                let mut v_min = Vec::new();
+            
+                for i in 0..dim {
+                    v_max.push((ub[i] - lb[i])* 0.2f64);
+                    v_min.push(-1.0*v_max[i]);
+                }
+            
+                let mut cgcurve = vec![0.0f64; max_iter];
+
+                // Velocities initialization 
+                let mut v = vec![vec![0.0f64; dim]; nop];
+            
+                //let mut currentx = Solution::new(nop+1, dim);
+        
+                let mut gbest_x = Genome::new(dim+1, dim);
+                //let mut gbest_0 = Vec::new();
+        
+                let mut rand1 = vec![0.0f64; dim];
+                let mut rand2 = vec![0.0f64; dim];
+                                   
+                // PSO algorithm     
+                // Particles initialization
+                let mut particles = self.initialize(self.params);
+
+                //initialize pbest_x population with (fitness = f64::MAX)
+                let mut pbest_x = self.initialize(self.params);
+
+                // Main PSO loop 
+                for t in 0..max_iter {       
+        
+                     //let mut gbest_index : usize = 0;
+
+                    for k in 0..nop {
+
+                        //Objective function computation
+                        // Evaluate search agent using objective function 
+                        particles[k].fitness = Some(self.problem.objectivefunction(&particles[k].genes)); 
+                        
+                        //Update the pbest 
+                        if particles[k].fitness < pbest_x[k].fitness {               
+                            //pbest_x[k] = particles[k].clone();   
+                            //copy_genome(&particles[k], &mut pbest_x[k]);                 
+                            pbest_x[k].genes[..dim].clone_from_slice(&particles[k].genes[..dim]);
+                        } 
+
+                        //Update the gbest
+                        if particles[k].fitness < gbest_x.fitness {
+                             // gbest_index = k;
+                            gbest_x = particles[k].clone();    
+                            //copy_genome(&particles[k], &mut gbest_x);
+                        }
+                    }
+
+                    //Update the x and v
+                    let tf64 = t as f64;
+                    let max_iterf64 = max_iter as f64;
+                    let w = w_max - ((tf64*(w_max - w_min))/ max_iterf64);
+                
+                    for k in 0..nop {
+                        self.randomize(&mut rand1);
+                        self.randomize(&mut rand2);
+
+                        for j in 0..dim {
+                            v[k][j] = (w*v[k][j]) + (c1*rand1[j]*(pbest_x[k].genes[j]-particles[k].genes[j])) 
+                            + (c2*rand2[j]*(gbest_x.genes[j]-particles[k].genes[j]));                 
+                        } 
+                    
+                        for j in 0..dim{
+                            if v[k][j] > v_max[j] {
+                            //index1.push(j);
+                                v[k][j] = v_max[j];
+                            }
+
+                            if v[k][j] < v_min[j]{
+                                //index2.push(j);
+                                v[k][j] = v_min[j];
+                            }
+                        }
+
+                        // Update particles positions 
+                        for j in 0..dim{
+                            particles[k].genes[j] = particles[k].genes[j] + v[k][j]; 
+                        }           
+
+                        for j in 0..dim{
+                            if particles[k].genes[j] > ub[j] {
+                                particles[k].genes[j] = ub[j];
+                            } 
+
+                            if particles[k].genes[j] < lb[j] {
+                                particles[k].genes[j] = lb[j];
+                            } 
+                        } 
+                    }
+                    cgcurve[t]= gbest_x.fitness.unwrap();  
+                }
+
+                let bestfit =  gbest_x.fitness.unwrap(); 
+                //return results
+                let duration = chronos.elapsed();
+                let result = OptimizationResult{
+                    best_genome : Some(gbest_x),
+                    best_fitness : Some(bestfit),
+                    convergence_trend : Some(cgcurve),
+                    computation_time : Some(duration),
+                    err_report : None,
+                };
+                // copy result to PSO struct
+                self.optimization_result = result.clone();
+                result
+           } 
+        }  
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct PSOparams<'a> {
