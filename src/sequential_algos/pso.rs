@@ -194,8 +194,9 @@ pub struct PSOparams<'a> {
 #[allow(dead_code)]
 impl<'a> PSOparams<'a>{
     pub fn new(p_size: usize, dim : usize, max_iter : usize, lb : &'a [f64], 
-    ub : &'a [f64], c1 :f64, c2 :f64)->PSOparams<'a> {
-        PSOparams{
+    ub : &'a [f64], c1 :f64, c2 :f64)-> Result<PSOparams<'a>, String> {
+       
+        let params = PSOparams{
             population_size : p_size,
             dimensions : dim,
             max_iterations : max_iter,
@@ -203,6 +204,11 @@ impl<'a> PSOparams<'a>{
             upper_bounds : ub,
             c1,
             c2,            
+        };
+
+        match params.check(){
+            Err(error)=> Err(error),
+            Ok(())=> Ok(params),
         }
     }
 }

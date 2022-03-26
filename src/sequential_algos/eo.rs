@@ -52,8 +52,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
     //check paramaters
     //let params = self.params.clone();
     
-    match EO::<'a, T>::check_parameters(self.params) {
-
+    match self.params.check(){
         Err(error) => OptimizationResult::get_none(error),
         Ok(()) =>{
 
