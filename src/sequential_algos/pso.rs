@@ -205,36 +205,6 @@ impl<'a> PSOparams<'a>{
             c2,            
         }
     }
-    
-    ///
-    /// Return default values of parameters, as following :
-    /// 
-    /// ~~~
-    /// 
-    ///  use sefar::sequential_algos::pso::*;
-    /// 
-    ///  PSOparams{
-    ///     population_size : 10,
-    ///     dimensions : 3,
-    ///     max_iterations : 100,
-    ///     lower_bounds : &[100.0f64, 100.0, 100.0],
-    ///     upper_bounds : &[-100.0f64, -100.0, -100.0],
-    ///     c1 : 2.0f64,
-    ///     c2 : 1.0f64,
-    /// };
-    /// ~~~
-    /// 
-    pub fn default()->Self{
-        PSOparams{
-            population_size : 10,
-            dimensions : 3,
-            max_iterations : 100,
-            lower_bounds : &[-100.0f64, -100.0, -100.0],
-            upper_bounds : &[100.0f64, 100.0, 100.0],
-            c1 : 2.0f64,
-            c2 : 1.0f64,
-        }
-    }
 }
 
 impl<'a> Parameters for PSOparams<'a> {
@@ -258,4 +228,36 @@ impl<'a> Parameters for PSOparams<'a> {
     fn get_upper_bounds(&self)-> Vec<f64>{
         self.upper_bounds.to_vec()
     }        
+}
+
+impl<'a> Default for PSOparams<'a> {
+      ///
+    /// Return default values of parameters, as following :
+    /// 
+    /// ~~~
+    /// 
+    ///  use sefar::sequential_algos::pso::*;
+    /// 
+    ///  PSOparams{
+    ///     population_size : 10,
+    ///     dimensions : 3,
+    ///     max_iterations : 100,
+    ///     lower_bounds : &[100.0f64, 100.0, 100.0],
+    ///     upper_bounds : &[-100.0f64, -100.0, -100.0],
+    ///     c1 : 2.0f64,
+    ///     c2 : 1.0f64,
+    /// };
+    /// ~~~
+    /// 
+    fn default()->Self{
+        PSOparams{
+            population_size : 10,
+            dimensions : 3,
+            max_iterations : 100,
+            lower_bounds : &[-100.0f64, -100.0, -100.0],
+            upper_bounds : &[100.0f64, 100.0, 100.0],
+            c1 : 2.0f64,
+            c2 : 1.0f64,
+        }
+    }
 }
