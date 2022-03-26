@@ -20,9 +20,9 @@ mod tests {
         //settings.population_size = 20;
         //settings.max_iterations = 500; 
 
-        let mut fo = F1 {};
+        let mut fo = Sphere {};
 
-        let mut eo : EO<F1> = EO::new(&settings, &mut fo);
+        let mut eo : EO<Sphere> = EO::new(&settings, &mut fo);
         
         let result = eo.run();
 
