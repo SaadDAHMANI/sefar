@@ -45,55 +45,7 @@ pub trait EOA {
         } 
     }  
         
-    fn check_parameters<P: Parameters>(params : &P)-> Result<(), String> {
-    
-        let mut errors : usize = 0;
-        let mut msg : String = String::new();
-        
-        if params.get_population_size() == 0 {
-            msg = String::from("population_size must be greater than 0!; \n");
-            errors +=1;
-        }
-    
-        if params.get_dimensions() ==0 {
-            msg = format!("{} Search space dimensions must be greater than 0!; \n", msg);
-            errors +=1;
-        }
-    
-        if params.get_max_iterations() ==0 {
-            msg = format!("{} Iterations count (max_iterations) must be greater than 0!; \n", msg);
-            errors +=1;
-        }
-    
-        if params.get_lower_bounds().is_empty() {
-            msg = format!("{} Lower_bounds length must be greater than 0!; \n", msg);
-            errors +=1;
-        }
-    
-        if params.get_upper_bounds().is_empty() {
-            msg = format!("{} Upper_bounds length must be greater than 0!; \n", msg);
-            errors +=1;
-        }
-    
-        if params.get_lower_bounds().len() != params.get_upper_bounds().len() {
-            msg = format!("{} Lower_bounds & Upper_bounds lengths must be equal!; \n", msg);
-            errors +=1;
-        }
-    
-        if params.get_lower_bounds().len() != params.get_dimensions() || params.get_upper_bounds().len() != params.get_dimensions() {
-            msg = format!("{} Lower_bounds & Upper_bounds lengths must equal search space dimension!; \n", msg);
-            errors +=1;
-        }
-       
-        if errors > 0  {
-            msg = format!("There are [{}] errors : \n {}", errors, msg.trim());       
-            Err(msg)
-        }
-        else {
-            Ok(())
-        }      
-    }
-
+   
     fn randomize(randvect : &mut Vec<f64>) {    
         let between = Uniform::from(0.0..=1.0);
         let mut rng = rand::thread_rng();
