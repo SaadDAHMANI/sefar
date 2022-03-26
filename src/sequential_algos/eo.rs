@@ -385,7 +385,7 @@ impl<'a> Default for EOparams<'a>{
 
 #[cfg(test)]
 mod eo_params_tests {
-    
+
     use super::*;
 
     #[test]
@@ -419,6 +419,30 @@ mod eo_params_tests {
         let p = EOparams::default();
         assert_eq!(p.a1, 2.0f64);
         assert_eq!(p.a2, 1.0f64);
+        assert_eq!(p.gp, 0.50f64);
+    }
+
+    #[test]
+    fn eoparams_unwrap_or_default_test_1(){        
+        let _ub =  vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
+        let _lb =  vec![-1.0f64, -2.0, -3.0, -4.0, -5.0];
+        
+        let p = EOparams::new(10,10,100, _lb.as_slice(), _ub.as_slice(),0.5, 0.5,0.5)
+                                       .unwrap_or_default();     
+        assert_eq!(p.a1, 2.0f64);
+        assert_eq!(p.a2, 1.0f64);
+        assert_eq!(p.gp, 0.50f64);
+    }
+
+    #[test]
+    fn eoparams_unwrap_or_default_test_2(){        
+        let _ub =  vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
+        let _lb =  vec![-1.0f64, -2.0, -3.0, -4.0, -5.0];
+        
+        let p = EOparams::new(10,5,100, _lb.as_slice(), _ub.as_slice(),0.5, 0.5,0.5)
+                                       .unwrap_or_default();     
+        assert_eq!(p.a1, 0.50f64);
+        assert_eq!(p.a2, 0.50f64);
         assert_eq!(p.gp, 0.50f64);
     }
 }

@@ -48,7 +48,7 @@ impl<'a, T: Problem> EOA for PSO <'a, T> {
          //check paramaters
          //let params = self.clone();
   
-         match PSO::<'a, T>::check_parameters(self.params) {
+         match self.params.check() {
              Err(error) => OptimizationResult::get_none(error), 
              Ok(()) => {     
                 let dim = self.params.dimensions;
