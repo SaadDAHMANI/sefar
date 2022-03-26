@@ -1,9 +1,7 @@
 
 use sefar::benchmarks::functions::Sphere;
-use sefar::sequential_algos::eo::EO;
-use sefar::sequential_algos::eo::EOparams;
-use sefar::sequential_algos::pso::PSO;
-use sefar::sequential_algos::pso::PSOparams;
+use sefar::sequential_algos::eo::{EO, EOparams};
+use sefar::sequential_algos::pso::{PSO, PSOparams};
 use sefar::core::eoa::EOA;
 
 const DIM : usize =10;

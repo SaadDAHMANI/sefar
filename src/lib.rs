@@ -8,7 +8,7 @@ mod common;
 
 #[cfg(test)]
 mod tests {
-    use crate::benchmarks::functions::F1;
+    use crate::benchmarks::functions::Sphere;
     use crate::sequential_algos::eo::EO;
     use crate::sequential_algos::eo::EOparams;
     use crate::core::eoa::EOA;
