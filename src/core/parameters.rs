@@ -66,7 +66,7 @@ pub trait Parameters {
             errors +=1;
         }
     
-        if self.get_lower_bounds().len() != self.get_dimensions() || params.get_upper_bounds().len() != params.get_dimensions() {
+        if self.get_lower_bounds().len() != self.get_dimensions() || self.get_upper_bounds().len() != self.get_dimensions() {
             msg = format!("{} Lower_bounds & Upper_bounds lengths must equal search space dimension!; \n", msg);
             errors +=1;
         }

@@ -307,8 +307,8 @@ pub struct EOparams<'a> {
 impl<'a> EOparams<'a>{
     pub fn new(p_size: usize, dim : usize, max_iter : usize, lb : &'a [f64], 
     ub : &'a [f64], a1 :f64, a2 :f64, gp : f64)-> Result<EOparams<'a>, String> {
-               
-        Ok(EOparams{
+                      
+        let params = EOparams{
             population_size : p_size,
             dimensions : dim,
             max_iterations : max_iter,
@@ -317,7 +317,12 @@ impl<'a> EOparams<'a>{
             a1,
             a2,
             gp,
-        })
+        };
+
+       match params.check() {
+           Err(error)=> Err(error),
+           Ok(())=> Ok(params),
+       }
     }    
 }
 
