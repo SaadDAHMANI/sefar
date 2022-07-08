@@ -360,6 +360,16 @@ impl Dataset{
         r2
     } 
 
+    pub fn get_first_items(ds : &Vec<Vec<f64>>)->Vec<f64> {
+
+        let mut result : Vec<f64> = Vec::with_capacity(ds.len());
+        
+        for i in 0..ds.len(){
+            result[i]= ds[i][0];
+        }
+
+        result
+    }
 }
 
 

@@ -5,7 +5,7 @@ use sefar::core::problem::Problem;
 #[derive(Debug, Clone)]
 pub struct Regression {
    pub learn_in : Vec<Vec<f64>>,
-   pub learn_out : Vec<Vec<f64>>,
+   pub learn_out : Vec<f64>,
    pub test_in : Vec<Vec<f64>>,
    pub test_out : Vec<Vec<f64>>,
    pub file : String,
@@ -48,7 +48,7 @@ impl Regression {
     let (ds_learn, ds_test) = ds0.split_on_2(learn_part);
 
     let learn_in = ds_learn.inputs;
-    let learn_out = ds_learn.outputs;
+    let learn_out = Dataset::get_first_items(&ds_learn.outputs);
     let test_in = ds_test.inputs;
     let test_out = ds_test.outputs;    
         
@@ -59,13 +59,12 @@ impl Regression {
         test_out,
         file : fileptah,
         }
-    }
+    }   
 }
 
 impl Problem for Regression {
     fn objectivefunction(&mut self, genome : &[f64]) ->f64 {
-        let fitness = 0.0f64;
-        
+              
         let n = self.learn_in.len();
         let mut computed : Vec<f64> = Vec::with_capacity(n);
         
@@ -82,6 +81,13 @@ impl Problem for Regression {
 
             computed[i] = q;
         }
+     
+        let fit = Dataset::compute_rmse(&computed, &self.learn_out);
+        
+        let fitness = match fit{
+            None => f64::powi(10.0f64,10),
+            Some(fit)=> fit,
+        };
 
         fitness
     }
