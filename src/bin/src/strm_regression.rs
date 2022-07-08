@@ -11,12 +11,8 @@ pub struct Regression {
    pub file : String,
 }
 impl Regression {
-    pub fn new(fileptah : String)-> Regression {
-        
-        //let root = String::from("/home/sd/Documents/Rust_apps/sefar/src/bin/data");
-        
-        //let path = format!("{}/{}", root, "Coxs_data.csv"); 
-     
+    pub fn new(fileptah : String)-> Regression {      
+            
         let mut incols = Vec::new();
     
         incols.push(2); 
@@ -46,9 +42,14 @@ impl Regression {
     let ds0 =  Dataset::read_from_csvfile(&fileptah, &incols, &outcols);
 
     let (ds_learn, ds_test) = ds0.split_on_2(learn_part);
+     
+    //println!("ds_learn.outputs = {:?}", ds_learn.outputs);
 
     let learn_in = ds_learn.inputs;
     let learn_out = Dataset::get_first_items(&ds_learn.outputs);
+
+    //println!("learn_out = {:?}", learn_out);
+
     let test_in = ds_test.inputs;
     let test_out = ds_test.outputs;    
         
@@ -66,7 +67,7 @@ impl Problem for Regression {
     fn objectivefunction(&mut self, genome : &[f64]) ->f64 {
               
         let n = self.learn_in.len();
-        let mut computed : Vec<f64> = Vec::with_capacity(n);
+        let mut computed : Vec<f64> = Vec::new();
         
         let m = genome.len()-1;
 
@@ -79,7 +80,7 @@ impl Problem for Regression {
             }
             q += genome[m];
 
-            computed[i] = q;
+            computed.push(q);
         }
      
         let fit = Dataset::compute_rmse(&computed, &self.learn_out);

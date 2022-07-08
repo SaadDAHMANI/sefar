@@ -362,12 +362,11 @@ impl Dataset{
 
     pub fn get_first_items(ds : &Vec<Vec<f64>>)->Vec<f64> {
 
-        let mut result : Vec<f64> = Vec::with_capacity(ds.len());
+        let mut result : Vec<f64> = Vec::new();
         
         for i in 0..ds.len(){
-            result[i]= ds[i][0];
+            result.push(ds[i][0]);
         }
-
         result
     }
 }
