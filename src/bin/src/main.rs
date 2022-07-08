@@ -1,12 +1,14 @@
+include!("strm_regression.rs");
+include!("dataset.rs");
 
 use sefar::benchmarks::functions::Sphere;
 use sefar::sequential_algos::eo::{EO, EOparams};
 use sefar::sequential_algos::pso::{PSO, PSOparams};
 use sefar::core::eoa::EOA;
 
-const DIM : usize =10;
-const POP_SIZE : usize =30;
-const KMAX : usize = 500;
+const DIM : usize = 5;
+const POP_SIZE : usize =5;
+const KMAX : usize = 5;
 
 fn main() {
     println!("Hello, sefar !");
