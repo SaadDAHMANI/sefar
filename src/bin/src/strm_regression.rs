@@ -7,33 +7,16 @@ pub struct Regression {
    pub learn_in : Vec<Vec<f64>>,
    pub learn_out : Vec<f64>,
    pub test_in : Vec<Vec<f64>>,
-   pub test_out : Vec<Vec<f64>>,
+   pub test_out : Vec<f64>,
    pub file : String,
 }
 impl Regression {
     pub fn new(fileptah : String)-> Regression {      
             
-        let mut incols = Vec::new();
-    
-        incols.push(2); 
-        incols.push(3);  
-        //incols.push(4);  
-        //incols.push(5);
-        //incols.push(6); 
-        //incols.push(7);
-        //incols.push(8);
-        //incols.push(9);
-        //incols.push(10);
-        //incols.push(11);
-        //incols.push(12); 
-        //incols.push(13);
-        //incols.push(14); 
-        //incols.push(15);
-        //incols.push(16); 
-        //incols.push(17);
-        //incols.push(18);
-        //incols.push(19);
+    let incols = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]; // M10
 
+    let incols = incols.to_vec();
+     
     let mut outcols = Vec::new();
     outcols.push(1);
     
@@ -51,7 +34,7 @@ impl Regression {
     //println!("learn_out = {:?}", learn_out);
 
     let test_in = ds_test.inputs;
-    let test_out = ds_test.outputs;    
+    let test_out = Dataset::get_first_items(&ds_test.outputs);    
         
     Regression{
         learn_in,
@@ -61,6 +44,88 @@ impl Regression {
         file : fileptah,
         }
     }   
+
+    pub fn compute_learn_indexes(&self, params : &Vec<f64>)->(f64, f64) {
+
+        let n = self.learn_in.len();
+        let mut computed : Vec<f64> = Vec::new();
+        
+        let m = self.learn_in[0].len();
+        
+        //println!("m= {:?}", m);
+
+        for i in 0..n {            
+            let mut q =0.0f64;
+
+            for j in 0..m {
+                 q+= params[j]*self.learn_in[i][j];     
+            }
+            q += params[m];
+
+            computed.push(q);
+        }
+     
+        let rmse = Dataset::compute_rmse(&computed, &self.learn_out);
+        
+        let rmsel = match rmse{
+            None => -1.0f64,
+            Some(value)=> value,
+        };
+
+        let r2 = Dataset::compute_determination_r2(&computed, &self.learn_out);
+
+        let r2l = match r2 {
+            None => -1.0f64,
+            Some(value)=> value,
+        };
+
+        (rmsel, r2l)
+    }
+
+    pub fn compute_test_indexes(&self, params : &Vec<f64>)->(f64, f64) {
+
+        let n = self.test_in.len();
+        let mut computed : Vec<f64> = Vec::new();
+        
+        let m = self.test_in[0].len();
+        
+        //println!("m= {:?}", m);
+
+        for i in 0..n {            
+            let mut q =0.0f64;
+
+            for j in 0..m {
+                 q+= params[j]*self.test_in[i][j];     
+            }
+            q += params[m];
+
+            computed.push(q);
+        }
+     
+        let rmse = Dataset::compute_rmse(&computed, &self.test_out);
+        
+        let rmset = match rmse{
+            None => -1.0f64,
+            Some(value)=> value,
+        };
+
+        let r2 = Dataset::compute_determination_r2(&computed, &self.test_out);
+
+        let r2t = match r2 {
+            None => -1.0f64,
+            Some(value)=> value,
+        };
+
+        (rmset, r2t)
+    }
+    
+    pub fn compute_result_indexes(&self, params : &Vec<f64>)->(f64, f64, f64, f64) {
+        let (rmsel, r2l)=self.compute_learn_indexes(params);
+        let (rmset, r2t)=self.compute_test_indexes(params);
+        (rmsel, rmset, r2l, r2t)
+    }
+
+
 }
 
 impl Problem for Regression {
@@ -69,10 +134,11 @@ impl Problem for Regression {
         let n = self.learn_in.len();
         let mut computed : Vec<f64> = Vec::new();
         
-        let m = genome.len()-1;
+        let m = self.learn_in[0].len();
+        
+        //println!("m= {:?}", m);
 
-        for i in 0..n {
-            
+        for i in 0..n {            
             let mut q =0.0f64;
 
             for j in 0..m {

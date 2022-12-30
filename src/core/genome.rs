@@ -7,7 +7,7 @@ pub struct Genome{
     pub genes : Vec<f64>,
     pub fitness : Option<f64>,
 }
-#[allow(dead_code)]
+#[allow(dead_code)] 
 impl Genome {
 
     // 

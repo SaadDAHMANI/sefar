@@ -21,11 +21,13 @@ fn main() {
 
     do_regression();
 
+   
+
 }
 
 #[allow(dead_code)]
 fn eo_f1_test1(){
-    
+
     let mut settings : EOparams = EOparams::default();
     
     settings.population_size = POP_SIZE;
@@ -83,34 +85,47 @@ fn do_regression(){
      
     let root = String::from("/home/sd/Documents/Rust_apps/sefar/src/bin/data");
       
-    let path = format!("{}/{}", root, "Coxs_data.csv"); 
+    let path = format!("{}/{}", root, "Coxs_data_ALL.csv"); 
 
-    let mut settings : EOparams = EOparams::default();
+    //let mut settings : EOparams = EOparams::default();
+    let mut settings : PSOparams = PSOparams::default();
 
-    let dim = 3;
+    let dim = 14;
 
-    settings.population_size = 5;
+    settings.population_size = 80;
     settings.dimensions = dim;    
-    settings.max_iterations = 1; 
+    settings.max_iterations = 2000; 
     
-    let lb =vec![-100.0f64; dim];
-    let ub =vec![100.0f64; dim];
+    let mut lb =vec![0.0f64; dim];
+    lb[13] = 0.0f64;
+
+    let ub =vec![10.0f64; dim];
 
     settings.lower_bounds = lb.as_slice();
     settings.upper_bounds = ub.as_slice();
     
     let mut regressn = Regression::new(path);
 
-    let mut eoa : EO<Regression> = EO::new(&settings, &mut regressn); 
+    //let mut eoa : EO<Regression> = EO::new(&settings, &mut regressn); 
+    let mut eoa : PSO<Regression> = PSO::new(&settings, &mut regressn); 
    
     let result = eoa.run();
-
        
     println!("EO result : \n best fitness : {:?} \n best genome : {:?}", result.best_fitness, result.best_genome);
     println!("Computation time : {:?}", result.computation_time);
     println!("Err : {:?}", result.err_report);
+    //println!("{:?}", result.convergence_trend);
 
+    match result.best_genome {
+        None => println!("error in optimization step..."),
+        Some(genome) =>{
+
+            let (rmsel, rmset, r2l, r2t) = regressn.compute_result_indexes(&genome.genes);
+
+            println!("Indexes = {}, {}, {}, {}", rmsel, rmset, r2l, r2t);   
+        },
+    }
+
+    
 }
-
-
 

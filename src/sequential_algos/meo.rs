@@ -1,5 +1,5 @@
 //
-// Implementation of Equilibrium Optimizer (EO)
+// Implementation of Modified Equilibrium Optimizer (m-EO)
 // 
  
 extern crate rand;
@@ -13,21 +13,23 @@ use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
 use crate::core::optimization_result::OptimizationResult;
 use crate::common::*;
+use crate::sequential_algos::eo::EOparams;
 
 ///
-/// Sequential Equilibrium Optimizer (EO)
+/// Sequential Modified Equilibrium Optimizer (MEO)
 /// Reference:
-/// "Faramarzi, A., Heidarinejad, M., Stephens, B., & Mirjalili, S. (2020).
-/// Equilibrium optimizer: A novel optimization algorithm. Knowledge-Based Systems, 191, 105190."
+/// "Gupta, S., Deep, K., & Mirjalili, S. (2020).
+/// An efficient equilibrium optimizer with mutation strategy for numerical optimization. 
+/// Applied Soft Computing, 96, 106542."
 /// 
 #[derive(Debug)]
-pub struct EO<'a, T : Problem> {
+pub struct MEO<'a, T : Problem> {
      pub problem : &'a mut T,
      pub params : &'a EOparams<'a>,
      pub optimization_result : OptimizationResult,
 }
 
-impl<'a, T : Problem> EO<'a, T>{
+impl<'a, T : Problem> MEO<'a, T>{
 
     pub fn new(settings :&'a EOparams, problem : &'a mut T )->Self{       
         let result = OptimizationResult{
@@ -38,7 +40,7 @@ impl<'a, T : Problem> EO<'a, T>{
             err_report : None, 
         };
        
-        EO { 
+        MEO { 
              problem,
              params: settings,
              optimization_result: result,            
@@ -46,7 +48,8 @@ impl<'a, T : Problem> EO<'a, T>{
     }   
 }
 
-impl<'a, T: Problem> EOA for EO<'a, T> {
+
+impl<'a, T: Problem> EOA for MEO<'a, T> {
    
     fn run(&mut self)-> OptimizationResult{
         
@@ -129,9 +132,36 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
             
             //let chronos = Instant::now();
             
-            //C=initialization(Particles_no,dim,ub,lb);
+            // Step 1: initialize the population randomly within the solution space 
             let mut c = self.initialize(self.params);
-    
+              
+            // Step 2 : Evaluate the fitness value of each candidate soluion
+            for genom in c.iter_mut(){
+                genom.fitness = Some(self.problem.objectivefunction(&genom.genes));
+            }
+            
+            // Step 3 : Select the 4 best solutions 
+            // 3.1 Sorting :
+            c.sort_by(Genome::cmp_genome);
+           
+            // 3.2 update indexes 
+            for i in 0..c.len(){
+                c[i].id = i;
+            }
+              
+            
+            //check
+            
+
+
+
+
+
+
+
+
+
+
             // the main loop of EO
             while iter < max_iter {
             
@@ -228,8 +258,8 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 
                 for i in 0..particles_no {
             
-                    EO::<'a, T>::randomize(&mut lambda);        //  lambda=rand(1,dim);  lambda in Eq(11)
-                    EO::<'a, T>::randomize(&mut r);             //  r=rand(1,dim);  r in Eq(11  
+                    MEO::<'a, T>::randomize(&mut lambda);        //  lambda=rand(1,dim);  lambda in Eq(11)
+                    MEO::<'a, T>::randomize(&mut r);             //  r=rand(1,dim);  r in Eq(11  
                             
                     //-------------------------------------------------------
                     // Ceq=C_pool(randi(size(C_pool,1)),:); 
@@ -245,8 +275,8 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 }
             
                 // r1 and r2 to use them in Eq(15)
-                EO::<'a, T>::randomize(&mut r1);
-                EO::<'a, T>::randomize(&mut r2);
+                MEO::<'a, T>::randomize(&mut r1);
+                MEO::<'a, T>::randomize(&mut r2);
             
                 for j in 0..dim {
                     // Eq. 15
@@ -290,168 +320,6 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
 }
 
 }
-
-
-#[derive(Debug, Clone)]
-pub struct EOparams<'a> {
-    pub population_size : usize,
-    pub dimensions : usize,
-    pub max_iterations: usize,
-    pub lower_bounds : &'a [f64],
-    pub upper_bounds : &'a [f64],
-    pub a1 : f64,
-    pub a2 : f64,
-    pub gp : f64,
-}
-
-#[allow(dead_code)]
-impl<'a> EOparams<'a>{
-    pub fn new(p_size: usize, dim : usize, max_iter : usize, lb : &'a [f64], 
-    ub : &'a [f64], a1 :f64, a2 :f64, gp : f64)-> Result<EOparams<'a>, String> {
-                      
-        let params = EOparams{
-            population_size : p_size,
-            dimensions : dim,
-            max_iterations : max_iter,
-            lower_bounds : lb,
-            upper_bounds : ub,
-            a1,
-            a2,
-            gp,
-        };
-
-       match params.check() {
-           Err(error)=> Err(error),
-           Ok(())=> Ok(params),
-       }
-    }    
-}
-
-impl<'a> Parameters for EOparams<'a> {
-
-   fn get_population_size(&self)->usize{
-        self.population_size
-    }
-
-   fn get_dimensions(&self)-> usize {
-        self.dimensions
-    }
-
-    fn get_max_iterations(&self)->usize{
-        self.max_iterations
-    }
-
-    fn get_lower_bounds(&self)-> Vec<f64>{
-        self.lower_bounds.to_vec()
-    }
-
-    fn get_upper_bounds(&self)-> Vec<f64>{
-        self.upper_bounds.to_vec()
-    }        
-}
-
-impl<'a> Default for EOparams<'a>{
-
-    ///
-    /// Return default values of parameters, as following :
-    /// 
-    /// ~~~
-    /// 
-    ///  use sefar::sequential_algos::eo::*;
-    /// 
-    ///  EOparams{
-    ///     population_size : 10,
-    ///     dimensions : 3,
-    ///     max_iterations : 100,
-    ///     lower_bounds : &[100.0f64, 100.0, 100.0],
-    ///     upper_bounds : &[-100.0f64, -100.0, -100.0],
-    ///     a1 : 2.0f64,
-    ///     a2 : 1.0f64,
-    ///     gp : 0.5f64,
-    /// };
-    /// ~~~
-    /// 
-    fn default()->Self{
-        EOparams{
-            population_size : 10,
-            dimensions : 3,
-            max_iterations : 100,
-            lower_bounds : &[-100.0f64, -100.0, -100.0],
-            upper_bounds : &[100.0f64, 100.0, 100.0],
-            a1 : 2.0f64,
-            a2 : 1.0f64,
-            gp : 0.5f64,
-        }
-    }
-}
-
-#[cfg(test)]
-mod eo_params_tests {
-
-    use super::*;
-
-    #[test]
-    fn test_ub_slice(){
-        let d : usize = 5;
-        let n : usize =10;
-        let k : usize = 100;
-        
-        let ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
-        let lb = ub.clone();
-        
-        let params = EOparams{
-            population_size : n,
-            max_iterations : k,
-            dimensions : d,
-            lower_bounds : lb.as_slice(),
-            upper_bounds : ub.as_slice(),
-            a1 : 2.0f64,
-            a2 : 1.0f64,
-            gp : 0.5f64,
-        };
-
-        let sl_ub =  vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
-        let slice_ub = sl_ub.as_slice();
-        
-        assert_eq!(params.upper_bounds, slice_ub);
-    }
-
-    #[test]
-    fn test_default_fn(){
-        let p = EOparams::default();
-        assert_eq!(p.a1, 2.0f64);
-        assert_eq!(p.a2, 1.0f64);
-        assert_eq!(p.gp, 0.50f64);
-    }
-
-    #[test]
-    fn eoparams_unwrap_or_default_test_1(){        
-        let _ub =  vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
-        let _lb =  vec![-1.0f64, -2.0, -3.0, -4.0, -5.0];
-        
-        let p = EOparams::new(10,10,100, _lb.as_slice(), _ub.as_slice(),0.5, 0.5,0.5)
-                                       .unwrap_or_default();     
-        assert_eq!(p.a1, 2.0f64);
-        assert_eq!(p.a2, 1.0f64);
-        assert_eq!(p.gp, 0.50f64);
-    }
-
-    #[test]
-    fn eoparams_unwrap_or_default_test_2(){        
-        let _ub =  vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
-        let _lb =  vec![-1.0f64, -2.0, -3.0, -4.0, -5.0];
-        
-        let p = EOparams::new(10,5,100, _lb.as_slice(), _ub.as_slice(),0.5, 0.5,0.5)
-                                       .unwrap_or_default();     
-        assert_eq!(p.a1, 0.50f64);
-        assert_eq!(p.a2, 0.50f64);
-        assert_eq!(p.gp, 0.50f64);
-    }
-}
-
-
-
-
 
 
 
