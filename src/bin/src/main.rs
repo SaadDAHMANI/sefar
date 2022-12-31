@@ -1,10 +1,11 @@
 include!("strm_regression.rs");
 include!("dataset.rs");
 
+use sefar::core::eoa::EOA;
 use sefar::benchmarks::functions::Sphere;
 use sefar::sequential_algos::eo::{EO, EOparams};
 use sefar::sequential_algos::pso::{PSO, PSOparams};
-use sefar::core::eoa::EOA;
+use sefar::sequential_algos::meo::MEO;
 
 const DIM : usize = 5;
 const POP_SIZE : usize =5;
@@ -19,7 +20,9 @@ fn main() {
 
     //peo_f1_test1();
 
-    do_regression();
+    meo_test1();
+
+    //do_regression();
 
    
 
@@ -129,3 +132,29 @@ fn do_regression(){
     
 }
 
+#[allow(dead_code)]
+fn meo_test1(){
+
+    let mut settings : EOparams = EOparams::default();
+    
+    settings.population_size = 7;
+    settings.dimensions = 3 ;    
+    settings.max_iterations = 2; 
+    
+    let lb =vec![-100.0f64; 3];
+    let ub =vec![100.0f64; 3];
+
+    settings.lower_bounds = lb.as_slice();
+    settings.upper_bounds = ub.as_slice();    
+
+    let mut fo = Sphere{};
+
+    let mut eo : MEO<Sphere> = MEO::new(&settings, &mut fo);
+    
+    let result = eo.run();
+       
+    println!("EO result : \n best fitness : {:?} \n best genome : {:?}", result.best_fitness, result.best_genome);
+    println!("Computation time : {:?}", result.computation_time);
+    println!("Err : {:?}", result.err_report);
+
+}

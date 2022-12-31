@@ -148,9 +148,12 @@ impl<'a, T: Problem> EOA for MEO<'a, T> {
             for i in 0..c.len(){
                 c[i].id = i;
             }
-              
-            
-            //check
+                          
+            // check
+
+            for g in c.iter(){
+                println!("id: {}, fit: {:?}", g.id, g.fitness);
+            }
             
 
 
