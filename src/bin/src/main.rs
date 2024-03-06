@@ -158,3 +158,30 @@ fn meo_test1(){
     println!("Err : {:?}", result.err_report);
 
 }
+
+#[allow(dead_code)]
+fn para_meo_test1(){
+
+    let mut settings : EOparams = EOparams::default();
+    
+    settings.population_size = 7;
+    settings.dimensions = 3 ;    
+    settings.max_iterations = 2; 
+    
+    let lb =vec![-100.0f64; 3];
+    let ub =vec![100.0f64; 3];
+
+    settings.lower_bounds = lb.as_slice();
+    settings.upper_bounds = ub.as_slice();    
+
+    let mut fo = Sphere{};
+
+    let mut eo : MEO<Sphere> = MEO::new(&settings, &mut fo);
+    
+    let result = eo.run();
+       
+    println!("EO result : \n best fitness : {:?} \n best genome : {:?}", result.best_fitness, result.best_genome);
+    println!("Computation time : {:?}", result.computation_time);
+    println!("Err : {:?}", result.err_report);
+
+}
