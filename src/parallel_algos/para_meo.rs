@@ -13,10 +13,10 @@ extern crate rand;
 //use rand::prelude::ThreadRng;
 //use std::time::Instant;
 
-use rayon::iter::{IndexedParallelIterator, IntoParallelRefMutIterator, ParallelIterator};
+//use rayon::iter::{IndexedParallelIterator, IntoParallelRefMutIterator, ParallelIterator};
 
 use crate::core::eoa::EOA;
-use crate::core::genome::Genome;
+//use crate::core::genome::Genome;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
 use crate::core::optimization_result::OptimizationResult;
@@ -80,7 +80,7 @@ impl<'a, T: Problem> EOA for ParaMEO<'a, T> {
 
                  
                 // Step 1: initialize the population randomly within the solution space 
-                let mut c = self.initialize(self.params);
+                let c = self.initialize(self.params);
                 
                 // Step 2 : Evaluate the fitness value of each candidate soluion
                 //for genom in c.iter_mut(){
