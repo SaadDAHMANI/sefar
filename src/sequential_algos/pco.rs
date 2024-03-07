@@ -53,6 +53,30 @@ impl<'a, T : Problem> PCO<'a, T>{
 }
 
 
+impl<'a, T: Problem> EOA for PCO<'a, T> {
+   
+    fn run(&mut self)-> OptimizationResult{
+
+
+
+
+
+
+
+
+
+        let result = OptimizationResult{
+            best_genome : None, //Some(Genome::new(0, self.params.dimensions)),
+            best_fitness : None, //Some(-1111.1111),
+            convergence_trend : None, //Some(convergence_curve),
+            computation_time : None, //Some(duration),
+            err_report : None,
+        };
+        return result;   
+
+    }    
+}
+
 
 
 
