@@ -58,13 +58,12 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
         match self.params.check(){
             Err(error) => OptimizationResult::get_none(error),
             Ok(()) =>{
-
-                let dim = self.params.dimensions; //self.params.get_dimensions(); 
-                let particles_no = self.params.population_size; //self.params.get_population_size();
-                let lb = self.params.lower_bounds; //self.params.get_lower_bounds();
-                let ub = self.params.upper_bounds;
-                let max_iter = self.params.max_iterations;
-
+                let dim =  self.params.get_dimensions();
+                let particles_no = self.params.get_population_size();
+                let lb = self.params.get_lower_bounds();
+                let ub = self.params.get_upper_bounds();
+                let max_iter = self.params.get_max_iterations();
+    
                 //
                 // a1=2;
                 // a2=1;
@@ -72,7 +71,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 let a1 : f64 = self.params.a1;
                 let a2 : f64 = self.params.a2;
                 let gp : f64 = self.params.gp;
-
+    
                 // Initialize variables 
                 //Ceq1=zeros(1,dim);   Ceq1_fit=inf; 
                 //Ceq2=zeros(1,dim);   Ceq2_fit=inf; 
@@ -98,7 +97,9 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 let mut ceq4_fit = f64::MAX;    
                 
                 let mut ceq1_index : usize = 0;
-            
+                //let mut ceq2_index : usize = 0;
+                //let mut ceq3_index : usize = 0;
+                //let mut ceq4_index : usize = 0;
         
                 // Iter=0; V=1;
                 let mut iter =0;
@@ -109,6 +110,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 let mut fit_old = vec![0.0f64; particles_no];
                 let mut c_old = vec![vec![0.0f64; dim]; particles_no];
                 let mut c_pool = vec![vec![0.0f64; dim]; 5];
+    
                 let mut lambda = vec![0.0f64; dim];
                 let mut r = vec![0.0f64; dim];
                 let mut r1 = vec![0.0f64; dim];
@@ -152,92 +154,72 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                         if fitness[i] < ceq1_fit {
                             ceq1_index = i;
                             ceq1_fit= fitness[i];
-                            //copy_vector(&c[i].genes, &mut ceq1);
-                            ceq1[..dim].clone_from_slice(&c[i].genes[..dim]);                        
+                            copy_vector(&c[i].genes, &mut ceq1, dim);
                         }
                         else if (fitness[i] < ceq2_fit) & (fitness[i] > ceq1_fit) {
                             //ceq2_index = i;
                             ceq2_fit= fitness[i];
-                            //copy_vector(&c[i].genes, &mut ceq2);
-                            ceq2[..dim].clone_from_slice(&c[i].genes[..dim]);            
+                            copy_vector(&c[i].genes, &mut ceq2, dim);            
                         }
                         else if (fitness[i] < ceq3_fit) & (fitness[i] > ceq2_fit) & (fitness[i] > ceq1_fit) {
                             //ceq3_index = i;
                             ceq3_fit= fitness[i];
-                            //copy_vector(&c[i].genes, &mut ceq3);
-                            ceq3[..dim].clone_from_slice(&c[i].genes[..dim]);
-
+                            copy_vector(&c[i].genes, &mut ceq3, dim);
                         }
                         else if (fitness[i] < ceq4_fit) & (fitness[i] > ceq3_fit) & (fitness[i] > ceq2_fit) & (fitness[i] > ceq1_fit) {
                             //ceq4_index = i;
                             ceq4_fit= fitness[i];
-                            //copy_vector(&c[i].genes, &mut ceq4);
-                            ceq4[..dim].clone_from_slice(&c[i].genes[..dim]);
-                            
+                            copy_vector(&c[i].genes, &mut ceq4, dim);
                         }
                     }
-
-                    // copy the best 4 genomes 
-                    //copy_vector(&c[ceq1_index].genes, &mut ceq1);
-                    //copy_vector(&c[ceq2_index].genes, &mut ceq2);
-                    //copy_vector(&c[ceq3_index].genes, &mut ceq3);
-                    //copy_vector(&c[ceq4_index].genes, &mut ceq4);
-
-                    //ceq1_fit = fitness[ceq1_index];
-                    //ceq2_fit = fitness[ceq2_index];
-                    //ceq3_fit = fitness[ceq3_index];
-                    //ceq4_fit = fitness[ceq4_index];
-                
+    
                     //-- Memory saving---
                 
                     if iter == 0 {
-                        //copy_vector(&fitness, &mut fit_old);
-                        fit_old[..particles_no].clone_from_slice(&fitness[..particles_no]);
+                        copy_vector(&fitness, &mut fit_old, dim);
                         copy_matrix(&c, &mut c_old);
                     }
                 
                     for i in 0..particles_no {
                         if fit_old[i] < fitness[i] {
-                            fitness[i] = fit_old[i];
-                            //copy_vector2genome(&c_old[i], &mut c[i]);
-                            c[i].genes[..dim].clone_from_slice(&c_old[i][..dim]);
+                            fitness[i]=fit_old[i];
+                            copy_vector2genome(&c_old[i], &mut c[i]);
                         }
                     }
                 
                     copy_matrix(&c, &mut c_old);
-                    //copy_vector(&fitness, &mut fit_old);
-                    fit_old[..particles_no].clone_from_slice(&fitness[..particles_no]);
+                    copy_vector(&fitness, &mut fit_old, dim);
+                
                     // compute averaged candidate Ceq_ave 
                     for i in 0..dim {
                         ceq_ave[i] = (ceq1[i] + ceq2[i] + ceq3[i] + ceq4[i])/4.0;    
                     }
                 
                     //Equilibrium pool
-                    c_pool[0][..dim].clone_from_slice(&ceq1[..dim]);
-                    c_pool[1][..dim].clone_from_slice(&ceq2[..dim]);
-                    c_pool[2][..dim].clone_from_slice(&ceq3[..dim]);
-                    c_pool[3][..dim].clone_from_slice(&ceq4[..dim]);
-                    c_pool[4][..dim].clone_from_slice(&ceq_ave[..dim]);
-
-
+                    for i in 0..dim {
+                        c_pool[0][i] = ceq1[i];
+                        c_pool[1][i] = ceq2[i];
+                        c_pool[2][i] = ceq3[i];
+                        c_pool[3][i] = ceq4[i];
+                        c_pool[4][i] = ceq_ave[i];
+                    }
+                
                     // comput t using Eq 09
                     let tmpt = (iter / max_iter) as f64;
                     let t : f64 = (1.0 - tmpt).powf(a2*tmpt);
-
+    
                     // let chronos = Instant::now();
                     
                     for i in 0..particles_no {
                 
-                        EO::<'a, T>::randomize(&mut lambda);        //  lambda=rand(1,dim);  lambda in Eq(11)
-                        EO::<'a, T>::randomize(&mut r);             //  r=rand(1,dim);  r in Eq(11  
+                        randomize(&mut lambda);        //  lambda=rand(1,dim);  lambda in Eq(11)
+                        randomize(&mut r);             //  r=rand(1,dim);  r in Eq(11  
                                 
                         //-------------------------------------------------------
                         // Ceq=C_pool(randi(size(C_pool,1)),:); 
                         // random selection of one candidate from the pool
                         _index = interval.sample(&mut rng);
-                        
-                        //copy_vector(&c_pool[_index], &mut ceq);
-                        ceq[..dim].clone_from_slice(&c_pool[_index][..dim]);
+                        copy_vector(&c_pool[_index], &mut ceq, dim);
                         //--------------------------------------------------------
                         // compute F using Eq(11) 
                         for j in 0..dim {
@@ -245,8 +227,8 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                     }
                 
                     // r1 and r2 to use them in Eq(15)
-                    EO::<'a, T>::randomize(&mut r1);
-                    EO::<'a, T>::randomize(&mut r2);
+                        randomize(&mut r1);
+                        randomize(&mut r2);
                 
                     for j in 0..dim {
                         // Eq. 15
@@ -263,12 +245,15 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                         c[i].genes[j] = ceq[j]+(c[i].genes[j]-ceq[j])*f[j] +  (_g/(lambda[j]*v))*(1.0-f[j]); 
                         }    
                     }
-
+    
                     // let duration = chronos.elapsed();
                     // println!("seq--> End computation in : {:?}", duration);
                 
                     convergence_curve[iter] = ceq1_fit;
-                    iter+=1;    
+                    iter+=1;  
+    
+                    #[cfg(feature = "report")]
+                    println!("Iter : {}, Best-fit : {}, Best-solution : {:?}", iter, ceq1_fit, ceq1);
                 }
                 
                 //return results
@@ -280,14 +265,13 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                     computation_time : Some(duration),
                     err_report : None,
                 };
-                // copy result to EO struct
-                self.optimization_result = result.clone();
-                result
-        
+                return result;   
             }
 
         }
     }
+
+
 
 }
 
