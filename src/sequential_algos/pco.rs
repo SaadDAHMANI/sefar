@@ -58,6 +58,24 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
     fn run(&mut self)-> OptimizationResult{
 
 
+        let dim : usize = self.params.dimensions;
+        let ub = self.params.upper_bounds;
+        let lb = self.params.lower_bounds;
+
+        //----------------------------------------
+        let mut rmax : Vec<f64> = vec![0.0f64; dim];
+
+
+
+
+        //-----------------------------------------
+        
+        let mut i : usize = 0;
+        for (a,b) in ub.iter().zip(lb.iter()){
+            rmax[i] = a-b;
+            i+=1;
+        }
+
 
 
 

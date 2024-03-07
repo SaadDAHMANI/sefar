@@ -5,18 +5,20 @@ use sefar::core::eoa::EOA;
 use sefar::benchmarks::functions::Sphere;
 use sefar::sequential_algos::eo::{EO, EOparams};
 use sefar::sequential_algos::pso::{PSO, PSOparams};
+use sefar::sequential_algos::pco::{PCO, PCOparams};
+
 use sefar::sequential_algos::meo::MEO;
 
-const DIM : usize = 5;
-const POP_SIZE : usize =10;
-const KMAX : usize = 3;
+const DIM : usize = 3;
+const POP_SIZE : usize = 4;
+const KMAX : usize = 2;
 
 
 
 fn main() {
     println!("Hello, sefar !");
     
-    eo_f1_test1();
+    //eo_f1_test1();
 
     //println!("_______________________________________________");
 
@@ -27,6 +29,22 @@ fn main() {
     //do_regression();
 
    
+
+}
+
+#[allow(dead_code)]
+fn pco_f1_test1(){
+    let mut settings : PCOparams = PCOparams::default();
+    
+    settings.population_size = POP_SIZE;
+    settings.dimensions = DIM ;    
+    settings.max_iterations = KMAX; 
+
+    let mut fo = Sphere{};
+
+    let mut pco : PCO<Sphere> = PCO::new(&settings, &mut fo);
+    
+    let result = pco.run();
 
 }
 
