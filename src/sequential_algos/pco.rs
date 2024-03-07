@@ -33,6 +33,32 @@ pub struct PCO<'a, T : Problem> {
      pub optimization_result : OptimizationResult,
 }
 
+impl<'a, T : Problem> PCO<'a, T>{
+
+    pub fn new(settings :&'a PCOparams, problem : &'a mut T )->Self{       
+        let result = OptimizationResult{
+            best_genome : None,
+            best_fitness :None,
+            convergence_trend : None,
+            computation_time : None,
+            err_report : None, 
+        };
+       
+        PCO { 
+             problem,
+             params: settings,
+             optimization_result: result,            
+        }
+    }   
+}
+
+
+
+
+
+
+
+
 #[derive(Debug, Clone)]
 pub struct PCOparams<'a> {
     /// Number of initial plants.
