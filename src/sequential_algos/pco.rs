@@ -57,15 +57,41 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
    
     fn run(&mut self)-> OptimizationResult{
 
+        let n : usize = self.params.get_population_size();
+        let dim : usize = self.params.get_dimensions();
+        let ub  = self.params.get_upper_bounds();
+        let lb = self.params.get_lower_bounds();
 
-        let dim : usize = self.params.dimensions;
-        let ub = self.params.upper_bounds;
-        let lb = self.params.lower_bounds;
+        let noi : usize = self.params.get_max_iterations();
+        let max_plant_number : usize = self.params.max_plant_number;
+        let vmax : f64 = self.params.vmax as f64;
+        
+
+        
 
         //----------------------------------------
         let mut rmax : Vec<f64> = vec![0.0f64; dim];
+        let mut r : Vec<Vec<f64>> = vec![vec![0.0f64; dim]; n];
+
+        let mut v : Vec<f64> = vec![0.0f64; n];
+        let mut best : Vec<f64> = Vec::new();
+                
+        let mut f : Vec<f64> = vec![0.0f64; n];
+        let mut fn_vec : Vec<f64> = vec![0.0f64; n];
+        let mut fitness : Vec<f64> = vec![0.0f64; n];
+        let mut fc : Vec<f64> = vec![0.0f64; n];
+        
+        let migrant_seeds_no : usize = 0;
+        let migrant_plant : Vec<Genome> = Vec::new();
 
 
+
+        let maxteta : f64 = f64::exp(-1.0);
+        let teta : f64 = maxteta.clone();
+        let mut plant_number= n.clone();
+        let mut iteration : usize = 1;
+
+        let max_plant : usize = n.clone();
 
 
         //-----------------------------------------
@@ -76,10 +102,129 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
             i+=1;
         }
 
+        println!("rmax : {:?}", rmax);
+
+        let mut plants = self.initialize(self.params);
+        let x= plants.clone();
+
+        randomize(&mut v);
+
+        while plant_number <= max_plant_number && iteration <= noi {
+
+            //for i=1:plantNumber
+                //f(i)=fobj(plants(i,:));
+            //end
+
+            // Evaluation of candidate solutions:
+            for i in 0..plants.len() {
+                f[i] = self.problem.objectivefunction(&plants[i].genes);
+            }
+
+            // Calculate Fitness Coefficient=fc
+            let minf = f.iter().fold(f64::MAX, |minf, y| minf.min(*y));
+            best.push(minf);
+
+            let normf = f.iter().map(|&x| x * x).sum::<f64>().sqrt();
+
+            for i in 0..n {
+                fn_vec[i] = f[i]/normf;                
+            }
+
+            for i in 0..n {
+                fitness[i] = 1.0/(1.0 + fn_vec[i]);
+            }
+
+            let mx : f64 = fitness.iter().fold(f64::MIN, |mx, y| mx.max(*y));
+            let mn : f64 = fitness.iter().fold(f64::MAX, |mn, y| mn.min(*y));
+
+            //println!("mx : {}; mn : {}", mx,mn);
+            if mx == mn {
+                for i in 0..n {
+                    fc[i] = fitness[i]/mx;
+                }    
+            }
+            else {
+                // fc=(fitness-mn)./(mx-mn);
+                let dif_mx_mn = mx-mn;
+                for i in 0..n {
+                    fc[i] = (fitness[i]-mn)/ dif_mx_mn;
+                }
+            }
+            
+            fitness.sort_by(|a,b| b.partial_cmp(a).unwrap());
+
+            #[cfg(feature="report")] println!("fitness : {:?}", fitness);
+
+            let mut survive : Vec<bool> = Vec::new();
+            for &value in &fc {
+                survive.push(value >= fc[max_plant-1]);
+            }
+
+            #[cfg(feature="report")] println!("survive : {:?}", survive );
+          
+
+            let mut  new_plant : Vec<Genome>= Vec::new();
+            
+            for i in 0..plants.len() {
+                if survive[i] == true {
+                    new_plant.push(plants[i].clone());
+                }
+            }
+
+            //plants=newPlant;
+            plants = new_plant;
+
+            //sz=size(newPlant);
+            //let sz : usize = plants.len();
+            //let mut x1 : Vec<f64> = Vec::new();
+            //let mut y : Vec<f64> = Vec::new();
+
+            //for j in 0..plants.len() {
+                //x1.push(plants[j].genes[0]);
+                //y.push(plants[j].genes[1]);
+            //}
+
+            plant_number = plants.len(); //x1.len();
+
+            #[cfg(feature ="report")] println!("Iter {};  plant_number :{}", iteration, plant_number);
+
+            // st=zeros(plantNumber,1);   
+            let mut st : Vec<f64> = vec![0.0f64; plant_number];
+
+            for i in 0..plant_number {
+                //Compute Neighborhood Radius
+                //r(i)=teta*rmax*exp(1-(5*v(i))/vmax);
+                for k in 0..dim {
+                    r[i][k] = teta*rmax[k]*f64::exp(1.0-(5.0*v[i])/vmax);  
+                }
+
+                let mut non : usize =0;
+                for j in 0..plant_number {
+
+                    // Calculating the distance between plants(i,:) and plants(j,:)
+                    let mut sum_of_squares = 0.0;
+                    for k in 0..dim {
+                        sum_of_squares += (plants[i].genes[k] - plants[j].genes[k]).powi(2);
+                    }
+                    let distance = f64::sqrt(sum_of_squares);
+                    
+                    if distance < r[i][j] {
+
+
+                        
+                    } 
+
+                }
+
+                println!("r : {:?}", r);                
+            }
 
 
 
 
+              //plant_number += 1;
+            iteration +=1; 
+        }
 
 
 

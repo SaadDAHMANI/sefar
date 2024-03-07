@@ -17,6 +17,8 @@ const KMAX : usize = 2;
 
 fn main() {
     println!("Hello, sefar !");
+
+    pco_f1_test1();
     
     //eo_f1_test1();
 
