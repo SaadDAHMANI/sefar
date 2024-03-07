@@ -111,3 +111,43 @@ impl<'a> Parameters for PCOparams<'a> {
      }        
  }
  
+
+impl<'a> Default for PCOparams<'a>{
+
+    ///
+    /// Return default values of parameters, as following :
+    /// 
+    /// ~~~
+    /// 
+    ///  use sefar::sequential_algos::pco::*;
+    /// 
+    ///  PCOparams{
+    ///     population_size : 10,
+    ///     dimensions : 3,
+    ///     max_iterations : 100,
+    ///     lower_bounds : &[-100.0f64, -100.0, -100.0],
+    ///     upper_bounds : &[100.0f64, 100.0, 100.0],
+    ///     vmax : 20,
+    ///     max_plant_number : 500,
+    ///     theta : 0.005,
+    ///     k : 0.1,
+    ///     miu : 0.05,
+    /// };
+    /// ~~~
+    /// 
+    fn default()->Self{
+        PCOparams{
+            population_size : 10,
+            dimensions : 3,
+            max_iterations : 100,
+            lower_bounds : &[-100.0f64, -100.0, -100.0],
+            upper_bounds : &[100.0f64, 100.0, 100.0],
+            vmax : 20,
+            max_plant_number : 500,
+            theta : 0.005,
+            k : 0.1,
+            miu : 0.05,
+        }
+    }
+}
+
