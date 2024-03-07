@@ -7,9 +7,11 @@ use sefar::sequential_algos::eo::{EO, EOparams};
 use sefar::sequential_algos::pso::{PSO, PSOparams};
 use sefar::sequential_algos::meo::MEO;
 
-const DIM : usize = 30;
-const POP_SIZE : usize =50;
-const KMAX : usize = 500;
+const DIM : usize = 5;
+const POP_SIZE : usize =10;
+const KMAX : usize = 3;
+
+
 
 fn main() {
     println!("Hello, sefar !");
