@@ -135,7 +135,7 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
             //end
 
             // Evaluation of candidate solutions:
-            for i in 0..plants.len() {
+            for i in 0..plants.len()-1 {
                 f[i] = self.problem.objectivefunction(&plants[i].genes);
             }
 
@@ -290,20 +290,24 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
 
              //migrantPlantOld=migrantPlant;
              let migrant_plant_old = migrant_plant.clone();
+             if plant_number+1 <= plant_number + sum_nos {
 
-            //migrantPlant=randi([plantNumber+1,plantNumber+sumNos],1,migrantSeedsNo);
-             migrant_plant = randi(plant_number+1,plant_number + sum_nos, migrant_seeds_no);
-
-            /* for i=1:migrantSeedsNo
-                  temp=A+(B-A).*rand(1,dim);
-                   plants(migrantPlant(i),:)=temp;
-            end */
             
-            for i in 0..migrant_seeds_no {
-                for j in 0..dim {
-                    plants[migrant_plant[i]].genes[j] = lb[j] + (ub[j]-lb[j])*between.sample(&mut rng); 
-                }
-            } 
+                //migrantPlant=randi([plantNumber+1,plantNumber+sumNos],1,migrantSeedsNo);
+                migrant_plant = randi(plant_number+1,plant_number + sum_nos, migrant_seeds_no);
+
+                /* for i=1:migrantSeedsNo
+                    temp=A+(B-A).*rand(1,dim);
+                    plants(migrantPlant(i),:)=temp;
+                end */
+                
+                for i in 0..migrant_seeds_no {
+                    for j in 0..dim {
+                        plants[migrant_plant[i]].genes[j] = lb[j] + (ub[j]-lb[j])*between.sample(&mut rng); 
+                    }
+                } 
+
+            }
 
             //plantNumberOld=plantNumber;
             plant_number_old = plant_number;
