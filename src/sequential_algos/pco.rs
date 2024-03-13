@@ -75,7 +75,7 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
         
 
         //----------------------------------------
-        let mut rmax_vec : Vec<f64> = vec![0.0f64; dim];
+        let rmax_vec : Vec<f64> = vec![0.0f64; dim];
         let mut rmax : f64 = 0.0;
         let mut r : Vec<f64> = vec![0.0f64; n];
 
@@ -301,7 +301,7 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
             
             for i in 0..migrant_seeds_no {
                 for j in 0..dim {
-                    plants[migrant_plant[i]].genes[j] = lb[j] + (ub[j]-lb[j])*between.sample(&mut rng);; 
+                    plants[migrant_plant[i]].genes[j] = lb[j] + (ub[j]-lb[j])*between.sample(&mut rng); 
                 }
             } 
 

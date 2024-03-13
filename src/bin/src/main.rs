@@ -50,7 +50,7 @@ fn pco_f1_test1(){
 
     match result.convergence_trend{
         None => println!("PCO: no convergence trend !!!"),
-        Some(cv) => println!("PCO: Convergence trend :\n {}", cv),
+        Some(cv) => println!("PCO: Convergence trend :\n {:?}", cv),
     };
 
 }

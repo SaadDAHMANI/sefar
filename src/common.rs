@@ -30,13 +30,23 @@ pub fn randomize(randvect : &mut Vec<f64>) {
 
 
 pub fn randi(imin: usize, imax : usize, cols : usize)->Vec<usize> {
+
     let mut vector : Vec<usize> = vec![0; cols];
-    let between = Uniform::from(imin..imax);
-    let mut rng = rand::thread_rng();
-            
-    for j in 0..cols{
-        vector[j] = between.sample(&mut rng);
-    }        
+
+    println!("i_min {}, imax : {}", imin, imax);
+    if imin == imax {
+        for j in 0..cols{
+            vector[j] = imin;
+        }    
+    }
+    else {
+        let between = Uniform::from(imin..imax);
+        let mut rng = rand::thread_rng();
+                
+        for j in 0..cols{
+            vector[j] = between.sample(&mut rng);
+        }      
+    }
     
     vector
 }
