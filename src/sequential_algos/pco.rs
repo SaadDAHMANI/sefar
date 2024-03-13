@@ -269,6 +269,11 @@ pub struct PCOparams<'a> {
     /// Growth rate.
     /// It shoud be greather than the maximum value, Theta_max = e^-1=0.36788.
     pub theta : f64,
+
+
+    /// Parameter (can be considered as constant too).
+    /// Defautl value : alpha = 5.0. 
+    pub alpha : f64,
     
     /// Growth parameter. 
     pub k : f64,
@@ -280,7 +285,7 @@ pub struct PCOparams<'a> {
 #[allow(dead_code)]
 impl<'a> PCOparams<'a>{
     pub fn new(p_size: usize, dim : usize, max_iter : usize, lb : &'a [f64], 
-    ub : &'a [f64], vmax : usize, max_plant_number : usize, theta : f64, k : f64, miu : f64)-> Result<PCOparams<'a>, String> {
+    ub : &'a [f64], vmax : usize, max_plant_number : usize, theta : f64, alpha : f64, k : f64, miu : f64)-> Result<PCOparams<'a>, String> {
                       
         let params = PCOparams{
             population_size : p_size,
@@ -291,6 +296,7 @@ impl<'a> PCOparams<'a>{
             vmax,
             max_plant_number,
             theta : f64::min(theta, f64::exp(-1.0)),
+            alpha,
             k,
             miu,
         };
@@ -344,6 +350,7 @@ impl<'a> Default for PCOparams<'a>{
     ///     vmax : 20,
     ///     max_plant_number : 500,
     ///     theta : 0.005,
+    ///     alpha : 5.0,
     ///     k : 0.1,
     ///     miu : 0.05,
     /// };
@@ -359,6 +366,7 @@ impl<'a> Default for PCOparams<'a>{
             vmax : 20,
             max_plant_number : 500,
             theta : 0.005,
+            alpha : 5.0,
             k : 0.1,
             miu : 0.05,
         }
