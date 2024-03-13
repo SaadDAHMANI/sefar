@@ -43,3 +43,14 @@ pub fn copy_vector2genome(source : & Vec<f64>, destination : &mut Genome){
     }
 }
 
+///
+/// Compute the euclidean distance between 2 solutions
+/// 
+pub fn euclidian_dist(p1 : &Genome, p2 : &Genome)-> f64 {
+   
+    let sum  = p1.genes.iter().zip(p2.genes.iter()).fold(0.0f64, |acc, (a,b)| acc+f64::powi(a-b, 2) );
+    
+    f64::sqrt(sum)
+        
+    
+}

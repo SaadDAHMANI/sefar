@@ -49,7 +49,7 @@ impl<'a, T : Problem> PCO<'a, T>{
              params: settings,
              optimization_result: result,            
         }
-    }   
+    }
 }
 
 
@@ -65,13 +65,15 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
         let noi : usize = self.params.get_max_iterations();
         let max_plant_number : usize = self.params.max_plant_number;
         let vmax : f64 = self.params.vmax as f64;
+        let alpha : f64 = self.params.alpha;
         
 
         
 
         //----------------------------------------
-        let mut rmax : Vec<f64> = vec![0.0f64; dim];
-        let mut r : Vec<Vec<f64>> = vec![vec![0.0f64; dim]; n];
+        let mut rmax_vec : Vec<f64> = vec![0.0f64; dim];
+        let mut rmax : f64 = 0.0;
+        let mut r : Vec<f64> = vec![0.0f64; n];
 
         let mut v : Vec<f64> = vec![0.0f64; n];
         let mut best : Vec<f64> = Vec::new();
@@ -96,13 +98,18 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
 
         //-----------------------------------------
         
-        let mut i : usize = 0;
+        /*  let mut i : usize = 0;
         for (a,b) in ub.iter().zip(lb.iter()){
             rmax[i] = a-b;
             i+=1;
-        }
+        } */
+
+        rmax = ub[0]-lb[0];
 
         println!("rmax : {:?}", rmax);
+
+        //-------------------------------------------
+
 
         let mut plants = self.initialize(self.params);
         let x= plants.clone();
@@ -191,31 +198,32 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
             // st=zeros(plantNumber,1);   
             let mut st : Vec<f64> = vec![0.0f64; plant_number];
 
+
             for i in 0..plant_number {
                 //Compute Neighborhood Radius
                 //r(i)=teta*rmax*exp(1-(5*v(i))/vmax);
-                for k in 0..dim {
-                    r[i][k] = teta*rmax[k]*f64::exp(1.0-(5.0*v[i])/vmax);  
-                }
 
+                r[i] = teta * rmax*f64::exp(1.0-(alpha*v[i])/vmax);
+
+                
+                // non : number of neighbours
                 let mut non : usize =0;
+
                 for j in 0..plant_number {
-
-                    // Calculating the distance between plants(i,:) and plants(j,:)
-                    let mut sum_of_squares = 0.0;
-                    for k in 0..dim {
-                        sum_of_squares += (plants[i].genes[k] - plants[j].genes[k]).powi(2);
+                    if euclidian_dist(&plants[i], &plants[j]) <= r[i] { // are neighbours in this case:
+                        // st(i)=st(i)+v(j);
+                        //non=non+1;
+                        st[i] += v[j];
+                        non +=1;                  
                     }
-                    let distance = f64::sqrt(sum_of_squares);
-                    
-                    if distance < r[i][j] {
-
-
-                        
-                    } 
-
                 }
 
+                
+
+                  
+
+
+              
                 println!("r : {:?}", r);                
             }
 
@@ -238,8 +246,8 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
         return result;   
 
     }    
-}
 
+}
 
 
 
