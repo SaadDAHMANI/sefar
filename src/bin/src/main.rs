@@ -10,7 +10,7 @@ use sefar::sequential_algos::pco::{PCO, PCOparams};
 use sefar::sequential_algos::meo::MEO;
 
 const DIM : usize = 3;
-const POP_SIZE : usize = 4;
+const POP_SIZE : usize = 5;
 const KMAX : usize = 2;
 
 
