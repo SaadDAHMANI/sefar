@@ -9,7 +9,9 @@
 /// 
 
 extern crate rand;
+
 use rand::distributions::{Distribution, Uniform};
+use rand::Rng;
 
 use crate::core::eoa::EOA;
 use crate::core::genome::Genome;
@@ -78,8 +80,10 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
 
         let mut v : Vec<f64> = vec![0.0f64; n];
         let mut dv : Vec<f64> = vec![0.0f64; n];
-        
+       
         let mut best : Vec<f64> = Vec::new();
+
+        let mut nos : Vec<i64> = vec![0i64; n];
                 
         let mut f : Vec<f64> = vec![0.0f64; n];
         let mut fn_vec : Vec<f64> = vec![0.0f64; n];
@@ -89,7 +93,10 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
         let migrant_seeds_no : usize = 0;
         let migrant_plant : Vec<Genome> = Vec::new();
 
-
+        //--------------------------------------------
+        let between = Uniform::from(0.0..=1.0);
+        let mut rng = rand::thread_rng();
+        //--------------------------------------------
 
         let maxteta : f64 = f64::exp(-1.0);
         let teta : f64 = maxteta.clone();
@@ -210,29 +217,59 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
 
                 
                 // non : number of neighbours
-                let mut non : usize =0;
+                let mut non : f64 =0.0;
 
                 for j in 0..plant_number {
                     if euclidian_dist(&plants[i], &plants[j]) <= r[i] { // are neighbours in this case:
                         // st(i)=st(i)+v(j);
                         //non=non+1;
                         st[i] += v[j];
-                        non +=1;                  
+                        non +=1.0;                  
                     }
                 }
 
                 // dv(i)=fc(i)*k*(log(non*vmax)-log(st(i)));
-                dv[i] = fc[i]*
+                dv[i] = fc[i]*k*(f64::ln(non*vmax)- f64::ln(st[i]));
 
+                // if v(i)+dv(i)<vmax
+                //      v(i)=v(i)+dv(i);
+                // else
+                //      v(i)=vmax;
+                // end
 
-                
+                if (v[i]+dv[i]) < vmax {
+                    v[i] = v[i] + dv[i];
+                } 
+                else {
+                    v[i] = vmax;
+                }
 
-                  
-
-
-              
-                println!("r : {:?}", r);                
             }
+
+             // ----- SEED PRODUCTION ----------------
+             // sumNos=0;
+             let mut sum_nos : i64 =0;
+             for i in 0..plant_number {
+                // NOS(i)=floor(v(i)+1);
+                nos[i] =  (v[i]+1.0).floor() as i64;
+                
+                //sumNos=sumNos+NOS(i);
+                sum_nos += nos[i];
+
+                for j in 0..nos[i]{
+                    //RND=randi(dim);
+                    let rnd = rng.gen_range(0..dim);
+                    
+                    //Temp=(plants(i,RND)-r(i))+2*r(i)*rand;
+                    let rand01 = between.sample(&mut rng);
+                    let  temp = (plants[i].genes[rnd]-r[i])+(2.0*r[i]* rand01);
+
+                }
+
+
+
+
+             }
 
 
 
