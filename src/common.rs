@@ -1,6 +1,7 @@
 extern crate rand;
 use rand::distributions::Uniform;
 use rand::distributions::Distribution;
+use rayon::vec;
 
 use crate::core::genome::Genome;
 
@@ -25,6 +26,19 @@ pub fn randomize(randvect : &mut Vec<f64>) {
     for i in 0..randvect.len() {
         randvect[i]=between.sample(&mut rng);
     }
+}
+
+
+pub fn randi(imin: usize, imax : usize, cols : usize)->Vec<usize> {
+    let mut vector : Vec<usize> = vec![0; cols];
+    let between = Uniform::from(imin..imax);
+    let mut rng = rand::thread_rng();
+            
+    for j in 0..cols{
+        vector[j] = between.sample(&mut rng);
+    }        
+    
+    vector
 }
 
 pub fn copy_vector(source : & Vec<f64>, destination : &mut Vec<f64>, dim : usize){

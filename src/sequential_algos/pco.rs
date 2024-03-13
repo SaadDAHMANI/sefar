@@ -69,6 +69,7 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
         let vmax : f64 = self.params.vmax as f64;
         let alpha : f64 = self.params.alpha;
         let k :f64  = self.params.k;
+        let miu : f64 = self.params.miu;
         
 
         
@@ -83,15 +84,15 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
        
         let mut best : Vec<f64> = Vec::new();
 
-        let mut nos : Vec<i64> = vec![0i64; n];
+        let mut nos : Vec<usize> = vec![0; n];
                 
         let mut f : Vec<f64> = vec![0.0f64; n];
         let mut fn_vec : Vec<f64> = vec![0.0f64; n];
         let mut fitness : Vec<f64> = vec![0.0f64; n];
         let mut fc : Vec<f64> = vec![0.0f64; n];
         
-        let migrant_seeds_no : usize = 0;
-        let migrant_plant : Vec<Genome> = Vec::new();
+        let mut migrant_seeds_no : usize = 0;
+        let mut migrant_plant :Vec<usize> = Vec::new();
 
         //--------------------------------------------
         let between = Uniform::from(0.0..=1.0);
@@ -104,6 +105,7 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
         let mut iteration : usize = 1;
 
         let max_plant : usize = n.clone();
+        let mut plant_number_old : usize =0;
 
 
         //-----------------------------------------
@@ -248,10 +250,10 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
 
              // ----- SEED PRODUCTION ----------------
              // sumNos=0;
-             let mut sum_nos : i64 =0;
+             let mut sum_nos : usize =0;
              for i in 0..plant_number {
                 // NOS(i)=floor(v(i)+1);
-                nos[i] =  (v[i]+1.0).floor() as i64;
+                nos[i] =  (v[i]+1.0).floor() as usize;
                 
                 //sumNos=sumNos+NOS(i);
                 sum_nos += nos[i];
@@ -276,25 +278,42 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
                     v.push(rand010);
 
                 }
-
-
-
-
              }
 
+             // -- SEED MIGRATION -------------------
+             
+             // migrantSeedsNoOld = migrantSeedsNo;
+             let migrant_seeds_no_old = migrant_seeds_no.clone();
+             
+             //migrantSeedsNo=floor(miu*sumNos);
+             migrant_seeds_no = (miu*sum_nos as f64).floor() as usize;
 
+             //migrantPlantOld=migrantPlant;
+             let migrant_plant_old = migrant_plant.clone();
 
+            //migrantPlant=randi([plantNumber+1,plantNumber+sumNos],1,migrantSeedsNo);
+             migrant_plant = randi(plant_number+1,plant_number + sum_nos, migrant_seeds_no);
 
-              //plant_number += 1;
+            /* for i=1:migrantSeedsNo
+                  temp=A+(B-A).*rand(1,dim);
+                   plants(migrantPlant(i),:)=temp;
+            end */
+            
+            for i in 0..migrant_seeds_no {
+                for j in 0..dim {
+                    plants[migrant_plant[i]].genes[j] = lb[j] + (ub[j]-lb[j])*between.sample(&mut rng);; 
+                }
+            } 
+
+            //plantNumberOld=plantNumber;
+            plant_number_old = plant_number;
             iteration +=1; 
         }
-
-
 
         let result = OptimizationResult{
             best_genome : None, //Some(Genome::new(0, self.params.dimensions)),
             best_fitness : None, //Some(-1111.1111),
-            convergence_trend : None, //Some(convergence_curve),
+            convergence_trend : Some(best), //Some(convergence_curve),
             computation_time : None, //Some(duration),
             err_report : None,
         };
