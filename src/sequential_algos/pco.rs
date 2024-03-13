@@ -66,6 +66,7 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
         let max_plant_number : usize = self.params.max_plant_number;
         let vmax : f64 = self.params.vmax as f64;
         let alpha : f64 = self.params.alpha;
+        let k :f64  = self.params.k;
         
 
         
@@ -76,6 +77,8 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
         let mut r : Vec<f64> = vec![0.0f64; n];
 
         let mut v : Vec<f64> = vec![0.0f64; n];
+        let mut dv : Vec<f64> = vec![0.0f64; n];
+        
         let mut best : Vec<f64> = Vec::new();
                 
         let mut f : Vec<f64> = vec![0.0f64; n];
@@ -217,6 +220,10 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
                         non +=1;                  
                     }
                 }
+
+                // dv(i)=fc(i)*k*(log(non*vmax)-log(st(i)));
+                dv[i] = fc[i]*
+
 
                 
 
