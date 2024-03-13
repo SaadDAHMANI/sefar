@@ -267,6 +267,7 @@ pub struct PCOparams<'a> {
     pub max_plant_number : usize,
 
     /// Growth rate.
+    /// It shoud be greather than the maximum value, Theta_max = e^-1=0.36788.
     pub theta : f64,
     
     /// Growth parameter. 
@@ -289,7 +290,7 @@ impl<'a> PCOparams<'a>{
             upper_bounds : ub,
             vmax,
             max_plant_number,
-            theta,
+            theta : f64::min(theta, f64::exp(-1.0)),
             k,
             miu,
         };
