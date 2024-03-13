@@ -48,6 +48,11 @@ fn pco_f1_test1(){
     
     let result = pco.run();
 
+    match result.convergence_trend{
+        None => println!("PCO: no convergence trend !!!"),
+        Some(cv) => println!("PCO: Convergence trend :\n {}", cv),
+    };
+
 }
 
 #[allow(dead_code)]
