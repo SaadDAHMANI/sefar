@@ -263,6 +263,17 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
                     //Temp=(plants(i,RND)-r(i))+2*r(i)*rand;
                     let rand01 = between.sample(&mut rng);
                     let  temp = (plants[i].genes[rnd]-r[i])+(2.0*r[i]* rand01);
+                    
+                    // seed=plants(i,:);
+                    // seed(RND)=Temp;
+                    // plants=[plants;seed];
+                    // v=[v;rand];
+                    let mut seed = plants[i].clone();
+                    seed.genes[rnd]=temp;
+                    plants.push(seed);
+
+                    let rand010 = between.sample(&mut rng);
+                    v.push(rand010);
 
                 }
 
