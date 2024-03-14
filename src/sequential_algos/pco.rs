@@ -140,8 +140,14 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
             }
 
             // Calculate Fitness Coefficient=fc
-            let minf = f.iter().fold(f64::MAX, |minf, y| minf.min(*y));
-            best.push(minf);
+            let min_f = f.iter().fold(f64::MAX, |min, &x| 
+                if min < x {
+                    x
+                }
+                else {min}            
+            );
+
+            best.push(min_f);
 
             let normf = f.iter().map(|&x| x * x).sum::<f64>().sqrt();
 
@@ -289,8 +295,8 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
              migrant_seeds_no = (miu*sum_nos as f64).floor() as usize;
 
              //migrantPlantOld=migrantPlant;
-             let migrant_plant_old = migrant_plant.clone();
-             if plant_number+1 <= plant_number + sum_nos {
+             //let migrant_plant_old = migrant_plant.clone();
+             if (plant_number+1) <= (plant_number + sum_nos) {
 
             
                 //migrantPlant=randi([plantNumber+1,plantNumber+sumNos],1,migrantSeedsNo);
