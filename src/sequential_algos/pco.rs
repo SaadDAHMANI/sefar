@@ -139,13 +139,17 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
                 f[i] = self.problem.objectivefunction(&plants[i].genes);
             }
 
+
             // Calculate Fitness Coefficient=fc
-            let min_f = f.iter().fold(f64::MAX, |min, &x| 
-                if min < x {
-                    x
+           let mut min_f : f64 = f64::MAX;
+           for elmnt in f.iter(){
+                if *elmnt < min_f {
+                    min_f = *elmnt;
                 }
-                else {min}            
-            );
+           }
+
+            #[cfg(feature="report")] println!("fitness before sorting : {:?}", fitness);
+            #[cfg(feature= "report")] println!("minf = min(f) = {}", min_f);
 
             best.push(min_f);
 
@@ -178,7 +182,7 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
             
             fitness.sort_by(|a,b| b.partial_cmp(a).unwrap());
 
-            #[cfg(feature="report")] println!("fitness : {:?}", fitness);
+            #[cfg(feature="report")] println!("fitness after sorting : {:?}", fitness);
 
             let mut survive : Vec<bool> = Vec::new();
             for &value in &fc {
