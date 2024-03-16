@@ -29,6 +29,7 @@ use crate::common::*;
 /// https://github.com/iman-aliabdi/PCO-Plant-Competition-Optimization
 /// 
 #[derive(Debug)]
+#[warn(non_checked_code)]
 pub struct PCO<'a, T : Problem> {
      pub problem : &'a mut T,
      pub params : &'a PCOparams<'a>,
@@ -70,26 +71,24 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
         let alpha : f64 = self.params.alpha;
         let k :f64  = self.params.k;
         let miu : f64 = self.params.miu;
-        
-
-        
 
         //----------------------------------------
-        let rmax_vec : Vec<f64> = vec![0.0f64; dim];
+        //let rmax_vec : Vec<f64> = vec![0.0f64; dim];
         let mut rmax : f64 = 0.0;
-        let mut r : Vec<f64> = vec![0.0f64; n];
+        let mut r : Vec<f64> = Vec::new();
 
         let mut v : Vec<f64> = vec![0.0f64; n];
-        let mut dv : Vec<f64> = vec![0.0f64; n];
+        let mut dv : Vec<f64> = Vec::new();// vec![0.0f64; n];
        
         let mut best : Vec<f64> = Vec::new();
 
-        let mut nos : Vec<usize> = vec![0; n];
+        let mut nos : Vec<usize> = Vec::new();
                 
-        let mut f : Vec<f64> = vec![0.0f64; n];
-        let mut fn_vec : Vec<f64> = vec![0.0f64; n];
-        let mut fitness : Vec<f64> = vec![0.0f64; n];
-        let mut fc : Vec<f64> = vec![0.0f64; n];
+        let mut f : Vec<f64> = Vec::new(); //let mut f : Vec<f64> = vec![0.0f64; n];
+        let mut fn_vec : Vec<f64> = Vec::new();
+
+        let mut fitness : Vec<f64> = Vec::new(); //vec![0.0f64; n];
+        let mut fc : Vec<f64> = Vec::new(); //vec![0.0f64; n];
         
         let mut migrant_seeds_no : usize = 0;
         let mut migrant_plant :Vec<usize> = Vec::new();
@@ -104,7 +103,7 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
         let mut plant_number= n.clone();
         let mut iteration : usize = 1;
 
-        let max_plant : usize = n.clone();
+        let mut max_plant : usize = n.clone();
         let mut plant_number_old : usize =0;
 
 
@@ -130,59 +129,68 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
 
         while plant_number <= max_plant_number && iteration <= noi {
 
+            #[cfg(feature="report")]println!("---- Iter : [{}]", iteration);
             //for i=1:plantNumber
                 //f(i)=fobj(plants(i,:));
             //end
 
             // Evaluation of candidate solutions:
-            for i in 0..plants.len()-1 {
-                f[i] = self.problem.objectivefunction(&plants[i].genes);
+            f.clear();
+
+            for i in 0..plants.len() {
+                f.push(self.problem.objectivefunction(&plants[i].genes));
             }
 
-
             // Calculate Fitness Coefficient=fc
-           let mut min_f : f64 = f64::MAX;
-           for elmnt in f.iter(){
-                if *elmnt < min_f {
-                    min_f = *elmnt;
-                }
-           }
 
-            #[cfg(feature="report")] println!("fitness before sorting : {:?}", fitness);
+           let min_f = match f.iter().min_by(|a, b| a.total_cmp(b)){
+                Some(min_value) => *min_value,
+                None => f64::MAX,
+           };
+
+            #[cfg(feature="report")] println!("fitness before sorting, f : {:?}", f);
             #[cfg(feature= "report")] println!("minf = min(f) = {}", min_f);
 
             best.push(min_f);
 
             let normf = f.iter().map(|&x| x * x).sum::<f64>().sqrt();
 
-            for i in 0..n {
-                fn_vec[i] = f[i]/normf;                
+           fn_vec.clear();
+            for i in 0..f.len() {
+                fn_vec.push(f[i]/normf);                
             }
 
-            for i in 0..n {
-                fitness[i] = 1.0/(1.0 + fn_vec[i]);
+            fitness.clear();
+
+            for i in 0..fn_vec.len() {
+                fitness.push(1.0/(1.0 + fn_vec[i]));
             }
 
             let mx : f64 = fitness.iter().fold(f64::MIN, |mx, y| mx.max(*y));
             let mn : f64 = fitness.iter().fold(f64::MAX, |mn, y| mn.min(*y));
 
             //println!("mx : {}; mn : {}", mx,mn);
+            
+            fc.clear();
+            
             if mx == mn {
-                for i in 0..n {
-                    fc[i] = fitness[i]/mx;
+                for i in 0..fitness.len() {
+                    fc.push(fitness[i]/mx);
                 }    
             }
             else {
                 // fc=(fitness-mn)./(mx-mn);
                 let dif_mx_mn = mx-mn;
-                for i in 0..n {
-                    fc[i] = (fitness[i]-mn)/ dif_mx_mn;
+                for i in 0..fitness.len() {
+                    fc.push((fitness[i]-mn)/ dif_mx_mn);
                 }
             }
             
             fitness.sort_by(|a,b| b.partial_cmp(a).unwrap());
 
             #[cfg(feature="report")] println!("fitness after sorting : {:?}", fitness);
+
+            max_plant = plant_number;
 
             let mut survive : Vec<bool> = Vec::new();
             for &value in &fc {
@@ -194,7 +202,7 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
 
             let mut  new_plant : Vec<Genome>= Vec::new();
             
-            for i in 0..plants.len() {
+            for i in 0..survive.len() {
                 if survive[i] == true {
                     new_plant.push(plants[i].clone());
                 }
@@ -220,13 +228,14 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
             // st=zeros(plantNumber,1);   
             let mut st : Vec<f64> = vec![0.0f64; plant_number];
 
+            r.clear();
+            dv.clear();
 
             for i in 0..plant_number {
                 //Compute Neighborhood Radius
                 //r(i)=teta*rmax*exp(1-(5*v(i))/vmax);
 
-                r[i] = teta * rmax*f64::exp(1.0-(alpha*v[i])/vmax);
-
+                r.push(teta * rmax*f64::exp(1.0-(alpha*v[i])/vmax));
                 
                 // non : number of neighbours
                 let mut non : f64 =0.0;
@@ -241,7 +250,8 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
                 }
 
                 // dv(i)=fc(i)*k*(log(non*vmax)-log(st(i)));
-                dv[i] = fc[i]*k*(f64::ln(non*vmax)- f64::ln(st[i]));
+                let tmpdvi = fc[i]*k*(f64::ln(non*vmax)- f64::ln(st[i]));
+                dv.push(tmpdvi);
 
                 // if v(i)+dv(i)<vmax
                 //      v(i)=v(i)+dv(i);
@@ -255,15 +265,16 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
                 else {
                     v[i] = vmax;
                 }
-
             }
 
              // ----- SEED PRODUCTION ----------------
              // sumNos=0;
              let mut sum_nos : usize =0;
+             nos.clear();
+
              for i in 0..plant_number {
                 // NOS(i)=floor(v(i)+1);
-                nos[i] =  (v[i]+1.0).floor() as usize;
+                nos.push((v[i]+1.0).floor() as usize);
                 
                 //sumNos=sumNos+NOS(i);
                 sum_nos += nos[i];

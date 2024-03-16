@@ -9,9 +9,9 @@ use sefar::sequential_algos::pco::{PCO, PCOparams};
 
 use sefar::sequential_algos::meo::MEO;
 
-const DIM : usize = 3;
-const POP_SIZE : usize = 5;
-const KMAX : usize = 2;
+const DIM : usize = 30;
+const POP_SIZE : usize = 30;
+const KMAX : usize = 500;
 
 
 
@@ -30,9 +30,9 @@ fn main() {
 
     //do_regression();
 
-   
+  }
 
-}
+
 
 #[allow(dead_code)]
 fn pco_f1_test1(){
@@ -41,6 +41,13 @@ fn pco_f1_test1(){
     settings.population_size = POP_SIZE;
     settings.dimensions = DIM ;    
     settings.max_iterations = KMAX; 
+
+       
+    let lb =vec![-100.0f64; DIM];
+    let ub =vec![100.0f64; DIM];
+
+    settings.lower_bounds = lb.as_slice();
+    settings.upper_bounds = ub.as_slice();  
 
     let mut fo = Sphere{};
 
