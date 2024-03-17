@@ -1,5 +1,5 @@
 [package]
-name = "bin"
+name = "sefar_bin"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,3 +10,7 @@ sefar = {path = "./sefar"}
 csv = "1.1.6"
 #serde_derive ="1.0.130"
 serde = { version = "1.0", features = ["derive"]}
+
+[[bin]]
+name = "sefar_bin"
+path = "src/main.rs"

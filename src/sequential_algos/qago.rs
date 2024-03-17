@@ -45,7 +45,7 @@ impl<'a, T : Problem> QAGO<'a, T>{
         }
     }
 
-    fn select_id(n: usize)->(Vec<usize>, Vec<usize>, Vec<usize>, Vec<usize>){
+    fn select_id(&self, n: usize)->(Vec<usize>, Vec<usize>, Vec<usize>, Vec<usize>){
 
         let mut l1 : Vec<usize> = vec![0; n];
         let mut l2 : Vec<usize> = vec![0; n];
@@ -96,7 +96,9 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
         let between01 = Uniform::from(0.0..=1.0);
 
         let mut best_x : Genome = Genome::new(n+2, d);
-        //let mut worst_x : Vec<Genome> = Genome::new(n+2, d);
+        let mut gap : Vec<Vec<f64>> = vec![vec![0.0; d]; 5];
+
+                //let mut worst_x : Vec<Genome> = Genome::new(n+2, d);
         //let mut better_x : Genome = Genome::new(n+2, d);
 
         // Step 1 : Initialization
@@ -200,7 +202,36 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
             #[cfg(feature="report")] println!("normal_x : {:?}", normal_x);
             //------------------------------------------------------------------------------------- 
 
+            //[L1,L2,L3,L4]=selectID(N);
+            let (l1, l2, l3, l4) = self.select_id(n);
 
+            println!("_______________________________________________________");
+
+            #[cfg(feature="report")] println!("l1 : {:?}", l1);
+
+            for i in 0..n {
+                for j in 0..d {
+                    //  Gap(1,:)=(Best_X - Better_X(i,:));
+                    gap[0][j] = best_x.genes[j]-better_x[i].genes[j];
+
+                    //Gap(2,:)=(Better_X(i,:)-Normal_X(i,:));
+                    gap[1][j] = better_x[i].genes[j] - normal_x[i].genes[j];
+
+                    // Gap(3,:)=(Normal_X(i,:)-Worst_X(i,:));
+                    gap[2][j] = normal_x[i].genes[j] - worst_x[i].genes[j];
+
+                    //Gap(4,:)=(x(L1(i),:)-x(L2(i),:));
+                    gap[3][j] = x[l1[i]].genes[j] - x[l2[i]].genes[j];
+
+                    //Gap(5,:)=(x(L3(i),:)-x(L4(i),:));
+                    gap[4][j] = x[l3[i]].genes[j] - x[l4[i]].genes[j];
+                }
+
+                // Parameter self-adaptation based on one-dimensional mapping of vectors
+
+               
+
+            }
 
 
             
