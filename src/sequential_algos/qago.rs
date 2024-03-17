@@ -68,7 +68,8 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
         let between01 = Uniform::from(0.0..=1.0);
 
         let mut best_x : Genome = Genome::new(n+2, d);
-        let mut worst_x : Genome = Genome::new(n+2, d);
+        //let mut worst_x : Vec<Genome> = Genome::new(n+2, d);
+        //let mut better_x : Genome = Genome::new(n+2, d);
 
         // Step 1 : Initialization
         let mut x = self.initialize(self.params);
@@ -96,6 +97,9 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
            // Parameter adaptation based on distribution
            // P1=ceil(unifrnd(0.05,0.2)*N);
            let p1 = f64::ceil(uniform_rand1(0.05, 0.2)*n as f64);
+           let p1_usize = p1.round() as usize;
+
+           #[cfg(feature="report")] println!("p1 = {}", p1);
            // P2=normrnd(0.001*ones(1,N),0.001*ones(1,N));
             for j in 0..n{
                 p2[j] = normal_rand1(0.001*n_f64, 0.001*n_f64);
@@ -119,27 +123,44 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
              copy_vector(&x[ind[0]].genes, &mut best_x.genes, d); 
 
              //worse_index=ind(randi([N-P1+1,N],N,1));
-             let worse_index = match ind.iter().enumerate().max_by_key(|&(_, v)| v) {
-                Some((i, _))=> i,
-                None =>0,   
-             };
+             let tmp_worse_index = rand_vec(n-p1_usize+1, n, n);
+
+             let mut worse_index : Vec<usize> = Vec::new();
+             for k in tmp_worse_index {
+                worse_index.push(ind[k]);
+             }
 
              //Worst_X=x(worse_index,:);
-             copy_vector(&x[ind[worse_index]].genes, &mut worst_x.genes, d);
 
+             let mut worst_x : Vec<Genome> = Vec::new();
+             for k in worse_index.iter() {
+                worst_x.push(x[worse_index[*k]].clone());
+             }
+           
              println!("_______________________________________________________________________");
 
              #[cfg(feature = "report")] println!("Worst_index : {}; Worst_X : {:?}", worse_index, worst_x);
 
              //better_index=ind(randi([2,P1],N,1));
-             let better_index = match ind.iter().enumerate().min_by_key(|&(_, v)| v) {
-                Some((i, _))=> i,
-                None =>0,   
-             };
+
+             let tmp_better_index = rand_vec(2, p1_usize, n, );
+             let mut better_index : Vec<usize> = Vec::new();
+             for k in tmp_better_index {
+                better_index.push(ind[k]);
+             }
+
+              //Better_X=x(better_index,:);
+             let mut better_x : Vec<Genome> = Vec::new();
+             for k in better_index.iter() {
+                better_x.push(x[better_index[*k]].clone());
+             }
+            
+            
 
 
 
-             
+
+
             //iteration incrementation
             iter+=1;
         }

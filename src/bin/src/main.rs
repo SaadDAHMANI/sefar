@@ -41,13 +41,13 @@ fn main() {
     println!("indexes : {:?}", ind);     
 
 
-     let x = [10, 5, 3, 400];
-     let z = match x.iter().enumerate().max_by_key(|&(_, v)| v) {
-        Some((i, v))=> i,
+     let x = [10, 5, 3, 1];
+     let z = match x.iter().enumerate().min_by_key(|&(_, v)| v) {
+        Some((i, _))=> i,
         None =>0,   
      };
 
-       println!("The worst index is  z = {}", z);                                                                                         
+       println!("The best index is  z = {}", z);                                                                                         
 
     let x : f64 = -2.7; 
     let y= x.ceil();
