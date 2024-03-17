@@ -8,6 +8,7 @@ edition = "2021"
 
 [dependencies]
 rand ="0.8.5"
+rand_distr = "0.4.3"
 csv = "1.1"
 serde = { version = "1.0", features = ["derive"]}
 rayon ="1.6.1"

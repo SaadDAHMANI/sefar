@@ -1,6 +1,9 @@
 extern crate rand;
-use rand::distributions::Uniform;
-use rand::distributions::Distribution;
+extern crate rand_distr;
+
+use rand::distributions::{Distribution, Uniform};
+use rand_distr::Normal;
+
 use rayon::vec;
 
 use crate::core::genome::Genome;
@@ -28,8 +31,35 @@ pub fn randomize(randvect : &mut Vec<f64>) {
     }
 }
 
+#[allow(dead_code)]                   
+pub fn uniform_rand(min_value : f64, max_value :f64)-> Result<f64, String>{
+    if min_value > max_value {
+        Err(String::from("uniform_rand : min_value > max_value !!"))
+    }
+    else {
+        let between = Uniform::from(min_value..=max_value);
+        let mut rng = rand::thread_rng();
+        Ok(between.sample(&mut rng)) 
+    }
+}
 
-pub fn randi(imin: usize, imax : usize, cols : usize)->Vec<usize> {
+#[allow(dead_code)]                   
+pub fn uniform_rand1(min_value : f64, max_value :f64)-> f64{
+    let between = Uniform::from(min_value..=max_value);
+    let mut rng = rand::thread_rng();
+    between.sample(&mut rng) 
+}
+
+#[allow(dead_code)]                   
+pub fn normal_rand1(mean : f64, std_dev:f64)-> f64{
+    let normal = Normal::new(mean, std_dev).unwrap();
+    let v = normal.sample(&mut rand::thread_rng());
+    v
+}
+
+
+/// Return a vector with Uniform random distribution
+pub fn rand_vec(imin: usize, imax : usize, cols : usize)->Vec<usize> {
 
     let mut vector : Vec<usize> = vec![0; cols];
 
@@ -46,9 +76,31 @@ pub fn randi(imin: usize, imax : usize, cols : usize)->Vec<usize> {
         for j in 0..cols{
             vector[j] = between.sample(&mut rng);
         }      
-    }
-    
+    }    
     vector
+}
+
+/// Return a vector with Uniform random distribution
+pub fn rand_matrix(min_value: f64, max_value : f64, rows : usize, cols : usize)-> Vec<Vec<f64>> {
+    let mut matrix : Vec<Vec<f64>> = vec![vec![0.0; cols]; rows];
+
+    if min_value >= max_value {
+        for i in 0..rows{
+            for j in 0..cols{
+                matrix[i][j] = max_value;
+            }
+        }            
+    }
+    else {
+        let between = Uniform::from(min_value..max_value);
+        let mut rng = rand::thread_rng();
+        for i in 0..rows{
+            for j in 0..cols{
+                matrix[i][j] = between.sample(&mut rng);
+            }
+        }     
+    }    
+   matrix
 }
 
 pub fn copy_vector(source : & Vec<f64>, destination : &mut Vec<f64>, dim : usize){

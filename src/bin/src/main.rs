@@ -8,15 +8,18 @@ use sefar::sequential_algos::pso::{PSO, PSOparams};
 use sefar::sequential_algos::pco::{PCO, PCOparams};
 
 use sefar::sequential_algos::meo::MEO;
+use sefar::sequential_algos::qago::{QAGOparams, QAGO};
 
-const DIM : usize = 30;
-const POP_SIZE : usize = 30;
-const KMAX : usize = 500;
+const DIM : usize = 3;
+const POP_SIZE : usize = 4;
+const KMAX : usize = 1;
 
 
 
 fn main() {
     println!("Hello, sefar !");
+
+    qago_f1_test1();
 
     //pco_f1_test1();
     
@@ -30,18 +33,58 @@ fn main() {
 
     //do_regression();
     
-    let x = [1, 5, 3, 4];
+    let fitness = [1.0, 5.0, 3.0, 4.0];
                                              
-    let mut y : Vec<usize> = (0..x.len()).collect();
-    y.sort_by_key(|&i| x[i]);
+    let mut ind : Vec<usize> = (0..fitness.len()).collect();
+    ind.sort_by(|&a, &b| fitness[a].partial_cmp(&fitness[b]).unwrap());
 
-    println!("y : {:?}", y);                                                                                               
-                                                 
+    println!("indexes : {:?}", ind);     
+
+
+     let x = [10, 5, 3, 400];
+     let z = match x.iter().enumerate().max_by_key(|&(_, v)| v) {
+        Some((i, v))=> i,
+        None =>0,   
+     };
+
+       println!("The worst index is  z = {}", z);                                                                                         
+
+    let x : f64 = -2.7; 
+    let y= x.ceil();
+    println!("ceil x : {}", y);                                            
                                              
 
   }
 
 
+
+#[allow(dead_code)]
+fn qago_f1_test1(){
+    let mut settings : QAGOparams = QAGOparams::default();
+    
+    /* settings.population_size = POP_SIZE;
+    settings.dimensions = DIM ;    
+    settings.max_iterations = KMAX; 
+
+       
+    let lb =vec![-100.0f64; DIM];
+    let ub =vec![100.0f64; DIM];
+
+    settings.lower_bounds = lb.as_slice();
+    settings.upper_bounds = ub.as_slice();  
+ */
+    let mut fo = Sphere{};
+
+    let mut algo : QAGO<Sphere> = QAGO::new(&settings, &mut fo);
+    
+    let result = algo.run();
+
+    match result.convergence_trend{
+        None => println!("QAGO: no convergence trend !!!"),
+        Some(cv) => println!("QAGO: Convergence trend :\n {:?}", cv),
+    };
+
+}
 
 #[allow(dead_code)]
 fn pco_f1_test1(){

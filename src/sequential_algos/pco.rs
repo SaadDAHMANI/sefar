@@ -316,7 +316,7 @@ impl<'a, T: Problem> EOA for PCO<'a, T> {
 
             
                 //migrantPlant=randi([plantNumber+1,plantNumber+sumNos],1,migrantSeedsNo);
-                migrant_plant = randi(plant_number+1,plant_number + sum_nos, migrant_seeds_no);
+                migrant_plant = rand_vec(plant_number+1,plant_number + sum_nos, migrant_seeds_no);
 
                 /* for i=1:migrantSeedsNo
                     temp=A+(B-A).*rand(1,dim);
