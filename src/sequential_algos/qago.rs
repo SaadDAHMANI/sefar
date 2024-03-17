@@ -43,6 +43,34 @@ impl<'a, T : Problem> QAGO<'a, T>{
              params: settings,
              optimization_result: result,            
         }
+    }
+
+    fn select_id(n: usize)->(Vec<usize>, Vec<usize>, Vec<usize>, Vec<usize>){
+
+        let mut l1 : Vec<usize> = vec![0; n];
+        let mut l2 : Vec<usize> = vec![0; n];
+        let mut l3 : Vec<usize> = vec![0; n];
+        let mut l4 : Vec<usize> = vec![0; n];
+
+        let mut r =[0, 0, 0, 0];       
+
+        for i in 0..n{
+            if n >= 1 {
+                let vecc: Vec<usize> = (0..n).filter(|&x| x != i).collect();
+                for kkk in 0..4{
+                    let nn = n-kkk;
+                    let interval01 = Uniform::from(0..nn);
+                    let t = interval01.sample(&mut rand::thread_rng());
+                    r[kkk] = vecc[t];
+                }
+
+                l1[i] = r[0];
+                l2[i] = r[1];
+                l3[i] = r[2];
+                l4[i] = r[3];
+            }
+        }
+        (l1, l2, l3, l4)
     }   
 }
 
@@ -155,7 +183,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
              for k in better_index.iter() {
                 better_x.push(x[better_index[*k]].clone());
              }
-             #[cfg(feature="report")] println!("better_x : {}", better_x);            
+             #[cfg(feature="report")] println!("better_x : {:?}", better_x);            
             //-------------------------------------------------------------------------------------
             //normal_index=ind(randi([P1+1,N-P1],N,1));
             let tmp_normal_index = rand_vec(p1_usize+1, n-p1_usize, n);
@@ -169,7 +197,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
             for k in normal_index.iter() {
                  normal_x.push(x[better_index[*k]].clone());
             };
-            #[cfg(feature="report")] println!("normal_x : {}", normal_x);
+            #[cfg(feature="report")] println!("normal_x : {:?}", normal_x);
             //------------------------------------------------------------------------------------- 
 
 
@@ -200,6 +228,8 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
 
     }
+
+
 }
 
 

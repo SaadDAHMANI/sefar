@@ -70,7 +70,10 @@ pub fn rand_vec(imin: usize, imax : usize, cols : usize)->Vec<usize> {
         }    
     }
     else {
-        let between = Uniform::from(imin..imax);
+        let min_u = usize::min(imin, imax);
+        let max_u =  usize::max(imin, imax);
+
+        let between = Uniform::from(min_u..max_u);
         let mut rng = rand::thread_rng();
                 
         for j in 0..cols{
