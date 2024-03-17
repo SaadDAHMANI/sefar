@@ -18,7 +18,7 @@ const KMAX : usize = 500;
 fn main() {
     println!("Hello, sefar !");
 
-    pco_f1_test1();
+    //pco_f1_test1();
     
     //eo_f1_test1();
 
@@ -29,6 +29,15 @@ fn main() {
     //meo_test1();
 
     //do_regression();
+    
+    let x = [1, 5, 3, 4];
+                                             
+    let mut y : Vec<usize> = (0..x.len()).collect();
+    y.sort_by_key(|&i| x[i]);
+
+    println!("y : {:?}", y);                                                                                               
+                                                 
+                                             
 
   }
 

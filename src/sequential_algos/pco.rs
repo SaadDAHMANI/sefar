@@ -29,13 +29,14 @@ use crate::common::*;
 /// https://github.com/iman-aliabdi/PCO-Plant-Competition-Optimization
 /// 
 #[derive(Debug)]
-#[warn(non_checked_code)]
+#[allow(dead_code)]
 pub struct PCO<'a, T : Problem> {
      pub problem : &'a mut T,
      pub params : &'a PCOparams<'a>,
      pub optimization_result : OptimizationResult,
 }
 
+#[allow(dead_code)]
 impl<'a, T : Problem> PCO<'a, T>{
 
     pub fn new(settings :&'a PCOparams, problem : &'a mut T )->Self{       
@@ -55,7 +56,7 @@ impl<'a, T : Problem> PCO<'a, T>{
     }
 }
 
-
+#[allow(dead_code)]
 impl<'a, T: Problem> EOA for PCO<'a, T> {
    
     fn run(&mut self)-> OptimizationResult{
