@@ -27,6 +27,30 @@ pub struct QAGO<'a, T : Problem> {
      pub optimization_result : OptimizationResult,
 }
 
+impl <'a, T : Problem> EOA for QAGO<'a, T>{
+    fn run(&mut self)-> OptimizationResult {
+
+
+
+
+        
+
+
+
+
+        let result = OptimizationResult{
+            best_genome : None,
+            best_fitness : None, 
+            convergence_trend : None,
+            computation_time : None,
+            err_report : None,
+        };
+        return result;  
+
+
+    }
+}
+
 
 
 
