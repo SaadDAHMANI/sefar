@@ -121,7 +121,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
             //Best_X=x(ind(1),:);
              copy_vector(&x[ind[0]].genes, &mut best_x.genes, d); 
-
+            //-------------------------------------------------------------------------------------
              //worse_index=ind(randi([N-P1+1,N],N,1));
              let tmp_worse_index = rand_vec(n-p1_usize+1, n, n);
 
@@ -139,22 +139,42 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
            
              println!("_______________________________________________________________________");
 
-             #[cfg(feature = "report")] println!("Worst_index : {}; Worst_X : {:?}", worse_index, worst_x);
+             #[cfg(feature = "report")] println!("Worst_index : {:?}; Worst_X : {:?}", worse_index, worst_x);
 
+             //-------------------------------------------------------------------------------------
              //better_index=ind(randi([2,P1],N,1));
 
-             let tmp_better_index = rand_vec(2, p1_usize, n, );
+             let tmp_better_index = rand_vec(2, p1_usize, n);
              let mut better_index : Vec<usize> = Vec::new();
              for k in tmp_better_index {
                 better_index.push(ind[k]);
-             }
+             };
 
               //Better_X=x(better_index,:);
              let mut better_x : Vec<Genome> = Vec::new();
              for k in better_index.iter() {
                 better_x.push(x[better_index[*k]].clone());
              }
-            
+             #[cfg(feature="report")] println!("better_x : {}", better_x);            
+            //-------------------------------------------------------------------------------------
+            //normal_index=ind(randi([P1+1,N-P1],N,1));
+            let tmp_normal_index = rand_vec(p1_usize+1, n-p1_usize, n);
+            let mut normal_index : Vec<usize> = Vec::new();
+            for k in tmp_normal_index {
+                normal_index.push(ind[k]);
+            };
+
+            //Normal_X=x(normal_index,:);
+            let mut normal_x : Vec<Genome> = Vec::new();
+            for k in normal_index.iter() {
+                 normal_x.push(x[better_index[*k]].clone());
+            };
+            #[cfg(feature="report")] println!("normal_x : {}", normal_x);
+            //------------------------------------------------------------------------------------- 
+
+
+
+
             
 
 
