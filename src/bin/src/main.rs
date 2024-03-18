@@ -33,15 +33,20 @@ fn main() {
 
     //do_regression();
     
-    let fitness = [1.0, 5.0, 3.0, 4.0];
-                                             
+    let fitness = [1.0, 4.0, 3.0, 2.0];
+    let b = [1.0, 4.0, 3.0, 2.0];
+
+    let s = fitness.iter().zip(b.iter()).fold(0.0f64, |sum, (a, b)| sum + a*b);
+    
+    println!("inner product result = {}", s);
+
     let mut ind : Vec<usize> = (0..fitness.len()).collect();
     ind.sort_by(|&a, &b| fitness[a].partial_cmp(&fitness[b]).unwrap());
 
     println!("indexes : {:?}", ind);     
 
 
-     let x = [10, 5, 3, 1];
+     let x = [1, 5, 3, 1];
      let z = match x.iter().enumerate().min_by_key(|&(_, v)| v) {
         Some((i, _))=> i,
         None =>0,   

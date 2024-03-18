@@ -105,6 +105,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
         let mut best_x : Genome = Genome::new(n+2, d);
         let mut gap : Vec<Vec<f64>> = vec![vec![0.0; d]; 5];
+        let mut dgap = [0.0; 5];
 
         let mut worst_x : Vec<Genome> = self.get_empty_solutions(n);
         let mut better_x : Vec<Genome> = self.get_empty_solutions(n);
@@ -224,7 +225,11 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
                 // Parameter self-adaptation based on one-dimensional mapping of vectors
 
-               
+                dgap[0] = best_x.genes.iter().zip(better_x[i].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
+                dgap[1] = better_x[i].genes.iter().zip(normal_x[i].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
+                dgap[2] = normal_x[i].genes.iter().zip(worst_x[i].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
+                dgap[3] = x[l1[i]].genes.iter().zip(x[l2[i]].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
+                dgap[4] = x[l3[i]].genes.iter().zip(x[l4[i]].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
 
             }
 
