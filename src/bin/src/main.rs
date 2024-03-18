@@ -34,6 +34,8 @@ fn main() {
     //do_regression();
     
     let fitness = [1.0, 4.0, 3.0, 2.0];
+    let min_distance = fitness.iter().min_by(|a, b| a.partial_cmp(b).unwrap()); 
+            
     let b = [1.0, 4.0, 3.0, 2.0];
 
     let s = fitness.iter().zip(b.iter()).fold(0.0f64, |sum, (a, b)| sum + a*b);

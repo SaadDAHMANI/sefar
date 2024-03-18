@@ -106,6 +106,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
         let mut best_x : Genome = Genome::new(n+2, d);
         let mut gap : Vec<Vec<f64>> = vec![vec![0.0; d]; 5];
         let mut dgap = [0.0; 5];
+        let mut lf = [0.0; 5];
 
         let mut worst_x : Vec<Genome> = self.get_empty_solutions(n);
         let mut better_x : Vec<Genome> = self.get_empty_solutions(n);
@@ -230,6 +231,23 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 dgap[2] = normal_x[i].genes.iter().zip(worst_x[i].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
                 dgap[3] = x[l1[i]].genes.iter().zip(x[l2[i]].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
                 dgap[4] = x[l3[i]].genes.iter().zip(x[l4[i]].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
+
+                let min_distance : f64 = match dgap.iter().min_by(|a, b| a.partial_cmp(b).unwrap()){
+                    Some(value) => *value,
+                    None => 1.0,
+                };
+
+                //DGap=DGap+2*abs(minDistance)
+                let min_distance_2 =  2.0*min_distance.abs();
+
+                for j in 0..5 {
+                    dgap[j] +=  min_distance_2;
+                }
+
+                let sum_dgap = dgap.iter().fold(0.0f64, |sum, a| sum+a); 
+                for k in 0..5{
+                    lf[k]= dgap[k]/sum_dgap;
+                }
 
             }
 
