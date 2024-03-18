@@ -45,6 +45,14 @@ impl<'a, T : Problem> QAGO<'a, T>{
         }
     }
 
+    fn get_empty_solutions(&self, n : usize)->Vec<Genome>{
+        let mut result : Vec<Genome> = Vec::with_capacity(n);
+        for i in 0..n {
+            result.push(Genome::new(i, self.params.get_dimensions()));
+        }
+        result
+    }
+
     fn select_id(&self, n: usize)->(Vec<usize>, Vec<usize>, Vec<usize>, Vec<usize>){
 
         let mut l1 : Vec<usize> = vec![0; n];
@@ -98,8 +106,11 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
         let mut best_x : Genome = Genome::new(n+2, d);
         let mut gap : Vec<Vec<f64>> = vec![vec![0.0; d]; 5];
 
-                //let mut worst_x : Vec<Genome> = Genome::new(n+2, d);
-        //let mut better_x : Genome = Genome::new(n+2, d);
+        let mut worst_x : Vec<Genome> = self.get_empty_solutions(n);
+        let mut better_x : Vec<Genome> = self.get_empty_solutions(n);
+        let mut normal_x : Vec<Genome> = self.get_empty_solutions(n);
+
+        //let mut better_x : Vec<Genome> = Vec::new();
 
         // Step 1 : Initialization
         let mut x = self.initialize(self.params);
@@ -153,18 +164,11 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
              copy_vector(&x[ind[0]].genes, &mut best_x.genes, d); 
             //-------------------------------------------------------------------------------------
              //worse_index=ind(randi([N-P1+1,N],N,1));
-             let tmp_worse_index = rand_vec(n-p1_usize+1, n, n);
-
-             let mut worse_index : Vec<usize> = Vec::new();
-             for k in tmp_worse_index {
-                worse_index.push(ind[k]);
-             }
-
-             //Worst_X=x(worse_index,:);
-
-             let mut worst_x : Vec<Genome> = Vec::new();
-             for k in worse_index.iter() {
-                worst_x.push(x[worse_index[*k]].clone());
+            let worse_index = rand_vec(n-p1_usize+1, n, n);
+                        
+            //Worst_X=x(worse_index,:);            
+             for k in 0..n {
+                 copy_vector(&x[worse_index[k]].genes, &mut worst_x[k].genes, d);//  worst_x[*k] = (x[worse_index[*k]].clone());
              }
            
              println!("_______________________________________________________________________");
@@ -174,30 +178,21 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
              //-------------------------------------------------------------------------------------
              //better_index=ind(randi([2,P1],N,1));
 
-             let tmp_better_index = rand_vec(2, p1_usize, n);
-             let mut better_index : Vec<usize> = Vec::new();
-             for k in tmp_better_index {
-                better_index.push(ind[k]);
-             };
-
-              //Better_X=x(better_index,:);
-             let mut better_x : Vec<Genome> = Vec::new();
-             for k in better_index.iter() {
-                better_x.push(x[better_index[*k]].clone());
+             let better_index = rand_vec(2, p1_usize, n);
+             
+             //Better_X=x(better_index,:);
+             for k in 0..n {
+                 copy_vector(&x[better_index[k]].genes, &mut better_x[k].genes, d);
              }
+
              #[cfg(feature="report")] println!("better_x : {:?}", better_x);            
             //-------------------------------------------------------------------------------------
             //normal_index=ind(randi([P1+1,N-P1],N,1));
-            let tmp_normal_index = rand_vec(p1_usize+1, n-p1_usize, n);
-            let mut normal_index : Vec<usize> = Vec::new();
-            for k in tmp_normal_index {
-                normal_index.push(ind[k]);
-            };
-
+            let normal_index = rand_vec(p1_usize+1, n-p1_usize, n);
+            
             //Normal_X=x(normal_index,:);
-            let mut normal_x : Vec<Genome> = Vec::new();
-            for k in normal_index.iter() {
-                 normal_x.push(x[better_index[*k]].clone());
+            for k in 0..n {
+                 copy_vector(&x[normal_index[k]].genes, &mut normal_x[k].genes, d); 
             };
             #[cfg(feature="report")] println!("normal_x : {:?}", normal_x);
             //------------------------------------------------------------------------------------- 
