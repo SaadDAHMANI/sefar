@@ -7,10 +7,14 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug",
-            "program": "$/home/sd/Documents/Rust_apps/sefar/src/bin/target/debug",
-            "args": [],
-            "cwd": "${workspaceFolder}"
+            "name": "Debug Rust",
+            "cargo": {
+                "args": ["build", "--manifest-path", "${fileDirname}/../Cargo.toml"]
+            }
+            
+            //"program": "./target/debug/sefar_bin",
+            //"args": [],
+            //"cwd": "${workspaceFolder}"
         }
     ]
 }
