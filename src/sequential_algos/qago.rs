@@ -61,9 +61,9 @@ impl<'a, T : Problem> QAGO<'a, T>{
         let mut l3 = Vec::new();
         let mut l4 = Vec::new();
     
-        for i in 0..=n {
+        for i in 0..n {
             if n >= 1 {
-                let mut vecc: Vec<usize> = (0..i).chain(i + 1..=n).collect();
+                let mut vecc: Vec<usize> = (0..i).chain(i + 1..n).collect();
                 let mut rng = rand::thread_rng();
                 let mut r = vec![0; 4];
     
@@ -177,7 +177,10 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
              copy_vector(&x[ind[0]].genes, &mut best_x.genes, d); 
             //-------------------------------------------------------------------------------------
              //worse_index=ind(randi([N-P1+1,N],N,1));
-            let worse_index = rand_vec(n-p1_usize+1, n, n);
+            //let worse_index = rand_vec(n-p1_usize+1, n-1, n);
+            let worse_index = rand_vec(n-p1_usize, n-1, n);
+            
+            println!("worse_index : {:?}", worse_index);
                         
             //Worst_X=x(worse_index,:);            
              for k in 0..n {
@@ -374,7 +377,7 @@ pub struct QAGOparams<'a> {
 
 impl<'a> Parameters for QAGOparams<'a> {
     fn get_dimensions(&self)->usize {
-        self.dimensions    
+         self.dimensions    
     }
 
     fn get_max_iterations(&self)->usize {
@@ -382,7 +385,7 @@ impl<'a> Parameters for QAGOparams<'a> {
     }
 
     fn get_population_size(&self)->usize {
-        self.population_size
+        usize::max(self.population_size, 5)
     }
 
     fn get_lower_bounds(&self)->Vec<f64> {
