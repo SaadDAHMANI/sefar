@@ -69,7 +69,7 @@ fn main() {
 fn qago_f1_test1(){
     let mut settings : QAGOparams = QAGOparams::default();
     
-    /* settings.population_size = POP_SIZE;
+    settings.population_size = POP_SIZE;
     settings.dimensions = DIM ;    
     settings.max_iterations = KMAX; 
 
@@ -79,7 +79,7 @@ fn qago_f1_test1(){
 
     settings.lower_bounds = lb.as_slice();
     settings.upper_bounds = ub.as_slice();  
- */
+
     let mut fo = Sphere{};
 
     let mut algo : QAGO<Sphere> = QAGO::new(&settings, &mut fo);

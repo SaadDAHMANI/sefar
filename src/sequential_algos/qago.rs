@@ -1,6 +1,7 @@
 
 extern crate rand;
 use rand::distributions::{Distribution, Uniform};
+use rand::Rng;
 //use rand::prelude::ThreadRng;
 use std::time::Instant;
 
@@ -55,29 +56,32 @@ impl<'a, T : Problem> QAGO<'a, T>{
 
     fn select_id(&self, n: usize)->(Vec<usize>, Vec<usize>, Vec<usize>, Vec<usize>){
 
-        let mut l1 : Vec<usize> = vec![0; n];
-        let mut l2 : Vec<usize> = vec![0; n];
-        let mut l3 : Vec<usize> = vec![0; n];
-        let mut l4 : Vec<usize> = vec![0; n];
-
-        let mut r =[0, 0, 0, 0];       
-
-        for i in 0..n{
+        let mut l1 = Vec::new();
+        let mut l2 = Vec::new();
+        let mut l3 = Vec::new();
+        let mut l4 = Vec::new();
+    
+        for i in 0..=n {
             if n >= 1 {
-                let vecc: Vec<usize> = (0..n).filter(|&x| x != i).collect();
-                for kkk in 0..4{
-                    let nn = n-kkk;
-                    let interval01 = Uniform::from(0..nn);
-                    let t = interval01.sample(&mut rand::thread_rng());
+                let mut vecc: Vec<usize> = (0..i).chain(i + 1..=n).collect();
+                let mut rng = rand::thread_rng();
+                let mut r = vec![0; 4];
+    
+                for kkk in 0..4 {
+                    let nt = n - kkk;
+                    let interval = Uniform::from(0..nt);
+                    let t = interval.sample(&mut rng);
                     r[kkk] = vecc[t];
+                    vecc.remove(t);
                 }
-
-                l1[i] = r[0];
-                l2[i] = r[1];
-                l3[i] = r[2];
-                l4[i] = r[3];
+    
+                l1.push(r[0]);
+                l2.push(r[1]);
+                l3.push(r[2]);
+                l4.push(r[3]);
             }
         }
+    
         (l1, l2, l3, l4)
     }   
 }
@@ -253,7 +257,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
                 let sum_dgap = dgap.iter().fold(0.0f64, |sum, a| sum+a); 
                 for k in 0..5{
-                    lf[k]= dgap[k]/sum_dgap;
+                    lf[k]= dgap[k]/sum_dgap + 1.0;
                 }
 
                 //Parameter self-adaptation based on fitness difference
@@ -275,7 +279,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 //SF=FGap./sum(FGap);
                 let sum_fgap = fgap.iter().fold(0.0f64, |sum, a| sum + a);
                 for k in 0..5 {
-                    sf[k] = fgap[k]/sum_fgap;
+                    sf[k] = fgap[k]/sum_fgap+1.0;
                 }
 
                 //Parameter self-adaptation based on Jensen-Shannon divergence
@@ -291,7 +295,6 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
                 // djs=sqrt(Djs);
                 let djs : f64 = f64::sqrt(0.5*(sum1 + sum2)); 
-
 
                 //Learning operator refinement
                 //newx(i,:)=x(i,:)+sum(Gap.*(djs.*LF+(1-djs).*SF),1);
@@ -369,7 +372,27 @@ pub struct QAGOparams<'a> {
     pub upper_bounds : &'a [f64],
 }
 
-impl<'a> Parameters for QAGOparams<'a> {}
+impl<'a> Parameters for QAGOparams<'a> {
+    fn get_dimensions(&self)->usize {
+        self.dimensions    
+    }
+
+    fn get_max_iterations(&self)->usize {
+        self.max_iterations
+    }
+
+    fn get_population_size(&self)->usize {
+        self.population_size
+    }
+
+    fn get_lower_bounds(&self)->Vec<f64> {
+        self.lower_bounds.to_vec()
+    }
+
+    fn get_upper_bounds(&self)->Vec<f64> {
+        self.upper_bounds.to_vec()
+    }
+}
 
 impl<'a> Default for QAGOparams<'a>{
 
@@ -391,7 +414,7 @@ impl<'a> Default for QAGOparams<'a>{
     /// 
     fn default()->Self{
         QAGOparams {
-            population_size : 4,
+            population_size : 10,
             dimensions : 3,
             max_iterations : 1,
             lower_bounds : &[-100.0f64, -100.0, -100.0],
