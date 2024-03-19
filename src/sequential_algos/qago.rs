@@ -112,10 +112,12 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
         let mut sf: [f64; 5]  = [0.0; 5];
         let mut ls : [f64; 5] = [0.0; 5];
         let mut ls : [f64; 5] = [0.0; 5];
+        let mut learn_operator : Vec<f64> = vec![0.0; d];
        
         let mut worst_x : Vec<Genome> = self.get_empty_solutions(n);
         let mut better_x : Vec<Genome> = self.get_empty_solutions(n);
         let mut normal_x : Vec<Genome> = self.get_empty_solutions(n);
+        let mut newx : Vec<Genome> = self.get_empty_solutions(n);
 
         //let mut better_x : Vec<Genome> = Vec::new();
 
@@ -290,7 +292,30 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 // djs=sqrt(Djs);
                 let djs : f64 = f64::sqrt(0.5*(sum1 + sum2)); 
 
+
                 //Learning operator refinement
+                //newx(i,:)=x(i,:)+sum(Gap.*(djs.*LF+(1-djs).*SF),1);
+                for j in 0..5 {
+                    let multiplier: f64 = djs*lf[j] + (1.0-djs)*sf[j];
+                    for l in 0..d {
+                        gap[j][l] *= multiplier; 
+                    }
+                }
+
+                 for t in 0..d {
+                    let mut tmp_sum : f64 =0.0;
+                    for j in 0..5 {
+                        tmp_sum += gap[j][t];
+                    }
+                    learn_operator [t] = tmp_sum;
+                }   
+
+                #[cfg(feature = "report")] println!("lear_operator : {:?}", learn_operator);
+                                      
+
+
+
+
 
 
 
