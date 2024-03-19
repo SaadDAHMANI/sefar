@@ -105,9 +105,14 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
         let mut best_x : Genome = Genome::new(n+2, d);
         let mut gap : Vec<Vec<f64>> = vec![vec![0.0; d]; 5];
-        let mut dgap = [0.0; 5];
-        let mut lf = [0.0; 5];
+        let mut dgap : [f64; 5] = [0.0; 5];
+        let mut fgap : [f64; 5] = [0.0; 5];
 
+        let mut lf : [f64; 5] = [0.0; 5];
+        let mut sf: [f64; 5]  = [0.0; 5];
+        let mut ls : [f64; 5] = [0.0; 5];
+        let mut ls : [f64; 5] = [0.0; 5];
+       
         let mut worst_x : Vec<Genome> = self.get_empty_solutions(n);
         let mut better_x : Vec<Genome> = self.get_empty_solutions(n);
         let mut normal_x : Vec<Genome> = self.get_empty_solutions(n);
@@ -233,21 +238,65 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 dgap[4] = x[l3[i]].genes.iter().zip(x[l4[i]].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
 
                 let min_distance : f64 = match dgap.iter().min_by(|a, b| a.partial_cmp(b).unwrap()){
-                    Some(value) => *value,
+                    Some(value) => (*value*2.0).abs(),
                     None => 1.0,
                 };
 
                 //DGap=DGap+2*abs(minDistance)
-                let min_distance_2 =  2.0*min_distance.abs();
+                //let min_distance_2 =  2.0*min_distance.abs();
 
                 for j in 0..5 {
-                    dgap[j] +=  min_distance_2;
+                    dgap[j] +=  min_distance;
                 }
 
                 let sum_dgap = dgap.iter().fold(0.0f64, |sum, a| sum+a); 
                 for k in 0..5{
                     lf[k]= dgap[k]/sum_dgap;
                 }
+
+                //Parameter self-adaptation based on fitness difference
+                //FGap(1,:)=(abs(fitness(ind(1))-fitness(better_index(i))));
+                fgap[0] = (fitness[ind[0]]-fitness[better_index[i]]).abs();
+
+                //FGap(2,:)=(abs(fitness(better_index(i))-fitness(normal_index(i))));
+                fgap[1] = (fitness[better_index[i]] - fitness[normal_index[i]]).abs();
+
+                //FGap(3,:)=(abs(normal_index(i)-fitness(worse_index(i)))); // Err in the original code line.
+                fgap[2] = (fitness[normal_index[i]] - fitness[worse_index[i]]).abs();
+
+                //FGap(4,:)=(abs(fitness(L1(i))-fitness(L2(i))));
+                fgap[3] = (fitness[l1[i]] - fitness[l2[i]]).abs();
+                
+                //FGap(5,:)=(abs(fitness(L3(i))-fitness(L4(i))));
+                fgap[4] = (fitness[l3[i]] - fitness[l4[i]]).abs();
+
+                //SF=FGap./sum(FGap);
+                let sum_fgap = fgap.iter().fold(0.0f64, |sum, a| sum + a);
+                for k in 0..5 {
+                    sf[k] = fgap[k]/sum_fgap;
+                }
+
+                //Parameter self-adaptation based on Jensen-Shannon divergence
+                // LS=(LF+SF)/2;
+                for k in 0..5 {
+                    ls[k] = (sf[k] + lf[k])/2.0;
+                }
+
+                //Djs=0.5*sum(LF.*log(LF./LS))+0.5*sum(SF.*log(SF./LS));
+
+                let sum1 : f64 = lf.iter().zip(ls.iter()).fold(0.0f64, |sum, (lfa,lsb)| sum + (lfa*f64::ln(lfa/lsb)));
+                let sum2 : f64 = sf.iter().zip(lf.iter()).fold(0.0f64, |sum, (sfa, lfb)| sum + (sfa*f64::ln(sfa/lfb)));
+
+                // djs=sqrt(Djs);
+                let djs : f64 = f64::sqrt(0.5*(sum1 + sum2)); 
+
+                //Learning operator refinement
+
+
+
+
+
+
 
             }
 
