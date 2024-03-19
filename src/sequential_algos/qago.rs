@@ -60,13 +60,21 @@ impl<'a, T : Problem> QAGO<'a, T>{
         let mut l2 = Vec::new();
         let mut l3 = Vec::new();
         let mut l4 = Vec::new();
-    
+        let mut rng = rand::thread_rng();
+        let mut r : [usize; 4] = [0; 4];
+
         for i in 0..n {
-            if n >= 1 {
-                let mut vecc: Vec<usize> = (0..i).chain(i + 1..n).collect();
-                let mut rng = rand::thread_rng();
-                let mut r = vec![0; 4];
-    
+            if n >= 2 {
+                
+                let mut vecc: Vec<usize> = Vec::with_capacity(n-1);
+                for j in 0..n{
+                    if j != i {
+                        vecc.push(j);
+                    }
+                }              
+                   
+                println!("vecc = {:?}", vecc);
+
                 for kkk in 0..4 {
                     let nt = n - kkk;
                     let interval = Uniform::from(0..nt);
