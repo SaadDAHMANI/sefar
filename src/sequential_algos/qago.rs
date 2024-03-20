@@ -392,7 +392,8 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
             }
 
             //  AF=0.01*(1-FEs/MaxFEs);
-            let af = 0.01* (1.0- (iter as f64 /max_iter as f64));           
+            //let af = 0.01* (1.0- (iter as f64 /max_iter as f64));
+            let af = 0.01 + 0.09* (1.0 - (iter as f64 /max_iter as f64));            
 
             for i in 0..n {
                 for j in 0..d {
