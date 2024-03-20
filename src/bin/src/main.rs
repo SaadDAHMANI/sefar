@@ -15,8 +15,6 @@ const DIM : usize = 3;
 const POP_SIZE : usize = 7;
 const KMAX : usize = 5;
 
-
-
 fn main() {
     println!("Hello, sefar !");
 

@@ -150,6 +150,8 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
         //Evaluation of candidate solution using the objective function
         for i in 0..n{
+            x[i].id = i;
+            
             fitness[i] = self.problem.objectivefunction(&x[i].genes);
 
             x[i].fitness = Some(fitness[i]);
