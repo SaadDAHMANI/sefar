@@ -93,6 +93,9 @@ impl<'a, T : Problem> QAGO<'a, T>{
             randvect[i]=between.sample(&mut rng);
         }
     }
+
+    //fn randperm(n : usize, k : usize){ }
+
 }
 
 impl <'a, T : Problem> EOA for QAGO<'a, T>{
@@ -148,6 +151,8 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
         //Evaluation of candidate solution using the objective function
         for i in 0..n{
             fitness[i] = self.problem.objectivefunction(&x[i].genes);
+
+            x[i].fitness = Some(fitness[i]);
             
             if gbestfitness >= fitness[i] {
                 gbestfitness = fitness[i];
@@ -405,6 +410,23 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 }
             }
 
+            for i in 0..n {
+                // Reflection operator refinement
+                for j in 0..d {
+                    if i1[i][j] 
+                    {
+                        if i2[i][j] {
+                            // newx(i,j)=lb+(ub-lb)*rand;
+                            newx[i].genes[j] = lb[j] + (ub[j] - lb[j])*between01.sample(&mut rng);
+
+                        }
+                        //else {
+
+                        //}
+                    }
+                }
+            }
+
 
 
 
@@ -419,12 +441,13 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
 
 
-
+        // Compute fitness for the best solution:
+        gbestx.fitness = Some( self.problem.objectivefunction(&gbestx.genes));
 
         let result = OptimizationResult{
-            best_genome : None,
-            best_fitness : None, 
-            convergence_trend : None,
+            best_genome : Some(gbestx),
+            best_fitness : Some(gbestfitness), 
+            convergence_trend : Some(gbesthistory),
             computation_time : None,
             err_report : None,
         };

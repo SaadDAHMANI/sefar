@@ -12,8 +12,8 @@ use sefar::sequential_algos::meo::MEO;
 use sefar::sequential_algos::qago::{QAGOparams, QAGO};
 
 const DIM : usize = 3;
-const POP_SIZE : usize = 4;
-const KMAX : usize = 1;
+const POP_SIZE : usize = 7;
+const KMAX : usize = 5;
 
 
 
@@ -94,6 +94,12 @@ fn qago_f1_test1(){
         None => println!("QAGO: no convergence trend !!!"),
         Some(cv) => println!("QAGO: Convergence trend :\n {:?}", cv),
     };
+
+    match result.best_genome {
+        None => println!("QAGO: no best solution !"),
+        Some(bg)=> println!("QAGO: best-genome {:?}", bg),
+    };
+
 
 }
 
