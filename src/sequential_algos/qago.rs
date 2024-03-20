@@ -391,7 +391,8 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 randomize(&mut vsaf[j]);
             }
 
-            let af = iter as f64 /max_iter as f64;           
+            //  AF=0.01*(1-FEs/MaxFEs);
+            let af = 0.01* (1.0- (iter as f64 /max_iter as f64));           
 
             for i in 0..n {
                 for j in 0..d {
