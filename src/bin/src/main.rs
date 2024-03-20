@@ -1,6 +1,7 @@
 include!("strm_regression.rs");
 include!("dataset.rs");
 
+
 use sefar::core::eoa::EOA;
 use sefar::benchmarks::functions::Sphere;
 use sefar::sequential_algos::eo::{EO, EOparams};
@@ -34,8 +35,10 @@ fn main() {
     //do_regression();
     
     let fitness = [1.0, 4.0, 3.0, 2.0];
-    let min_distance = fitness.iter().min_by(|a, b| a.partial_cmp(b).unwrap()); 
-            
+    let _min_distance = fitness.iter().min_by(|a, b| a.partial_cmp(b).unwrap()); 
+
+    println!("min_distance : {:?}", _min_distance);
+
     let b = [1.0, 4.0, 3.0, 2.0];
 
     let s = fitness.iter().zip(b.iter()).fold(0.0f64, |sum, (a, b)| sum + a*b);
@@ -49,6 +52,7 @@ fn main() {
 
 
      let x = [1, 5, 3, 1];
+     
      let z = match x.iter().enumerate().min_by_key(|&(_, v)| v) {
         Some((i, _))=> i,
         None =>0,   

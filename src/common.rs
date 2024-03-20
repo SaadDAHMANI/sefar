@@ -83,7 +83,10 @@ pub fn rand_vec(imin: usize, imax : usize, cols : usize)->Vec<usize> {
     vector
 }
 
+///
 /// Return a vector with Uniform random distribution
+///
+#[allow(dead_code)]
 pub fn rand_matrix(min_value: f64, max_value : f64, rows : usize, cols : usize)-> Vec<Vec<f64>> {
     let mut matrix : Vec<Vec<f64>> = vec![vec![0.0; cols]; rows];
 

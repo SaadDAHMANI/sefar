@@ -1,6 +1,7 @@
 
 extern crate rand;
 use rand::distributions::{Distribution, Uniform};
+use rand::rngs::ThreadRng;
 use rand::Rng;
 //use rand::prelude::ThreadRng;
 use std::time::Instant;
@@ -54,42 +55,32 @@ impl<'a, T : Problem> QAGO<'a, T>{
         result
     }
 
-    fn select_id(&self, n: usize)->(Vec<usize>, Vec<usize>, Vec<usize>, Vec<usize>){
+    fn select_id(&self, index_differ : usize, n : usize, rng : &mut ThreadRng)->(usize, usize, usize, usize){
 
-        let mut l1 = Vec::new();
-        let mut l2 = Vec::new();
-        let mut l3 = Vec::new();
-        let mut l4 = Vec::new();
-        let mut rng = rand::thread_rng();
-        let mut r : [usize; 4] = [0; 4];
+        let mut l1 : usize = index_differ; 
+        let mut l2 : usize = index_differ;
+        let mut l3 : usize = index_differ;
+        let mut l4 : usize = index_differ;
 
-        for i in 0..n {
-            if n >= 2 {
-                
-                let mut vecc: Vec<usize> = Vec::with_capacity(n-1);
-                for j in 0..n{
-                    if j != i {
-                        vecc.push(j);
-                    }
-                }              
-                   
-                println!("vecc = {:?}", vecc);
-
-                for kkk in 0..4 {
-                    let nt = n - kkk;
-                    let interval = Uniform::from(0..nt);
-                    let t = interval.sample(&mut rng);
-                    r[kkk] = vecc[t];
-                    vecc.remove(t);
-                }
-    
-                l1.push(r[0]);
-                l2.push(r[1]);
-                l3.push(r[2]);
-                l4.push(r[3]);
-            }
+        //let mut rng = rand::thread_rng();
+        let mut interval = Uniform::from(0..n);        
+        
+        while l1 == index_differ {
+            l1 = interval.sample(rng);
         }
-    
+
+        while l2 == index_differ {
+            l2 = interval.sample(rng);
+        }
+
+        while l3 == index_differ {
+            l3 = interval.sample(rng);
+        }
+
+        while l4 == index_differ {
+            l4 = interval.sample(rng);
+        }
+        
         (l1, l2, l3, l4)
     }   
 }
@@ -114,6 +105,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
         let n_f64 = n as f64;
         let between01 = Uniform::from(0.0..=1.0);
+        let mut rng = rand::thread_rng();
 
         let mut best_x : Genome = Genome::new(n+2, d);
         let mut gap : Vec<Vec<f64>> = vec![vec![0.0; d]; 5];
@@ -123,7 +115,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
         let mut lf : [f64; 5] = [0.0; 5];
         let mut sf: [f64; 5]  = [0.0; 5];
         let mut ls : [f64; 5] = [0.0; 5];
-        let mut ls : [f64; 5] = [0.0; 5];
+       
         let mut learn_operator : Vec<f64> = vec![0.0; d];
        
         let mut worst_x : Vec<Genome> = self.get_empty_solutions(n);
@@ -220,15 +212,16 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
             };
             #[cfg(feature="report")] println!("normal_x : {:?}", normal_x);
             //------------------------------------------------------------------------------------- 
-
-            //[L1,L2,L3,L4]=selectID(N);
-            let (l1, l2, l3, l4) = self.select_id(n);
-
-            println!("_______________________________________________________");
-
-            #[cfg(feature="report")] println!("l1 : {:?}", l1);
+         
+             println!("_______________________________________________________");
 
             for i in 0..n {
+                  //[L1,L2,L3,L4]=selectID(N);
+
+                let (l1, l2, l3, l4) = self.select_id(i, n , &mut rng);
+                
+                #[cfg(feature="report")] println!("i : {}, l1: {}, l2: {}, l3: {}, l4: {}", i, l1, l2, l3, l4);
+
                 for j in 0..d {
                     //  Gap(1,:)=(Best_X - Better_X(i,:));
                     gap[0][j] = best_x.genes[j]-better_x[i].genes[j];
@@ -240,10 +233,10 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                     gap[2][j] = normal_x[i].genes[j] - worst_x[i].genes[j];
 
                     //Gap(4,:)=(x(L1(i),:)-x(L2(i),:));
-                    gap[3][j] = x[l1[i]].genes[j] - x[l2[i]].genes[j];
+                    gap[3][j] = x[l1].genes[j] - x[l2].genes[j];
 
                     //Gap(5,:)=(x(L3(i),:)-x(L4(i),:));
-                    gap[4][j] = x[l3[i]].genes[j] - x[l4[i]].genes[j];
+                    gap[4][j] = x[l3].genes[j] - x[l4].genes[j];
                 }
 
                 // Parameter self-adaptation based on one-dimensional mapping of vectors
@@ -251,8 +244,8 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 dgap[0] = best_x.genes.iter().zip(better_x[i].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
                 dgap[1] = better_x[i].genes.iter().zip(normal_x[i].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
                 dgap[2] = normal_x[i].genes.iter().zip(worst_x[i].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
-                dgap[3] = x[l1[i]].genes.iter().zip(x[l2[i]].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
-                dgap[4] = x[l3[i]].genes.iter().zip(x[l4[i]].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
+                dgap[3] = x[l1].genes.iter().zip(x[l2].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
+                dgap[4] = x[l3].genes.iter().zip(x[l4].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
 
                 let min_distance : f64 = match dgap.iter().min_by(|a, b| a.partial_cmp(b).unwrap()){
                     Some(value) => (*value*2.0).abs(),
@@ -282,10 +275,10 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 fgap[2] = (fitness[normal_index[i]] - fitness[worse_index[i]]).abs();
 
                 //FGap(4,:)=(abs(fitness(L1(i))-fitness(L2(i))));
-                fgap[3] = (fitness[l1[i]] - fitness[l2[i]]).abs();
+                fgap[3] = (fitness[l1] - fitness[l2]).abs();
                 
                 //FGap(5,:)=(abs(fitness(L3(i))-fitness(L4(i))));
-                fgap[4] = (fitness[l3[i]] - fitness[l4[i]]).abs();
+                fgap[4] = (fitness[l3] - fitness[l4]).abs();
 
                 //SF=FGap./sum(FGap);
                 let sum_fgap = fgap.iter().fold(0.0f64, |sum, a| sum + a);
