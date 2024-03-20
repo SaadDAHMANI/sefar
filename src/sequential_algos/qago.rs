@@ -309,8 +309,8 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                     }
                 }
 
-                 for t in 0..d {
-                    let mut tmp_sum : f64 =0.0;
+                for t in 0..d {
+                    let mut tmp_sum : f64 = 0.0;
                     for j in 0..5 {
                         tmp_sum += gap[j][t];
                     }
@@ -318,7 +318,34 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 }   
 
                 #[cfg(feature = "report")] println!("lear_operator : {:?}", learn_operator);
-                                      
+
+                //newx(i,:)=x(i,:)+sum(Gap.*(djs.*LF+(1-djs).*SF),1);
+                for t in 0..d {
+                    newx[i].genes[t] = x[i].genes[t] + learn_operator[t];
+                }
+
+                #[cfg(feature = "report")] println!("newx[{}], Genome : {:?} ", i, newx[i]);
+
+                // Boundary constraints
+                for t in 0..d {
+                    if newx[i].genes[t] < lb[t] || newx[i].genes[t] > ub[t] {
+                        newx[i].genes[t] = lb[t] + (ub[t]-lb[t])*between01.sample(&mut rng);
+                    }
+                } 
+
+                // Evaluation
+                let new_fitness = self.problem.objectivefunction(&newx[i].genes);
+
+                //Selection
+                if new_fitness < fitness[i]{
+                    fitness[i] = new_fitness;
+                    copy_vector(&newx[i].genes, &mut x[i].genes, d);
+                    //copy_vector2genome(&newx[i].genes, &mut x[i]);
+                    if new_fitness < gbestfitness {
+                        gbestfitness = new_fitness;
+                        copy_vector(&newx[i].genes, &mut gbestx.genes, d);
+                    }
+                }
 
 
 
@@ -330,14 +357,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
 
 
-            }
-
-
-            
-
-
-
-
+            }        
 
             //iteration incrementation
             iter+=1;
