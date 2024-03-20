@@ -83,6 +83,16 @@ impl<'a, T : Problem> QAGO<'a, T>{
         
         (l1, l2, l3, l4)
     }   
+
+    fn randomize_usize(randvect : &mut Vec<usize>, min_value : usize, max_value : usize) {    
+               
+        let between = Uniform::from(min_value..=max_value);
+        let mut rng = rand::thread_rng();
+                
+        for i in 0..randvect.len() {
+            randvect[i]=between.sample(&mut rng);
+        }
+    }
 }
 
 impl <'a, T : Problem> EOA for QAGO<'a, T>{
@@ -122,6 +132,13 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
         let mut better_x : Vec<Genome> = self.get_empty_solutions(n);
         let mut normal_x : Vec<Genome> = self.get_empty_solutions(n);
         let mut newx : Vec<Genome> = self.get_empty_solutions(n);
+
+        let mut vscr : Vec<Vec<f64>> = vec![vec![0.0; d]; n];
+        let mut vsaf : Vec<Vec<f64>> = vec![vec![0.0; d]; n];
+        let mut i1 : Vec<Vec<bool>> = vec![vec![false; d]; n];
+        let mut i2 : Vec<Vec<bool>> = vec![vec![false; d]; n];
+        let mut r_vec : Vec<usize> = vec![0; d]; 
+        let mut r : Vec<Vec<usize>> = vec![vec![0; d]; n];
 
         //let mut better_x : Vec<Genome> = Vec::new();
 
@@ -347,6 +364,46 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                     }
                 }
 
+                if between01.sample(&mut rng) < p2[i] && ind[i] != ind[0] {
+                    fitness[i] = new_fitness;
+                    copy_vector(&newx[i].genes, &mut x[i].genes, d);
+                }
+            }
+
+            gbesthistory[iter] = gbestfitness;
+
+            // 2. Improved reflection phase   
+            //newx=x;
+            for i in 0..n {
+                copy_vector(&x[i].genes, &mut newx[i].genes, d);
+            }
+
+            // P2=normrnd(0.001*ones(1,N),0.001*ones(1,N));
+            for j in 0..n {
+                p2[j] = normal_rand1(0.001*n_f64, 0.001*n_f64);            
+                randomize(&mut vscr[j]);
+                randomize(&mut vsaf[j]);
+            }
+
+            let af = iter as f64 /max_iter as f64;           
+
+            for i in 0..n {
+                for j in 0..d {
+                    if vscr[i][j]<p3[i][j] { i1[i][j] = true; }
+                    else {i1[i][j] = false;}
+
+                    if vsaf[i][j] < af { i2[i][j] = true; }
+                    else {i2[i][j] = false;}
+                }
+            }
+            
+            // R=ind(randi(P1,N,D));
+            for i in 0..n {
+                Self::randomize_usize(&mut r_vec, 0, p1_usize);
+                for j in 0..d {
+                    r[i][j] = ind[r_vec[j]];
+                }
+            }
 
 
 
@@ -355,9 +412,6 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
 
 
-
-
-            }        
 
             //iteration incrementation
             iter+=1;
@@ -402,7 +456,7 @@ impl<'a> Parameters for QAGOparams<'a> {
     }
 
     fn get_max_iterations(&self)->usize {
-        self.max_iterations
+        usize::max(self.max_iterations,1) 
     }
 
     fn get_population_size(&self)->usize {
