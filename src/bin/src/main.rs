@@ -11,9 +11,9 @@ use sefar::sequential_algos::pco::{PCO, PCOparams};
 use sefar::sequential_algos::meo::MEO;
 use sefar::sequential_algos::qago::{QAGOparams, QAGO};
 
-const DIM : usize = 3;
-const POP_SIZE : usize = 7;
-const KMAX : usize = 5;
+const DIM : usize = 5;
+const POP_SIZE : usize = 30;
+const KMAX : usize = 1000;
 
 fn main() {
     println!("Hello, sefar !");
@@ -24,7 +24,7 @@ fn main() {
     
     //eo_f1_test1();
 
-    //println!("_______________________________________________");
+    println!("_______________________________________________");
 
     //peo_f1_test1();
 
@@ -88,10 +88,10 @@ fn qago_f1_test1(){
     
     let result = algo.run();
 
-    match result.convergence_trend{
+   /*  match result.convergence_trend{
         None => println!("QAGO: no convergence trend !!!"),
         Some(cv) => println!("QAGO: Convergence trend :\n {:?}", cv),
-    };
+    }; */
 
     match result.best_genome {
         None => println!("QAGO: no best solution !"),

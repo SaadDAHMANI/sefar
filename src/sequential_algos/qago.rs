@@ -151,7 +151,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
         //Evaluation of candidate solution using the objective function
         for i in 0..n{
             x[i].id = i;
-            
+
             fitness[i] = self.problem.objectivefunction(&x[i].genes);
 
             x[i].fitness = Some(fitness[i]);
@@ -377,8 +377,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 }
             }
 
-            gbesthistory[iter] = gbestfitness;
-
+            
             // 2. Improved reflection phase   
             //newx=x;
             for i in 0..n {
@@ -422,21 +421,48 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                             newx[i].genes[j] = lb[j] + (ub[j] - lb[j])*between01.sample(&mut rng);
 
                         }
-                        //else {
+                        else {
+                            let randv = between01.sample(&mut rng);
+                            //newx(i,j)=x(i,j)+rand*((x(R(i,j),j)-x(i,j))+(x(RM,j)-x(i,j)));
+                            newx[i].genes[j] = x[i].genes[j] + randv*((x[r[i][j]].genes[j] - x[i].genes[j])); // + (x[i].genes[j]))
+                        }
+                    }
 
-                        //}
+                    //Boundary constraints
+                    if newx[i].genes[j] > ub[j] {
+                        newx[i].genes[j] = (x[i].genes[j] + ub[j])/2.0;
+                    }
+
+                    if newx[i].genes[j] < lb[j] {
+                        newx[i].genes[j] = (x[i].genes[j] + lb[j])/2.0;
                     }
                 }
             }
 
+            //Evaluation
 
+            for i in 0..n {
+                let new_fitness = self.problem.objectivefunction(&x[i].genes);
+                
+                if new_fitness < fitness[i] {
+                    fitness[i] = new_fitness;
+                    copy_vector(&newx[i].genes, &mut x[i].genes, d);
+                    if new_fitness < gbestfitness {
+                        gbestfitness = new_fitness;
+                        copy_vector(&x[i].genes, &mut gbestx.genes, d);   
+                    }
+                }
 
+                if between01.sample(&mut rng) < p2[i] && ind[i] != ind[0] {
+                    fitness[i] = new_fitness;
+                    copy_vector(&newx[i].genes, &mut x[i].genes, d);
+                }
+            }
 
+            println!("Iter : {}, Current best fitness : {}", iter, gbestfitness);
 
-
-
-
-
+            // Save best fitness history :
+            gbesthistory[iter] = gbestfitness;
             //iteration incrementation
             iter+=1;
         }
