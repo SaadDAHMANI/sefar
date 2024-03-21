@@ -168,10 +168,19 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
         // Loop iterations
         while iter < max_iter {
 
+
            //Sorte and sorting indexes:
            let mut ind : Vec<usize> = (0..fitness.len()).collect();
-           ind.sort_by(|&a, &b| fitness[a].partial_cmp(&fitness[b]).unwrap());
-           //------------------------------
+           ind.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
+           //----------------------------------------------------------------------------------------
+
+            /*println!("ind: {:?}", ind);
+            for i in 0..n{
+                println!("i: {},  ind : {}, fit ={:.2}", i, ind[i], fitness[i]);
+            } */
+
+           //----------------------------------------------------------------------------------------
+
            // Parameter adaptation based on distribution
            // P1=ceil(unifrnd(0.05,0.2)*N);
            let p1 = f64::ceil(uniform_rand1(0.05, 0.2)*n as f64);

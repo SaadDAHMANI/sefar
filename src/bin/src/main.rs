@@ -12,8 +12,8 @@ use sefar::sequential_algos::meo::MEO;
 use sefar::sequential_algos::qago::{QAGOparams, QAGO};
 
 const DIM : usize = 3;
-const POP_SIZE : usize = 20;
-const KMAX : usize = 500;
+const POP_SIZE : usize = 7;
+const KMAX : usize = 200;
 
 fn main() {
     println!("Hello, sefar !");
