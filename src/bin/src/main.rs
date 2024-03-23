@@ -13,13 +13,13 @@ use sefar::sequential_algos::qago::{QAGOparams, QAGO};
 
 const DIM : usize = 3;
 const POP_SIZE : usize = 10;
-const KMAX : usize = 1;
+const KMAX : usize = 200;
 
 fn main() {
     println!("Hello, sefar !");
 
-    //qago_f1_test1();
-    println!("ln(10) = {}", f64::ln(10.0));
+    qago_f1_test1();
+    
     //pco_f1_test1();
     
     //eo_f1_test1();

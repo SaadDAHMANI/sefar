@@ -357,10 +357,10 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
                 //Learning operator refinement
                 //newx(i,:)=x(i,:)+sum(Gap.*(djs.*LF+(1-djs).*SF),1);
-                for j in 0..5 {
-                    let multiplier: f64 = djs*lf[j] + (1.0-djs)*sf[j];
-                    for l in 0..d {
-                        gap[j][l] *= multiplier; 
+                for k in 0..5 {
+                    let multiplier: f64 = djs*lf[k] + (1.0-djs)*sf[k];
+                    for t in 0..d {
+                        gap[k][t] *= multiplier; 
                     }
                 }
 
@@ -393,11 +393,11 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 fes +=1;
 
                 //Selection
-                if new_fitness < fitness[i]{
+                if new_fitness <= fitness[i]{
                     fitness[i] = new_fitness;
                     copy_vector(&newx[i].genes, &mut x[i].genes, d);
                     //copy_vector2genome(&newx[i].genes, &mut x[i]);
-                    if new_fitness < gbestfitness {
+                    if new_fitness <= gbestfitness {
                         gbestfitness = new_fitness;
                         copy_vector(&newx[i].genes, &mut gbestx.genes, d);
                     }
@@ -422,16 +422,16 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 p2[j] = normal_rand1(0.001, 0.001);               
                 randomize(&mut vscr[j]);
                 randomize(&mut vsaf[j]);
-            }
-
-            //  AF=0.01*(1-FEs/MaxFEs);
+            };
+            
+            //AF=0.01*(1-FEs/MaxFEs);
             //let af = 0.01* (1.0- (iter as f64 /max_iter as f64));
             //let af = 0.01 + 0.09* (1.0 - (iter as f64 /max_iter as f64));            
             let af = 0.01* (1.0- (fes as f64 /fes_max));
             
             for i in 0..n {
                 for j in 0..d {
-                    if vscr[i][j]<p3[i][j] { i1[i][j] = true; }
+                    if vscr[i][j]< p3[i][j] { i1[i][j] = true; }
                     else {i1[i][j] = false;}
 
                     if vsaf[i][j] < af { i2[i][j] = true; }
@@ -446,6 +446,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                     r[i][j] = ind[r_vec[j]];
                 }
             }
+            println!("\n R matrix : {:?} \n", r);
 
             for i in 0..n {
                 // Reflection operator refinement
@@ -479,12 +480,10 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                         newx[i].genes[j] = (x[i].genes[j] + lb[j])/2.0;
                     }
                 }
-            }
-
+           
             //Evaluation
-
-            for i in 0..n {
-                let new_fitness = self.problem.objectivefunction(&x[i].genes);
+           
+                let new_fitness = self.problem.objectivefunction(&newx[i].genes);
                 fes +=1;
 
 
