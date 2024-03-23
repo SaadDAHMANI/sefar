@@ -6,14 +6,14 @@ use sefar::core::eoa::EOA;
 use sefar::benchmarks::functions::Sphere;
 use sefar::sequential_algos::eo::{EO, EOparams};
 use sefar::sequential_algos::pso::{PSO, PSOparams};
-use sefar::sequential_algos::pco::{PCO, PCOparams};
+//use sefar::sequential_algos::pco::{PCO, PCOparams};
 
 use sefar::sequential_algos::meo::MEO;
 use sefar::sequential_algos::qago::{QAGOparams, QAGO};
 
-const DIM : usize = 3;
-const POP_SIZE : usize = 10;
-const KMAX : usize = 200;
+const DIM : usize = 100;
+const POP_SIZE : usize = 200;
+const KMAX : usize = 2500;
 
 fn main() {
     println!("Hello, sefar !");
@@ -31,36 +31,6 @@ fn main() {
     //meo_test1();
 
     //do_regression();
-    
-    let fitness = [1.0, 4.0, 3.0, 2.0];
-    let _min_distance = fitness.iter().min_by(|a, b| a.partial_cmp(b).unwrap()); 
-
-    println!("min_distance : {:?}", _min_distance);
-
-    let b = [1.0, 4.0, 3.0, 2.0];
-
-    let s = fitness.iter().zip(b.iter()).fold(0.0f64, |sum, (a, b)| sum + a*b);
-    
-    println!("inner product result = {}", s);
-
-    let mut ind : Vec<usize> = (0..fitness.len()).collect();
-    ind.sort_by(|&a, &b| fitness[a].partial_cmp(&fitness[b]).unwrap());
-
-    println!("indexes : {:?}", ind);     
-
-
-     let x = [1, 5, 3, 1];
-     
-     let z = match x.iter().enumerate().min_by_key(|&(_, v)| v) {
-        Some((i, _))=> i,
-        None =>0,   
-     };
-
-       println!("The best index is  z = {}", z);                                                                                         
-
-    let x : f64 = -2.7; 
-    let y= x.ceil();
-    println!("ceil x : {}", y);                                            
                                              
 
   }
@@ -76,8 +46,8 @@ fn qago_f1_test1(){
     settings.max_iterations = KMAX; 
 
        
-    let lb =vec![-10.0f64; DIM];
-    let ub =vec![10.0f64; DIM];
+    let lb =vec![-100.0f64; DIM];
+    let ub =vec![100.0f64; DIM];
 
     settings.lower_bounds = lb.as_slice();
     settings.upper_bounds = ub.as_slice();  
@@ -88,44 +58,20 @@ fn qago_f1_test1(){
     
     let result = algo.run();
 
-    match result.convergence_trend{
+    /*match result.convergence_trend{
         None => println!("QAGO: no convergence trend !!!"),
         Some(cv) => println!("QAGO: Convergence trend :\n {:?}", cv),
     };
+    */
 
-    match result.best_genome {
+    /*match result.best_genome {
         None => println!("QAGO: no best solution !"),
         Some(bg)=> println!("QAGO: best-genome {:?}", bg),
     };
+    */
 
+    println!("QAGO : {:?}", result.to_string());
 
-}
-
-#[allow(dead_code)]
-fn pco_f1_test1(){
-    let mut settings : PCOparams = PCOparams::default();
-    
-    settings.population_size = POP_SIZE;
-    settings.dimensions = DIM ;    
-    settings.max_iterations = KMAX; 
-
-       
-    let lb =vec![-100.0f64; DIM];
-    let ub =vec![100.0f64; DIM];
-
-    settings.lower_bounds = lb.as_slice();
-    settings.upper_bounds = ub.as_slice();  
-
-    let mut fo = Sphere{};
-
-    let mut pco : PCO<Sphere> = PCO::new(&settings, &mut fo);
-    
-    let result = pco.run();
-
-    match result.convergence_trend{
-        None => println!("PCO: no convergence trend !!!"),
-        Some(cv) => println!("PCO: Convergence trend :\n {:?}", cv),
-    };
 
 }
 

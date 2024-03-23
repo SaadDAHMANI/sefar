@@ -63,7 +63,7 @@ pub fn rand_vec(imin: usize, imax : usize, cols : usize)->Vec<usize> {
 
     let mut vector : Vec<usize> = vec![0; cols];
 
-    println!("i_min {}, imax : {}", imin, imax);
+    //println!("i_min {}, imax : {}", imin, imax);
     if imin == imax {
         for j in 0..cols{
             vector[j] = imin;

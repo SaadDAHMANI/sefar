@@ -2,7 +2,7 @@
 extern crate rand;
 use rand::distributions::{Distribution, Uniform};
 use rand::rngs::ThreadRng;
-use rand::Rng;
+//use rand::Rng;
 //use rand::prelude::ThreadRng;
 use std::time::Instant;
 
@@ -101,6 +101,8 @@ impl<'a, T : Problem> QAGO<'a, T>{
 impl <'a, T : Problem> EOA for QAGO<'a, T>{
     fn run(&mut self)-> OptimizationResult {
 
+        let chronos = Instant::now();
+
         let d : usize =  self.params.get_dimensions();
         let n : usize = self.params.get_population_size();
         let max_iter = self.params.get_max_iterations();
@@ -116,7 +118,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
         let mut p2 : Vec<f64> = vec![0.0; n];
         let mut p3 : Vec<Vec<f64>> = vec![vec![0.0; d]; n];
 
-        let n_f64 = n as f64;
+        //let n_f64 = n as f64;
         let between01 = Uniform::from(0.0..=1.0);
         let between0n = Uniform::from(0..n);
 
@@ -180,10 +182,10 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
            ind.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
            //----------------------------------------------------------------------------------------
 
-            println!("ind: {:?}", ind);
-            for i in 0..n{
-                println!("i: {},  ind : {}, fit [ind[i]] ={:.2}", i, ind[i], fitness[ind[i]]);
-            } 
+            // println!("ind: {:?}", ind);
+            // for i in 0..n{
+            //     println!("i: {},  ind : {}, fit [ind[i]] ={:.2}", i, ind[i], fitness[ind[i]]);
+            // } 
            //----------------------------------------------------------------------------------------
 
            // Parameter adaptation based on distribution
@@ -191,7 +193,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
            let p1 = f64::ceil(uniform_rand1(0.05, 0.2)*n as f64);
            let p1_usize = usize::max(p1.round() as usize, 1); // take 1 element at least
 
-           #[cfg(feature="report")] println!("\n p1 = {} \n", p1);
+           //#[cfg(feature="report")] println!("\n p1 = {} \n", p1);
            // P2=normrnd(0.001*ones(1,N),0.001*ones(1,N));
             for j in 0..n{
                 //p2[j] = normal_rand1(0.001*n_f64, 0.001*n_f64);
@@ -220,14 +222,14 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
             //let worse_index = rand_vec(n-p1_usize+1, n-1, n);
             let worse_index = rand_vec(n-p1_usize, n-1, n);
             
-            println!("\n worse_index : {:?} \n", worse_index);
+            //println!("\n worse_index : {:?} \n", worse_index);
                         
             //Worst_X=x(worse_index,:);            
              for k in 0..n {
                  copy_vector(&x[worse_index[ind[k]]].genes, &mut worst_x[k].genes, d);//  worst_x[*k] = (x[worse_index[*k]].clone());
              }
            
-             println!("_______________________________________________________________________");
+             //println!("_______________________________________________________________________");
 
              //#[cfg(feature = "report")] println!("Worst_index : {:?}; Worst_X : {:?}", worse_index, worst_x);
 
@@ -236,7 +238,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
              let better_index = rand_vec(1, p1_usize, n);
 
-             println!("\n better_index : {:?} \n", better_index);
+            // println!("\n better_index : {:?} \n", better_index);
              
              //Better_X=x(better_index,:);
              for k in 0..n {
@@ -247,7 +249,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
             //-------------------------------------------------------------------------------------
             //normal_index=ind(randi([P1+1,N-P1],N,1));
             let normal_index = rand_vec(p1_usize+1, n-p1_usize, n);
-            println!("\n normal_index : {:?} \n", normal_index);
+            //println!("\n normal_index : {:?} \n", normal_index);
 
             //Normal_X=x(normal_index,:);
             for k in 0..n {
@@ -256,14 +258,14 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
             //#[cfg(feature="report")] println!("normal_x : {:?}", normal_x);
             //------------------------------------------------------------------------------------- 
          
-             println!("_______________________________________________________");
+            // println!("_______________________________________________________");
 
             for i in 0..n {
                   //[L1,L2,L3,L4]=selectID(N);
 
                 let (l1, l2, l3, l4) = self.select_id(i, n , &mut rng);
                 
-                #[cfg(feature="report")] println!("i : {}, l1: {}, l2: {}, l3: {}, l4: {}", i, l1, l2, l3, l4);
+                //#[cfg(feature="report")] println!("i : {}, l1: {}, l2: {}, l3: {}, l4: {}", i, l1, l2, l3, l4);
 
                 for j in 0..d {
                     //  Gap(1,:)=(Best_X - Better_X(i,:));
@@ -290,7 +292,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 dgap[3] = x[l1].genes.iter().zip(x[l2].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
                 dgap[4] = x[l3].genes.iter().zip(x[l4].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
 
-                println!("dgap : \n {:?} \n", dgap);
+                //println!("dgap : \n {:?} \n", dgap);
 
                 let min_distance : f64 = match dgap.iter().min_by(|a, b| a.total_cmp(b)){
                     Some(value) =>  2.0*value.abs(), //(*value*2.0).abs(),
@@ -306,7 +308,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                     dgap[k] +=  min_distance;
                 }
 
-                println!("dgap + 2*abs() : \n {:?} \n", dgap);
+                //println!("dgap + 2*abs() : \n {:?} \n", dgap);
 
                 let mut sum_dgap = dgap.iter().fold(0.0f64, |sum, a| sum + a); 
                 if sum_dgap == 0.0 {sum_dgap =1.0} 
@@ -331,7 +333,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 //FGap(5,:)=(abs(fitness(L3(i))-fitness(L4(i))));
                 fgap[4] = (fitness[l3] - fitness[l4]).abs();
 
-                println!("fgap : {:?} ", fgap);
+                //println!("fgap : {:?} ", fgap);
 
                 //SF=FGap./sum(FGap);
                 let mut sum_fgap = fgap.iter().fold(0.0f64, |sum, a| sum + a);
@@ -393,11 +395,11 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 fes +=1;
 
                 //Selection
-                if new_fitness <= fitness[i]{
+                if new_fitness < fitness[i]{
                     fitness[i] = new_fitness;
                     copy_vector(&newx[i].genes, &mut x[i].genes, d);
                     //copy_vector2genome(&newx[i].genes, &mut x[i]);
-                    if new_fitness <= gbestfitness {
+                    if new_fitness < gbestfitness {
                         gbestfitness = new_fitness;
                         copy_vector(&newx[i].genes, &mut gbestx.genes, d);
                     }
@@ -446,7 +448,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                     r[i][j] = ind[r_vec[j]];
                 }
             }
-            println!("\n R matrix : {:?} \n", r);
+            //println!("\n R matrix : {:?} \n", r);
 
             for i in 0..n {
                 // Reflection operator refinement
@@ -490,9 +492,10 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 if new_fitness < fitness[i] {
                     fitness[i] = new_fitness;
                     copy_vector(&newx[i].genes, &mut x[i].genes, d);
+
                     if new_fitness < gbestfitness {
                         gbestfitness = new_fitness;
-                        copy_vector(&x[i].genes, &mut gbestx.genes, d);   
+                        copy_vector(&newx[i].genes, &mut gbestx.genes, d);   
                     }
                 }
 
@@ -502,28 +505,33 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 }
             }
 
-            println!("Iter : {}, Current best fitness : {}", iter, gbestfitness);
-
+            //println!("Iter : {}, Current best fitness : {}", iter, gbestfitness);
+            //__________________________________________________________________________________________
+            #[cfg(feature = "report")] println!("QAGO :: Iter [{}] best fitness : {}", iter, gbestfitness);
+            //__________________________________________________________________________________________
+            
             // Save best fitness history :
             gbesthistory[iter] = gbestfitness;
             //iteration incrementation
-            iter+=1;
+            iter+=1;            
         }
 
 
 
         // Compute fitness for the best solution:
-        gbestx.fitness = Some( self.problem.objectivefunction(&gbestx.genes));
+        gbestx.fitness = Some(self.problem.objectivefunction(&gbestx.genes));
+
+         //return results
+         let duration = chronos.elapsed();
 
         let result = OptimizationResult{
             best_genome : Some(gbestx),
             best_fitness : Some(gbestfitness), 
             convergence_trend : Some(gbesthistory),
-            computation_time : None,
+            computation_time : Some(duration),
             err_report : None,
         };
         return result;  
-
 
     }
 
