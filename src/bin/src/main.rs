@@ -13,7 +13,7 @@ use sefar::sequential_algos::qago::{QAGOparams, QAGO};
 
 const DIM : usize = 3;
 const POP_SIZE : usize = 7;
-const KMAX : usize = 10;
+const KMAX : usize = 4;
 
 fn main() {
     println!("Hello, sefar !");

@@ -180,11 +180,11 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
            ind.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
            //----------------------------------------------------------------------------------------
 
-            println!("ind: {:?}", ind);
+            /* println!("ind: {:?}", ind);
             for i in 0..n{
                 println!("i: {},  ind : {}, fit [ind[i]] ={:.2}", i, ind[i], fitness[ind[i]]);
             } 
-
+ */
            //----------------------------------------------------------------------------------------
 
            // Parameter adaptation based on distribution
@@ -203,7 +203,8 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
             //P3=normrnd(0.3*rand(N,D),0.01);
             for i in 0..n{
                 for j in 0..d {
-                    p3[i][j] = normal_rand1(0.3*between01.sample(&mut rand::thread_rng()), 0.01)
+                    //p3[i][j] = normal_rand1(0.3*between01.sample(&mut rand::thread_rng()), 0.01);
+                    p3[i][j] = normal_rand1(0.3, 0.01);
                 }
             }
            
@@ -219,7 +220,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
             //let worse_index = rand_vec(n-p1_usize+1, n-1, n);
             let worse_index = rand_vec(n-p1_usize, n-1, n);
             
-            println!("worse_index : {:?}", worse_index);
+            //println!("worse_index : {:?}", worse_index);
                         
             //Worst_X=x(worse_index,:);            
              for k in 0..n {
