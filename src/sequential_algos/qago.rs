@@ -195,7 +195,8 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
            #[cfg(feature="report")] println!("p1 = {}", p1);
            // P2=normrnd(0.001*ones(1,N),0.001*ones(1,N));
             for j in 0..n{
-                p2[j] = normal_rand1(0.001*n_f64, 0.001*n_f64);
+                //p2[j] = normal_rand1(0.001*n_f64, 0.001*n_f64);
+                p2[j] = normal_rand1(0.001, 0.001);
             }
 
             #[cfg(feature="report")] println!("QAGO : P2 = {:?}", p2);
