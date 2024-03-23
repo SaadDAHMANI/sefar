@@ -13,18 +13,18 @@ use sefar::sequential_algos::qago::{QAGOparams, QAGO};
 
 const DIM : usize = 3;
 const POP_SIZE : usize = 10;
-const KMAX : usize = 3;
+const KMAX : usize = 1;
 
 fn main() {
     println!("Hello, sefar !");
 
-    qago_f1_test1();
-
+    //qago_f1_test1();
+    println!("ln(10) = {}", f64::ln(10.0));
     //pco_f1_test1();
     
     //eo_f1_test1();
 
-    println!("_______________________________________________");
+    println!("_________________________ MAIN ______________________");
 
     //peo_f1_test1();
 
@@ -76,8 +76,8 @@ fn qago_f1_test1(){
     settings.max_iterations = KMAX; 
 
        
-    let lb =vec![-100.0f64; DIM];
-    let ub =vec![100.0f64; DIM];
+    let lb =vec![-10.0f64; DIM];
+    let ub =vec![10.0f64; DIM];
 
     settings.lower_bounds = lb.as_slice();
     settings.upper_bounds = ub.as_slice();  
@@ -88,10 +88,10 @@ fn qago_f1_test1(){
     
     let result = algo.run();
 
-   /*  match result.convergence_trend{
+    match result.convergence_trend{
         None => println!("QAGO: no convergence trend !!!"),
         Some(cv) => println!("QAGO: Convergence trend :\n {:?}", cv),
-    }; */
+    };
 
     match result.best_genome {
         None => println!("QAGO: no best solution !"),

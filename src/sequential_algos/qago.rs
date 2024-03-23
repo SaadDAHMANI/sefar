@@ -290,21 +290,29 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 dgap[3] = x[l1].genes.iter().zip(x[l2].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
                 dgap[4] = x[l3].genes.iter().zip(x[l4].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
 
+                println!("dgap : \n {:?} \n", dgap);
+
                 let min_distance : f64 = match dgap.iter().min_by(|a, b| a.total_cmp(b)){
-                    Some(value) => (*value*2.0).abs(),
+                    Some(value) =>  2.0*value.abs(), //(*value*2.0).abs(),
                     None => 1.0,
                 };
+
+                //println!("min_distance : {}", min_distance);
 
                 //DGap=DGap+2*abs(minDistance)
                 //let min_distance_2 =  2.0*min_distance.abs();
 
-                for j in 0..5 {
-                    dgap[j] +=  min_distance;
+                for k in 0..5 {
+                    dgap[k] +=  min_distance;
                 }
 
-                let sum_dgap = dgap.iter().fold(0.0f64, |sum, a| sum+a); 
+                println!("dgap + 2*abs() : \n {:?} \n", dgap);
+
+                let mut sum_dgap = dgap.iter().fold(0.0f64, |sum, a| sum + a); 
+                if sum_dgap == 0.0 {sum_dgap =1.0} 
+
                 for k in 0..5{
-                    lf[k]= dgap[k]/sum_dgap + 1.0;
+                    lf[k]= dgap[k]/sum_dgap; 
                 }
 
                 //Parameter self-adaptation based on fitness difference
@@ -323,12 +331,14 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 //FGap(5,:)=(abs(fitness(L3(i))-fitness(L4(i))));
                 fgap[4] = (fitness[l3] - fitness[l4]).abs();
 
+                println!("fgap : {:?} ", fgap);
+
                 //SF=FGap./sum(FGap);
                 let mut sum_fgap = fgap.iter().fold(0.0f64, |sum, a| sum + a);
                 if sum_fgap == 0.0f64 { sum_fgap = 1.0; } 
 
                 for k in 0..5 {
-                    sf[k] = fgap[k]/sum_fgap; // +1.0;
+                    sf[k] = fgap[k]/sum_fgap;
                 }
 
                 //Parameter self-adaptation based on Jensen-Shannon divergence
@@ -340,7 +350,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 //Djs=0.5*sum(LF.*log(LF./LS))+0.5*sum(SF.*log(SF./LS));
 
                 let sum1 : f64 = lf.iter().zip(ls.iter()).fold(0.0f64, |sum, (lfa,lsb)| sum + (lfa*f64::ln(lfa/lsb)));
-                let sum2 : f64 = sf.iter().zip(lf.iter()).fold(0.0f64, |sum, (sfa, lfb)| sum + (sfa*f64::ln(sfa/lfb)));
+                let sum2 : f64 = sf.iter().zip(ls.iter()).fold(0.0f64, |sum, (sfa, lsb)| sum + (sfa*f64::ln(sfa/lsb)));
 
                 // djs=sqrt(Djs);
                 let djs : f64 = f64::sqrt(0.5*(sum1 + sum2)); 
