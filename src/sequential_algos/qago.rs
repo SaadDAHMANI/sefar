@@ -224,7 +224,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                         
             //Worst_X=x(worse_index,:);            
              for k in 0..n {
-                 copy_vector(&x[worse_index[k]].genes, &mut worst_x[k].genes, d);//  worst_x[*k] = (x[worse_index[*k]].clone());
+                 copy_vector(&x[worse_index[ind[k]]].genes, &mut worst_x[k].genes, d);//  worst_x[*k] = (x[worse_index[*k]].clone());
              }
            
              println!("_______________________________________________________________________");
@@ -240,7 +240,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
              
              //Better_X=x(better_index,:);
              for k in 0..n {
-                 copy_vector(&x[better_index[k]].genes, &mut better_x[k].genes, d);
+                 copy_vector(&x[better_index[ind[k]]].genes, &mut better_x[k].genes, d);
              }
 
              //#[cfg(feature="report")] println!("better_x : {:?}", better_x);            
@@ -251,7 +251,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
             //Normal_X=x(normal_index,:);
             for k in 0..n {
-                 copy_vector(&x[normal_index[k]].genes, &mut normal_x[k].genes, d); 
+                 copy_vector(&x[normal_index[ind[k]]].genes, &mut normal_x[k].genes, d); 
             };
             //#[cfg(feature="report")] println!("normal_x : {:?}", normal_x);
             //------------------------------------------------------------------------------------- 
