@@ -201,11 +201,13 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
             #[cfg(feature="report")] println!("QAGO : P2 = {:?}", p2);
 
+            println!("------------------------------------------------");
+
             //P3=normrnd(0.3*rand(N,D),0.01);
             for i in 0..n{
                 for j in 0..d {
-                    //p3[i][j] = normal_rand1(0.3*between01.sample(&mut rand::thread_rng()), 0.01);
-                    p3[i][j] = normal_rand1(0.3, 0.01);
+                    p3[i][j] = normal_rand1(0.3*between01.sample(&mut rand::thread_rng()), 0.01);
+                    //p3[i][j] = normal_rand1(0.3, 0.01);
                 }
             }
            
@@ -235,7 +237,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
              //-------------------------------------------------------------------------------------
              //better_index=ind(randi([2,P1],N,1));
 
-             let better_index = rand_vec(2, p1_usize, n);
+             let better_index = rand_vec(1, p1_usize, n);
              
              //Better_X=x(better_index,:);
              for k in 0..n {
