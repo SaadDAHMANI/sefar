@@ -63,7 +63,7 @@ impl<'a, T : Problem> QAGO<'a, T>{
         let mut l4 : usize = index_differ;
 
         //let mut rng = rand::thread_rng();
-        let mut interval = Uniform::from(0..n);        
+        let interval = Uniform::from(0..n);        
         
         while l1 == index_differ {
             l1 = interval.sample(rng);
@@ -154,7 +154,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
         let mut x = self.initialize(self.params);
 
         //Evaluation of candidate solution using the objective function
-        for i in 0..n{
+        for i in 0..n {
             x[i].id = i;
 
             fitness[i] = self.problem.objectivefunction(&x[i].genes);
@@ -180,11 +180,10 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
            ind.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
            //----------------------------------------------------------------------------------------
 
-            /* println!("ind: {:?}", ind);
+            println!("ind: {:?}", ind);
             for i in 0..n{
                 println!("i: {},  ind : {}, fit [ind[i]] ={:.2}", i, ind[i], fitness[ind[i]]);
             } 
- */
            //----------------------------------------------------------------------------------------
 
            // Parameter adaptation based on distribution
@@ -199,7 +198,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 p2[j] = normal_rand1(0.001, 0.001);
             }
 
-            #[cfg(feature="report")] println!("QAGO : P2 = {:?}", p2);
+            //#[cfg(feature="report")] println!("QAGO : P2 = {:?}", p2);
 
             println!("------------------------------------------------");
 
@@ -211,7 +210,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 }
             }
            
-            #[cfg(feature="report")] println!("QAGO : P3 = {:?}", p3);
+            //#[cfg(feature="report")] println!("QAGO : P3 = {:?}", p3);
 
             //1. Improved learning phase 
             //1.1 Sampling individuals 
@@ -362,14 +361,14 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                     learn_operator [t] = tmp_sum;
                 }   
 
-                #[cfg(feature = "report")] println!("lear_operator : {:?}", learn_operator);
+                //#[cfg(feature = "report")] println!("learn_operator : {:?}", learn_operator);
 
                 //newx(i,:)=x(i,:)+sum(Gap.*(djs.*LF+(1-djs).*SF),1);
                 for t in 0..d {
                     newx[i].genes[t] = x[i].genes[t] + learn_operator[t];
                 }
 
-                #[cfg(feature = "report")] println!("newx[{}], Genome : {:?} ", i, newx[i]);
+                //#[cfg(feature = "report")] println!("newx[{}], Genome : {:?} ", i, newx[i]);
 
                 // Boundary constraints
                 for t in 0..d {
@@ -408,7 +407,8 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
             // P2=normrnd(0.001*ones(1,N),0.001*ones(1,N));
             for j in 0..n {
-                p2[j] = normal_rand1(0.001*n_f64, 0.001*n_f64);            
+                //p2[j] = normal_rand1(0.001*n_f64, 0.001*n_f64);
+                p2[j] = normal_rand1(0.001, 0.001);               
                 randomize(&mut vscr[j]);
                 randomize(&mut vsaf[j]);
             }

@@ -12,7 +12,7 @@ use sefar::sequential_algos::meo::MEO;
 use sefar::sequential_algos::qago::{QAGOparams, QAGO};
 
 const DIM : usize = 3;
-const POP_SIZE : usize = 7;
+const POP_SIZE : usize = 8;
 const KMAX : usize = 4;
 
 fn main() {
