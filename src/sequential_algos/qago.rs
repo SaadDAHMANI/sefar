@@ -118,7 +118,12 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
         let n_f64 = n as f64;
         let between01 = Uniform::from(0.0..=1.0);
+        let between0n = Uniform::from(0..n);
+
         let mut rng = rand::thread_rng();
+
+        let mut fes : usize = 0;
+        let fes_max = (max_iter*n) as f64;
 
         let mut best_x : Genome = Genome::new(n+2, d);
         let mut gap : Vec<Vec<f64>> = vec![vec![0.0; d]; 5];
@@ -142,7 +147,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
         let mut i2 : Vec<Vec<bool>> = vec![vec![false; d]; n];
         let mut r_vec : Vec<usize> = vec![0; d]; 
         let mut r : Vec<Vec<usize>> = vec![vec![0; d]; n];
-
+        
         //let mut better_x : Vec<Genome> = Vec::new();
 
         // Step 1 : Initialization
@@ -153,6 +158,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
             x[i].id = i;
 
             fitness[i] = self.problem.objectivefunction(&x[i].genes);
+            fes +=1; // increment function evaluation counter.
 
             x[i].fitness = Some(fitness[i]);
             
@@ -170,21 +176,21 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
 
            //Sorte and sorting indexes:
-           let mut ind : Vec<usize> = (0..fitness.len()).collect();
+           let mut ind : Vec<usize> = (0..n).collect();
            ind.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
            //----------------------------------------------------------------------------------------
 
-            /*println!("ind: {:?}", ind);
+            println!("ind: {:?}", ind);
             for i in 0..n{
-                println!("i: {},  ind : {}, fit ={:.2}", i, ind[i], fitness[i]);
-            } */
+                println!("i: {},  ind : {}, fit [ind[i]] ={:.2}", i, ind[i], fitness[ind[i]]);
+            } 
 
            //----------------------------------------------------------------------------------------
 
            // Parameter adaptation based on distribution
            // P1=ceil(unifrnd(0.05,0.2)*N);
            let p1 = f64::ceil(uniform_rand1(0.05, 0.2)*n as f64);
-           let p1_usize = p1.round() as usize;
+           let p1_usize = usize::max(p1.round() as usize, 1); // take 1 element at least
 
            #[cfg(feature="report")] println!("p1 = {}", p1);
            // P2=normrnd(0.001*ones(1,N),0.001*ones(1,N));
@@ -280,7 +286,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 dgap[3] = x[l1].genes.iter().zip(x[l2].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
                 dgap[4] = x[l3].genes.iter().zip(x[l4].genes.iter()).fold(0.0f64, |sum, (a, b)| sum + (a*b));
 
-                let min_distance : f64 = match dgap.iter().min_by(|a, b| a.partial_cmp(b).unwrap()){
+                let min_distance : f64 = match dgap.iter().min_by(|a, b| a.total_cmp(b)){
                     Some(value) => (*value*2.0).abs(),
                     None => 1.0,
                 };
@@ -314,9 +320,11 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 fgap[4] = (fitness[l3] - fitness[l4]).abs();
 
                 //SF=FGap./sum(FGap);
-                let sum_fgap = fgap.iter().fold(0.0f64, |sum, a| sum + a);
+                let mut sum_fgap = fgap.iter().fold(0.0f64, |sum, a| sum + a);
+                if sum_fgap == 0.0f64 { sum_fgap = 1.0; } 
+
                 for k in 0..5 {
-                    sf[k] = fgap[k]/sum_fgap+1.0;
+                    sf[k] = fgap[k]/sum_fgap; // +1.0;
                 }
 
                 //Parameter self-adaptation based on Jensen-Shannon divergence
@@ -368,6 +376,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
                 // Evaluation
                 let new_fitness = self.problem.objectivefunction(&newx[i].genes);
+                fes +=1;
 
                 //Selection
                 if new_fitness < fitness[i]{
@@ -402,8 +411,9 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
             //  AF=0.01*(1-FEs/MaxFEs);
             //let af = 0.01* (1.0- (iter as f64 /max_iter as f64));
-            let af = 0.01 + 0.09* (1.0 - (iter as f64 /max_iter as f64));            
-
+            //let af = 0.01 + 0.09* (1.0 - (iter as f64 /max_iter as f64));            
+            let af = 0.01* (1.0- (fes as f64 /fes_max));
+            
             for i in 0..n {
                 for j in 0..d {
                     if vscr[i][j]<p3[i][j] { i1[i][j] = true; }
@@ -433,9 +443,15 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
                         }
                         else {
+                            let mut rm : usize = i;
+                            
+                            while rm == i || rm ==r[i][j] {
+                                rm = between0n.sample(&mut rng);
+                            }
+
                             let randv = between01.sample(&mut rng);
                             //newx(i,j)=x(i,j)+rand*((x(R(i,j),j)-x(i,j))+(x(RM,j)-x(i,j)));
-                            newx[i].genes[j] = x[i].genes[j] + randv*((x[r[i][j]].genes[j] - x[i].genes[j])); // + (x[i].genes[j]))
+                            newx[i].genes[j] = x[i].genes[j] + randv*((x[r[i][j]].genes[j] - x[i].genes[j]) + (x[rm].genes[j] - x[i].genes[j])); // + (x[i].genes[j]))
                         }
                     }
 
@@ -454,7 +470,9 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
             for i in 0..n {
                 let new_fitness = self.problem.objectivefunction(&x[i].genes);
-                
+                fes +=1;
+
+
                 if new_fitness < fitness[i] {
                     fitness[i] = new_fitness;
                     copy_vector(&newx[i].genes, &mut x[i].genes, d);
