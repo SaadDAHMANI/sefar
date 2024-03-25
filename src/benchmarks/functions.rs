@@ -4,7 +4,7 @@ use crate::core::problem::Problem;
 #[derive(Debug,Clone)]
 
 ///
-/// Sphere enchmark function
+/// Sphere enchmark function (F1)
 /// 
 pub struct Sphere{}
 
@@ -15,12 +15,15 @@ impl Problem for Sphere{
     }
 }
 
+///
+/// F2 = Sum(x_i) + Prod(x_i) = Sum(X) + Prod(X)  
+/// 
 #[derive(Debug, Clone)]
 pub struct F2{}
-impl Problem for F2{
+impl Problem for F2 {
     fn objectivefunction(&mut self, genome : &[f64]) ->f64 {
       let sum = genome.iter().fold(0.0f64, |sum, g| sum + g.abs());
-      let prod = genome.iter().fold(1.0f64, |prod, g| prod * g.abs());
+      let prod = genome.iter().fold(1.0f64, |prod, g| prod* f64::abs(*g));
       sum + prod
     }
 }

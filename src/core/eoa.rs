@@ -12,8 +12,8 @@ pub trait EOA {
 
        let n: usize = params.get_population_size();
        let dim: usize = params.get_dimensions();
-       let lb = params.get_lower_bounds();
-       let ub = params.get_upper_bounds();
+       let lb = &params.get_lower_bounds();
+       let ub = &params.get_upper_bounds();
     
        let mut positions : Vec<Genome> = Vec::with_capacity(n);
 
@@ -25,7 +25,7 @@ pub trait EOA {
             
              for  j in 0..dim {   
               //  positions[i][j]= intervall01.sample(&mut rng)*(ub-lb)+lb;                         
-              sln.genes[j]= intervall01.sample(&mut rng)*(ub[j]-lb[j])+lb[j];   
+              sln.genes[j]= intervall01.sample(&mut rng)*(ub[j]-lb[j]) + lb[j];   
             }
             positions.push(sln);
         }        

@@ -3,7 +3,7 @@ include!("dataset.rs");
 
 
 use sefar::core::eoa::EOA;
-use sefar::benchmarks::functions::Sphere;
+use sefar::benchmarks::functions::{Sphere, F2};
 use sefar::sequential_algos::eo::{EO, EOparams};
 use sefar::sequential_algos::pso::{PSO, PSOparams};
 //use sefar::sequential_algos::pco::{PCO, PCOparams};
@@ -11,20 +11,26 @@ use sefar::sequential_algos::pso::{PSO, PSOparams};
 use sefar::sequential_algos::meo::MEO;
 use sefar::sequential_algos::qago::{QAGOparams, QAGO};
 
-const DIM : usize = 100;
-const POP_SIZE : usize = 200;
-const KMAX : usize = 2500;
+const DIM : usize = 30;
+const POP_SIZE : usize = 70;
+const KMAX : usize = 1000*DIM/POP_SIZE;
 
 fn main() {
     println!("Hello, sefar !");
 
+    println!("Evaluation with Max_Iter = {}", KMAX);
+
     qago_f1_test1();
-    
+
+    println!("_________________________F2______________________");
+
+    qago_f2_test1();
+
     //pco_f1_test1();
     
     //eo_f1_test1();
 
-    println!("_________________________ MAIN ______________________");
+  
 
     //peo_f1_test1();
 
@@ -70,9 +76,42 @@ fn qago_f1_test1(){
     };
     */
 
-    println!("QAGO : {:?}", result.to_string());
+    println!("QAGO : F1 (Sphere) test; Result: {:?}", result.to_string());
+}
 
+#[allow(dead_code)]
+fn qago_f2_test1(){
+    let mut settings : QAGOparams = QAGOparams::default();
+    
+    settings.population_size = POP_SIZE;
+    settings.dimensions = DIM ;    
+    settings.max_iterations = KMAX; 
+       
+    let lb =vec![-100.0f64; DIM];
+    let ub =vec![100.0f64; DIM];
 
+    settings.lower_bounds = lb.as_slice();
+    settings.upper_bounds = ub.as_slice();  
+
+    let mut fo = F2{};
+
+    let mut algo : QAGO<F2> = QAGO::new(&settings, &mut fo);
+    
+    let result = algo.run();
+
+    /*match result.convergence_trend{
+        None => println!("QAGO: no convergence trend !!!"),
+        Some(cv) => println!("QAGO: Convergence trend :\n {:?}", cv),
+    };
+    */
+
+    /*match result.best_genome {
+        None => println!("QAGO: no best solution !"),
+        Some(bg)=> println!("QAGO: best-genome {:?}", bg),
+    };
+    */
+
+    println!("QAGO : F2 test; Result: {:?}", result.to_string());
 }
 
 #[allow(dead_code)]

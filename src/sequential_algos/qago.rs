@@ -111,7 +111,8 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
         let mut gbestx : Genome = Genome::new(n+1, d);      
         let mut gbestfitness : f64 = f64::MAX; // Change this to f64::MIN in the case of maximization.
-        let mut gbesthistory = vec![f64::NAN; max_iter];
+        let mut gbesthistory = vec![0.0; max_iter];
+
         let mut fitness = vec![0.0; n];
         let mut iter : usize =0;
 
@@ -182,10 +183,12 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
            ind.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
            //----------------------------------------------------------------------------------------
 
-            // println!("ind: {:?}", ind);
-            // for i in 0..n{
-            //     println!("i: {},  ind : {}, fit [ind[i]] ={:.2}", i, ind[i], fitness[ind[i]]);
-            // } 
+           // println!("ind: {:?}", ind);
+
+           /*  for i in 0..n{
+                 println!("i: {},  ind : {}, fit [ind[i]] ={:.2}", i, ind[i], fitness[ind[i]]);
+            } */
+
            //----------------------------------------------------------------------------------------
 
            // Parameter adaptation based on distribution
@@ -193,10 +196,10 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
            let p1 = f64::ceil(uniform_rand1(0.05, 0.2)*n as f64);
            let p1_usize = usize::max(p1.round() as usize, 1); // take 1 element at least
 
-           //#[cfg(feature="report")] println!("\n p1 = {} \n", p1);
+           //println!("\n p1: {p1} ; p2: {p1_usize} \n");
+           
            // P2=normrnd(0.001*ones(1,N),0.001*ones(1,N));
-            for j in 0..n{
-                //p2[j] = normal_rand1(0.001*n_f64, 0.001*n_f64);
+            for j in 0..n {               
                 p2[j] = normal_rand1(0.001, 0.001);
             }
 
@@ -221,6 +224,8 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
              //worse_index=ind(randi([N-P1+1,N],N,1));
             //let worse_index = rand_vec(n-p1_usize+1, n-1, n);
             let worse_index = rand_vec(n-p1_usize, n-1, n);
+
+            //println!("worse_index : n-p1_usize = {}, n-1 = {}", n-p1_usize, n-1);
             
             //println!("\n worse_index : {:?} \n", worse_index);
                         
@@ -236,7 +241,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
              //-------------------------------------------------------------------------------------
              //better_index=ind(randi([2,P1],N,1));
 
-             let better_index = rand_vec(1, p1_usize, n);
+             let better_index = rand_vec(1, p1_usize, n);            
 
             // println!("\n better_index : {:?} \n", better_index);
              
@@ -248,7 +253,9 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
              //#[cfg(feature="report")] println!("better_x : {:?}", better_x);            
             //-------------------------------------------------------------------------------------
             //normal_index=ind(randi([P1+1,N-P1],N,1));
-            let normal_index = rand_vec(p1_usize+1, n-p1_usize, n);
+            let normal_index = rand_vec(p1_usize+1, n-(p1_usize+1), n);
+
+            //println!("Normal_index : p1_usize+1  = {}, n-p1_usize = {}",p1_usize+1, n-(p1_usize+1));
             //println!("\n normal_index : {:?} \n", normal_index);
 
             //Normal_X=x(normal_index,:);
@@ -304,6 +311,8 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 //DGap=DGap+2*abs(minDistance)
                 //let min_distance_2 =  2.0*min_distance.abs();
 
+                //dgap.iter_mut().for_each(|a| *a += min_distance);
+
                 for k in 0..5 {
                     dgap[k] +=  min_distance;
                 }
@@ -314,12 +323,12 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 if sum_dgap == 0.0 {sum_dgap =1.0} 
 
                 for k in 0..5{
-                    lf[k]= dgap[k]/sum_dgap; 
+                    lf[k]= dgap[k]/sum_dgap;                          
                 }
 
                 //Parameter self-adaptation based on fitness difference
                 //FGap(1,:)=(abs(fitness(ind(1))-fitness(better_index(i))));
-                fgap[0] = (fitness[ind[0]]-fitness[better_index[i]]).abs();
+                fgap[0] = (fitness[ind[0]] - fitness[better_index[i]]).abs();
 
                 //FGap(2,:)=(abs(fitness(better_index(i))-fitness(normal_index(i))));
                 fgap[1] = (fitness[better_index[i]] - fitness[normal_index[i]]).abs();
@@ -371,7 +380,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                     for j in 0..5 {
                         tmp_sum += gap[j][t];
                     }
-                    learn_operator [t] = tmp_sum;
+                    learn_operator[t] = tmp_sum;
                 }   
 
                 //#[cfg(feature = "report")] println!("learn_operator : {:?}", learn_operator);
@@ -385,7 +394,11 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
 
                 // Boundary constraints
                 for t in 0..d {
-                    if newx[i].genes[t] < lb[t] || newx[i].genes[t] > ub[t] {
+                    if newx[i].genes[t] < lb[t] {
+                        newx[i].genes[t] = lb[t] + (ub[t]-lb[t])*between01.sample(&mut rng);
+                    }
+
+                    if newx[i].genes[t] > ub[t] {
                         newx[i].genes[t] = lb[t] + (ub[t]-lb[t])*between01.sample(&mut rng);
                     }
                 } 
@@ -404,13 +417,13 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                         copy_vector(&newx[i].genes, &mut gbestx.genes, d);
                     }
                 }
-
-                if between01.sample(&mut rng) < p2[i] && ind[i] != ind[0] {
-                    fitness[i] = new_fitness;
-                    copy_vector(&newx[i].genes, &mut x[i].genes, d);
-                }
+                else {
+                    if between01.sample(&mut rng) < p2[i] && ind[i] != ind[0] {
+                        fitness[i] = new_fitness;
+                        copy_vector(&newx[i].genes, &mut x[i].genes, d);
+                    }
+                }               
             }
-
             
             // 2. Improved reflection phase   
             //newx=x;
@@ -423,13 +436,14 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                 //p2[j] = normal_rand1(0.001*n_f64, 0.001*n_f64);
                 p2[j] = normal_rand1(0.001, 0.001);               
                 randomize(&mut vscr[j]);
-                randomize(&mut vsaf[j]);
+                randomize(&mut vsaf[j]);                                                                  
             };
             
             //AF=0.01*(1-FEs/MaxFEs);
             //let af = 0.01* (1.0- (iter as f64 /max_iter as f64));
             //let af = 0.01 + 0.09* (1.0 - (iter as f64 /max_iter as f64));            
-            let af = 0.01* (1.0- (fes as f64 /fes_max));
+            //let af = 0.01* (1.0- (fes as f64 /fes_max));
+            let af = 0.01 + 0.09*(1.0- (fes as f64 /fes_max));
             
             for i in 0..n {
                 for j in 0..d {
@@ -448,6 +462,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
                     r[i][j] = ind[r_vec[j]];
                 }
             }
+            
             //println!("\n R matrix : {:?} \n", r);
 
             for i in 0..n {
