@@ -147,7 +147,7 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
            ind.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
            //----------------------------------------------------------------------------------------
 
-           println!("ind : {:?}", ind); 
+           //println!("ind : {:?}", ind); 
 
            // Save best solution 
            copy_vector(&x[ind[0]].genes, &mut best_x.genes, d);
@@ -249,25 +249,20 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                     }
                 }
 
-                
-
-
-
-
-
-              
-
-
-
-
-                
-                
-
+                // Save the best solution
+                if gbestfitness > fitness[i] {
+                    gbestfitness = fitness[i];
+                    copy_solution(&x[i], &mut gbest_x, d);
+                }
             }
 
-
+            // Reflection phase
             
 
+
+
+            gbesthistory[iter] = gbestfitness;
+            #[cfg(feature= "report")] println!("Iter : {}, best-fitness : {}", iter, gbestfitness);
 
             iter += 1;
         }
