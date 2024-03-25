@@ -99,7 +99,7 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         const P3 :f64 = 0.3;
 
         let mut fes : f64 = 0.0;
-        let mut max_fes :f64  = n as f64 + (max_iter * 2* n) as f64;
+        let max_fes :f64  = n as f64 + (max_iter * 2* n) as f64;
 
         let mut gbestfitness : f64 = f64::MAX;
 
@@ -323,19 +323,12 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
             iter += 1;
         }
 
-
-
-
-
-
-
-
-
+        println!("Iter : {}, FES: {}, Max_FES {}", iter, fes, max_fes);
 
         let result : OptimizationResult = OptimizationResult {
-            best_genome : None,
-            best_fitness : None,
-            convergence_trend : None,
+            best_genome : Some(best_x),
+            best_fitness : Some(gbestfitness),
+            convergence_trend : Some(gbesthistory),
             computation_time : None,
             err_report : None,
         };
