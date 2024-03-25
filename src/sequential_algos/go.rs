@@ -89,6 +89,9 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         let d : usize = self.params.dimensions;
         let max_iter : usize = self.params.max_iterations;
 
+        let ub = self.params.upper_bounds;
+        let lb = self.params.lower_bounds;
+
         let mut iter : usize = 0;        
         //Parameter setting
         const P1 : usize = 5;
@@ -112,6 +115,7 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         let mut ka : Vec<Vec<f64>> = vec![vec![0.0; d]; 4];
 
         let mut rng = rand::thread_rng();
+        let mut intervall01 = Uniform::from(0.0..1.0);
 
         let mut new_x : Vec<Genome> = self.get_empty_solutions(n);
 
@@ -220,6 +224,35 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                 for j in 0..d {
                     new_x[i].genes[j] = x[i].genes[j] + ka[0][j] + ka[1][j] + ka[2][j] + ka[3][j];
                 }
+
+                // Space bound 
+                for j in 0..d {
+                     new_x[i].genes[j] = f64::min( new_x[i].genes[j], ub[j]);
+                     new_x[i].genes[j] = f64::max(new_x[i].genes[j], lb[j]);                 
+                }
+
+                //newfitness= ObjectiveFunction(newx(i,:)); 
+
+                let new_fitness = self.problem.objectivefunction(&new_x[i].genes);
+                fes +=1;
+
+                //Update solutions
+                if new_fitness < fitness[i] {
+                    fitness[i] = new_fitness;
+                    copy_solution(&new_x[i], &mut x[i], d);
+                }
+                else {
+                    let rand_value = intervall01.sample(&mut rng);
+                    if rand_value < P2 && ind[i] != ind[0] {
+                        fitness[i] = new_fitness;
+                        copy_solution(&new_x[i], &mut x[i], d);
+                    }
+                }
+
+                
+
+
+
 
 
               

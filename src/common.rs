@@ -114,9 +114,13 @@ pub fn copy_vector(source : & Vec<f64>, destination : &mut Vec<f64>, dim : usize
     //for i in 0..source.len() {
     //    destination[i]=source[i];
     //}
-    destination[..dim].clone_from_slice(&source[..dim]);    
+    destination[..dim].clone_from_slice(&source[..dim]);
+}
 
-
+pub fn copy_solution(source : &Genome, destination : &mut Genome, dim: usize){
+    destination.id = source.id;
+    destination.fitness = source.fitness; 
+    destination.genes[..dim].clone_from_slice(&source.genes[..dim]);
 }
 
 pub fn copy_vector2genome(source : & Vec<f64>, destination : &mut Genome){
