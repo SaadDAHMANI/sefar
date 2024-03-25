@@ -1,4 +1,8 @@
 
+use rand::rngs::ThreadRng;
+use rand_distr::{Distribution, Uniform};
+use rayon::result;
+
 use crate::core::eoa::EOA;
 use crate::core::genome::Genome;
 use crate::core::parameters::Parameters;
@@ -22,6 +26,7 @@ pub struct GO<'a, T : Problem> {
 }
 
 
+
 impl<'a, T : Problem> GO<'a, T> {
 
     pub fn new(settings :&'a GOparams, problem : &'a mut T )->Self{       
@@ -39,6 +44,42 @@ impl<'a, T : Problem> GO<'a, T> {
              optimization_result: result,            
         }
     }
+
+    fn get_empty_solutions(&self, n : usize)->Vec<Genome>{
+        let mut result : Vec<Genome> = Vec::with_capacity(n);
+        for i in 0..n {
+            result.push(Genome::new(i, self.params.get_dimensions()));
+        }
+        result
+    }
+
+
+    ///
+    /// Generate 2 random values in [0, maxi[ differ from index_differ.
+    /// 
+    fn select_id(&self, index_differ : usize, maxi : usize, rng : &mut ThreadRng)-> (usize, usize) {
+
+        let mut l1 : usize = index_differ;
+        let mut l2 : usize = index_differ;
+        
+        //let mut rng = rand::thread_rng();
+        let interval = Uniform::from(0..maxi);        
+
+        while l1 == index_differ {
+            l1 = interval.sample(rng);
+        }
+
+        while l2 == index_differ {
+            l2 = interval.sample(rng);
+        }
+
+        (l1, l2)
+    }   
+
+    fn norm(&self, a : &[f64])-> f64 {
+        a.iter().fold(0.0, |sum, x| sum + (x*x)).sqrt()
+    }
+
 }
 
 impl<'a, T : Problem> EOA for GO<'a, T> {
@@ -61,8 +102,18 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         let mut gbest_x : Genome = Genome::new(n+1, d);
         let mut gbesthistory : Vec<f64> = vec![0.0; max_iter];
 
-        let mut best_x : Genome = Genome::new(n+2, d); 
+        let mut best_x : Genome = Genome::new(n+2, d);
+        let mut worst_x : Genome = Genome::new(n+3, d);
+        let mut better_x : Genome = Genome::new(n+3, d);
 
+        let mut gap : Vec<Vec<f64>> = vec![vec![0.0; d]; 4];
+        let mut distance : [f64; 4] = [0.0; 4];
+        let mut lf : [f64; 4] = [0.0; 4];
+        let mut ka : Vec<Vec<f64>> = vec![vec![0.0; d]; 4];
+
+        let mut rng = rand::thread_rng();
+
+        let mut new_x : Vec<Genome> = self.get_empty_solutions(n);
 
         //Initialization
         let mut x = self.initialize(self.params);
@@ -92,16 +143,92 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
            ind.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
            //----------------------------------------------------------------------------------------
 
+           println!("ind : {:?}", ind); 
+
            // Save best solution 
            copy_vector(&x[ind[0]].genes, &mut best_x.genes, d);
 
             // Learning phase
+            let interval_worst = Uniform::from(n-P1..n);
+            let interval_better = Uniform::from(1..P1);
 
             for i in 0..n {
-                let worse_index = rand_vec(n-P1, n-1, n);
+                
+                //  Worst_X = x(ind(randi([popsize-P1+1,popsize],1)),:);
+                let wors_index : usize = interval_worst.sample(&mut rng);
+                copy_vector(&x[ind[wors_index]].genes, &mut worst_x.genes, d);
 
-                println!("wors_index : {:?}", worse_index);
+                // Better_X=x(ind(randi([2,P1],1)),:);
+                let better_index : usize = interval_better.sample(&mut rng);
+                copy_vector(&x[ind[better_index]].genes, &mut better_x.genes, d);
+                
+                //random=selectID(popsize,i,2); L1=random(1); L2=random(2);
+                let (l1, l2 ) = self.select_id(i, n, &mut rng);
+               
+                // Gap1=(Best_X-Better_X);
+                for j in 0..d {
+                    gap[0][j] = best_x.genes[j] - better_x.genes[j];  
+                }
 
+                //Gap2=(Best_X-Worst_X);
+                for j in 0..d {
+                    gap[1][j] = best_x.genes[j] - worst_x.genes[j];  
+                }
+
+                //Gap3=(Better_X-Worst_X);
+                for j in 0..d {
+                    gap[2][j] = better_x.genes[j] - worst_x.genes[j];  
+                }
+
+                //Gap4=(x(L1,:)-x(L2,:));
+                for j in 0..d {
+                    gap[3][j] = x[l1].genes[j] - x[l2].genes[j];  
+                }
+
+                //Distance1=norm(Gap1); Distance2=norm(Gap2); Distance3=norm(Gap3); Distance4=norm(Gap4);
+                for k in 0..4 {
+                    distance[k] = self.norm(&gap[k]);
+                }
+
+                // SumDistance=Distance1+Distance2+Distance3+Distance4;
+                let mut sum_distance = distance.iter().fold(0.0, |sum, a| sum + a); 
+                if sum_distance == 0.0 {sum_distance =1.0;}
+
+                // LF1=Distance1/SumDistance;  LF2=Distance2/SumDistance;  LF3=Distance3/SumDistance; LF4=Distance4/SumDistance;
+
+                for k in 0..4 {
+                    lf[k] = distance[k]/sum_distance;
+                }
+
+                let max_fitness = match fitness.iter().max_by(|a, b| a.total_cmp(b)) {
+                    Some(value) => *value,
+                    None => fitness[0],
+                };
+
+                //  SF=(fitness(i)/max(fitness));
+                let sf = fitness[i]/max_fitness; 
+
+                //KA1=LF1*SF*Gap1; KA2=LF2*SF*Gap2; KA3=LF3*SF*Gap3; KA4=LF4*SF*Gap4;
+                for t in 0..4{
+                    for j in 0..d {
+                        ka[t][j] = sf*lf[t]*gap[t][j];
+                    }                   
+                }
+
+                // newx(i,:)=x(i,:)+KA1+KA2+KA3+KA4;
+                let sum_ka = ka.iter().fold(0.0, |sum, a|  sum+a);
+                for j in 0..d {
+                    new_x[i].genes[j] = x[i].genes[j] + sum_ka;
+                }
+
+                
+              
+
+
+
+
+                
+                
 
             }
 
