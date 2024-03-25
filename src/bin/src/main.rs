@@ -10,21 +10,22 @@ use sefar::sequential_algos::pso::{PSO, PSOparams};
 
 use sefar::sequential_algos::meo::MEO;
 use sefar::sequential_algos::qago::{QAGOparams, QAGO};
+use sefar::sequential_algos::go::{GOparams, GO};
 
-const DIM : usize = 30;
-const POP_SIZE : usize = 70;
-const KMAX : usize = 1000*DIM/POP_SIZE;
+const DIM : usize = 3;
+const POP_SIZE : usize = 7;
+const KMAX : usize = 1; //1000*DIM/POP_SIZE;
 
 fn main() {
     println!("Hello, sefar !");
 
     println!("Evaluation with Max_Iter = {}", KMAX);
 
-    qago_f1_test1();
+    go_f1_test1();
 
     println!("_________________________F2______________________");
 
-    qago_f2_test1();
+    //qago_f2_test1();
 
     //pco_f1_test1();
     
@@ -41,6 +42,43 @@ fn main() {
 
   }
 
+
+  #[allow(dead_code)]
+  fn go_f1_test1(){
+      let mut settings : GOparams = GOparams::default();
+      
+      settings.population_size = POP_SIZE;
+      settings.dimensions = DIM ;    
+      settings.max_iterations = KMAX; 
+  
+         
+      let lb =vec![-100.0f64; DIM];
+      let ub =vec![100.0f64; DIM];
+  
+      settings.lower_bounds = lb.as_slice();
+      settings.upper_bounds = ub.as_slice();  
+  
+      let mut fo = Sphere{};
+  
+      let mut algo : GO<Sphere> = GO::new(&settings, &mut fo);
+      
+      let result = algo.run();
+  
+      /*match result.convergence_trend{
+          None => println!("QAGO: no convergence trend !!!"),
+          Some(cv) => println!("QAGO: Convergence trend :\n {:?}", cv),
+      };
+      */
+  
+      /*match result.best_genome {
+          None => println!("QAGO: no best solution !"),
+          Some(bg)=> println!("QAGO: best-genome {:?}", bg),
+      };
+      */
+  
+      println!("QAGO : F1 (Sphere) test; Result: {:?}", result.to_string());
+}
+  
 
 
 #[allow(dead_code)]

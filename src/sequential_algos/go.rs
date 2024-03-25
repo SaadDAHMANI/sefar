@@ -47,8 +47,10 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         let n : usize = self.params.population_size;
         let d : usize = self.params.dimensions;
         let max_iter : usize = self.params.max_iterations;
-        
+
+        let mut iter : usize = 0;        
         //Parameter setting
+        const P1 : usize = 5;
         const P2 :f64 = 0.001;
         const P3 :f64 = 0.3;
 
@@ -56,8 +58,10 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         let mut gbestfitness : f64 = f64::MAX;
 
         let mut fitness : Vec<f64> = vec![0.0; n];
-        let mut gbest_x = Genome::new(n+1, d);
+        let mut gbest_x : Genome = Genome::new(n+1, d);
         let mut gbesthistory : Vec<f64> = vec![0.0; max_iter];
+
+        let mut best_x : Genome = Genome::new(n+2, d); 
 
 
         //Initialization
@@ -80,7 +84,39 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
 
         println!("Best_fitness : {}", gbestfitness);
 
-        
+
+        while  iter < max_iter {
+
+            //Sorte and sorting indexes:
+           let mut ind : Vec<usize> = (0..n).collect();
+           ind.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
+           //----------------------------------------------------------------------------------------
+
+           // Save best solution 
+           copy_vector(&x[ind[0]].genes, &mut best_x.genes, d);
+
+            // Learning phase
+
+            for i in 0..n {
+                let worse_index = rand_vec(n-P1, n-1, n);
+
+                println!("wors_index : {:?}", worse_index);
+
+
+            }
+
+
+            
+
+
+            iter += 1;
+        }
+
+
+
+
+
+
 
 
 
@@ -120,7 +156,7 @@ impl<'a> Parameters for GOparams<'a> {
     }
 
     fn get_population_size(&self)->usize {
-        usize::max(self.population_size, 5)
+        usize::max(self.population_size, 6)
     }
 
     fn get_lower_bounds(&self)->Vec<f64> {
