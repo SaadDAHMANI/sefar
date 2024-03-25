@@ -1,7 +1,102 @@
+
 use crate::core::eoa::EOA;
 use crate::core::genome::Genome;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
+use crate::core::optimization_result::OptimizationResult;
+use crate::common::*;
+
+///
+/// GO : Growth Optimizer  
+/// Reference:
+/// 
+/// 
+/// 
+/// 
+/// 
+#[derive(Debug)]
+pub struct GO<'a, T : Problem> {
+     pub problem : &'a mut T,
+     pub params : &'a GOparams<'a>,
+     pub optimization_result : OptimizationResult,
+}
+
+
+impl<'a, T : Problem> GO<'a, T> {
+
+    pub fn new(settings :&'a GOparams, problem : &'a mut T )->Self{       
+        let result = OptimizationResult{
+            best_genome : None,
+            best_fitness :None,
+            convergence_trend : None,
+            computation_time : None,
+            err_report : None, 
+        };
+       
+        GO{ 
+             problem,
+             params: settings,
+             optimization_result: result,            
+        }
+    }
+}
+
+impl<'a, T : Problem> EOA for GO<'a, T> {
+    fn run(&mut self)-> OptimizationResult {
+
+        let n : usize = self.params.population_size;
+        let d : usize = self.params.dimensions;
+        let max_iter : usize = self.params.max_iterations;
+        
+        //Parameter setting
+        const P2 :f64 = 0.001;
+        const P3 :f64 = 0.3;
+
+        let mut fes : usize = 0;
+        let mut gbestfitness : f64 = f64::MAX;
+
+        let mut fitness : Vec<f64> = vec![0.0; n];
+        let mut gbest_x = Genome::new(n+1, d);
+        let mut gbesthistory : Vec<f64> = vec![0.0; max_iter];
+
+
+        //Initialization
+        let mut x = self.initialize(self.params);
+        
+
+        //Evaluation of search agents
+
+        for i in 0..n {
+            fitness[i] = self.problem.objectivefunction(&x[i].genes);
+            fes +=1;
+
+            if gbestfitness > fitness[i] {
+                gbestfitness = fitness[i];
+                copy_vector(&x[i].genes, &mut gbest_x.genes,d);
+            }
+        }
+
+        gbesthistory[0] = gbestfitness;
+
+        println!("Best_fitness : {}", gbestfitness);
+
+        
+
+
+
+
+        let result : OptimizationResult = OptimizationResult {
+            best_genome : None,
+            best_fitness : None,
+            convergence_trend : None,
+            computation_time : None,
+            err_report : None,
+        };
+
+        result
+
+    }
+} 
 
 
 
