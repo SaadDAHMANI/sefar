@@ -1,7 +1,6 @@
 
 use rand::rngs::ThreadRng;
 use rand_distr::{Distribution, Uniform};
-use rayon::result;
 
 use crate::core::eoa::EOA;
 use crate::core::genome::Genome;
@@ -13,9 +12,10 @@ use crate::common::*;
 ///
 /// GO : Growth Optimizer  
 /// Reference:
-/// 
-/// 
-/// 
+/// Growth Optimizer: A powerful metaheuristic algorithm for solving continuous and 
+/// discrete global optimization problems.
+/// Paper link : https://doi.org/10.1016/j.knosys.2022.110206 
+/// Matlab original code : https://github.com/tsingke/Growth-Optimizer
 /// 
 /// 
 #[derive(Debug)]

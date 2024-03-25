@@ -1,4 +1,4 @@
-use std::fmt::Display;
+//use std::fmt::Display;
 use std::time::Duration;
 use crate::core::genome::Genome;
 
@@ -25,10 +25,17 @@ pub struct OptimizationResult {
      }
  }  
 
- impl Display for OptimizationResult{
+/*  impl Display for OptimizationResult{
      fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
          write!(f, "Best-fitness : {:?}; Best-solution : {:?}; Time : {:?}; Err-report: {:?}", self.best_fitness, self.best_genome, self.computation_time, self.err_report)
      }
+ } */
+
+ impl ToString for OptimizationResult{
+    fn to_string(&self) -> String {
+        format!("Best-fitness : {:?} \n; Best-solution : {:?} \n; Time : {:?} \n; Err-report: {:?}", self.best_fitness, self.best_genome, self.computation_time, self.err_report)
+    }
  }
+ 
 
  
