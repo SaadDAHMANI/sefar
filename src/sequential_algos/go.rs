@@ -216,12 +216,12 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                 }
 
                 // newx(i,:)=x(i,:)+KA1+KA2+KA3+KA4;
-                let sum_ka = ka.iter().fold(0.0, |sum, a|  sum+a);
+                //let sum_ka = ka.iter().fold(0.0, |sum, a|  sum + a);
                 for j in 0..d {
-                    new_x[i].genes[j] = x[i].genes[j] + sum_ka;
+                    new_x[i].genes[j] = x[i].genes[j] + ka[0][j] + ka[1][j] + ka[2][j] + ka[3][j];
                 }
 
-                
+
               
 
 
