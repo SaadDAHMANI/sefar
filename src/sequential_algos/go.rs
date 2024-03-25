@@ -17,6 +17,7 @@ use crate::common::*;
 /// Paper link : https://doi.org/10.1016/j.knosys.2022.110206 
 /// Matlab original code : https://github.com/tsingke/Growth-Optimizer
 /// 
+/// Written in Rust by Saad Dahmani <sd.dahmani2000@gmail.com>
 /// 
 #[derive(Debug)]
 pub struct GO<'a, T : Problem> {
