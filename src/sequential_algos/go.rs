@@ -98,7 +98,9 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         const P2 :f64 = 0.001;
         const P3 :f64 = 0.3;
 
-        let mut fes : usize = 0;
+        let mut fes : f64 = 0.0;
+        let mut max_fes :f64  = n as f64 + (max_iter * 2* n) as f64;
+
         let mut gbestfitness : f64 = f64::MAX;
 
         let mut fitness : Vec<f64> = vec![0.0; n];
@@ -107,7 +109,8 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
 
         let mut best_x : Genome = Genome::new(n+2, d);
         let mut worst_x : Genome = Genome::new(n+3, d);
-        let mut better_x : Genome = Genome::new(n+3, d);
+        let mut better_x : Genome = Genome::new(n+4, d);
+        let mut r : Genome = Genome::new(n+5, d);
 
         let mut gap : Vec<Vec<f64>> = vec![vec![0.0; d]; 4];
         let mut distance : [f64; 4] = [0.0; 4];
@@ -115,7 +118,8 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         let mut ka : Vec<Vec<f64>> = vec![vec![0.0; d]; 4];
 
         let mut rng = rand::thread_rng();
-        let mut intervall01 = Uniform::from(0.0..1.0);
+        let intervall01 = Uniform::from(0.0..=1.0);
+        let intervall0_p1 = Uniform::from(0..P1);
 
         let mut new_x : Vec<Genome> = self.get_empty_solutions(n);
 
@@ -127,7 +131,7 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
 
         for i in 0..n {
             fitness[i] = self.problem.objectivefunction(&x[i].genes);
-            fes +=1;
+            fes +=1.0;
 
             if gbestfitness > fitness[i] {
                 gbestfitness = fitness[i];
@@ -234,7 +238,7 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                 //newfitness= ObjectiveFunction(newx(i,:)); 
 
                 let new_fitness = self.problem.objectivefunction(&new_x[i].genes);
-                fes +=1;
+                fes +=1.0;
 
                 //Update solutions
                 if new_fitness < fitness[i] {
@@ -257,9 +261,61 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
             }
 
             // Reflection phase
-            
+            for i in 0..n{
+                //newx(i,:)=x(i,:);
+                copy_solution(&x[i], &mut new_x[i], d);
+               
+                for j in 0..d {
+                    let rand_value = intervall01.sample(&mut rng);
+                    if rand_value < P3 {
+                        // R=x(ind(randi(P1)),:);
+                        let rand_index = intervall0_p1.sample(&mut rng);
+                        copy_solution(&x[ind[rand_index]], &mut r, d);
 
+                        // newx(i,j) = x(i,j)+(R(:,j)-x(i,j))*unifrnd(0,1);
+                        new_x[i].genes[j] = x[i].genes[j] + r.genes[j] - x[i].genes[j]*intervall01.sample(&mut rng); 
 
+                        // AF=(0.01+(0.1-0.01)*(1-FEs/MaxFEs));
+                        let af =  0.01+(0.1-0.01)*(1.0-fes/max_fes);
+
+                        if intervall01.sample(&mut rng) < af {
+                            //newx(i,j)=xmin+(xmax-xmin)*unifrnd(0,1);
+                            new_x[i].genes[j] = lb[j] + (ub[j] - lb[j])*intervall01.sample(&mut rng); 
+                        }
+                    } 
+
+                }
+
+                // Space bound
+                for j in 0..d {
+                    new_x[i].genes[j] = f64::min( new_x[i].genes[j], ub[j]);
+                    new_x[i].genes[j] = f64::max(new_x[i].genes[j], lb[j]);                 
+               }
+
+               //  newfitness= ObjectiveFunction(newx(i,:));
+               let new_fitness = self.problem.objectivefunction(&new_x[i].genes);
+               //FEs=FEs+1;
+               fes += 1.0;
+               
+               //Update solutions
+               if new_fitness < fitness[i] {
+                    fitness[i] = new_fitness;
+                    copy_solution(&new_x[i], &mut x[i], d);
+                }
+                else {
+                     let rand_value = intervall01.sample(&mut rng);
+                if rand_value < P2 && ind[i] != ind[0] {
+                    fitness[i] = new_fitness;
+                    copy_solution(&new_x[i], &mut x[i], d);
+                }
+            }
+
+                // Save the best solution
+                if gbestfitness > fitness[i] {
+                    gbestfitness = fitness[i];
+                    copy_solution(&x[i], &mut gbest_x, d);
+                }
+            }
 
             gbesthistory[iter] = gbestfitness;
             #[cfg(feature= "report")] println!("Iter : {}, best-fitness : {}", iter, gbestfitness);

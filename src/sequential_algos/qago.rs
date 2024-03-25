@@ -126,7 +126,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
         let mut rng = rand::thread_rng();
 
         let mut fes : usize = 0;
-        let fes_max = (max_iter*n) as f64;
+        let fes_max = n as f64 + (max_iter * 2* n) as f64;
 
         let mut best_x : Genome = Genome::new(n+2, d);
         let mut gap : Vec<Vec<f64>> = vec![vec![0.0; d]; 5];
