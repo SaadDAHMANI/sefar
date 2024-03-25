@@ -1,4 +1,6 @@
 
+use std::time::Instant;
+
 use rand::rngs::ThreadRng;
 use rand_distr::{Distribution, Uniform};
 
@@ -25,8 +27,6 @@ pub struct GO<'a, T : Problem> {
      pub params : &'a GOparams<'a>,
      pub optimization_result : OptimizationResult,
 }
-
-
 
 impl<'a, T : Problem> GO<'a, T> {
 
@@ -85,6 +85,8 @@ impl<'a, T : Problem> GO<'a, T> {
 
 impl<'a, T : Problem> EOA for GO<'a, T> {
     fn run(&mut self)-> OptimizationResult {
+
+        let chronos = Instant::now();
 
         let n : usize = self.params.population_size;
         let d : usize = self.params.dimensions;
@@ -324,13 +326,14 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
             iter += 1;
         }
 
-        println!("Iter : {}, FES: {}, Max_FES {}", iter, fes, max_fes);
+        let duration = chronos.elapsed();
+        //println!("Iter : {}, FES: {}, Max_FES {}", iter, fes, max_fes);
 
         let result : OptimizationResult = OptimizationResult {
             best_genome : Some(best_x),
             best_fitness : Some(gbestfitness),
             convergence_trend : Some(gbesthistory),
-            computation_time : None,
+            computation_time : Some(duration),
             err_report : None,
         };
 
