@@ -4,8 +4,6 @@ extern crate rand_distr;
 use rand::distributions::{Distribution, Uniform};
 use rand_distr::Normal;
 
-use rayon::vec;
-
 use crate::core::genome::Genome;
 
 
@@ -132,6 +130,7 @@ pub fn copy_vector2genome(source : & Vec<f64>, destination : &mut Genome){
 ///
 /// Compute the euclidean distance between 2 solutions
 /// 
+#[allow(dead_code)]
 pub fn euclidian_dist(p1 : &Genome, p2 : &Genome)-> f64 {
    
     let sum  = p1.genes.iter().zip(p2.genes.iter()).fold(0.0f64, |acc, (a,b)| acc+f64::powi(a-b, 2) );

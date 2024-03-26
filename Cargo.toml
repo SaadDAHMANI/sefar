@@ -15,4 +15,5 @@ rayon ="1.6.1"
 
 [features]
 report = []
+binary = []
 #deep_report = [report]

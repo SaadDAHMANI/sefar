@@ -15,24 +15,16 @@ use sefar::sequential_algos::go::{GOparams, GO};
 
 const DIM : usize = 7;
 const POP_SIZE : usize = 20;
-const KMAX : usize = 500; //1000*DIM/POP_SIZE;
+const KMAX : usize = 100; //1000*DIM/POP_SIZE;
 
 fn main() {
     println!("Hello, sefar !");
-
-    let x= [-100.0, -50.0, -5.0 , 0.0, 5.0, 10.0, 20.0, 60.0, 80.0, 100.0];
-    let mut y : f64 =0.0;
-
-    for i in x.into_iter(){
-        y = 1.0/(1.0+ f64::exp(-1.0* i));
-        println!("tanh(x= {}) = {} || y= {:.3}, y.round() = {}", i, f64::tanh(i), y, y.round());
-    }
-
-   /*  println!("Evaluation with Max_Iter = {}", KMAX);
+   
+    println!("Evaluation with Max_Iter = {}", KMAX);
     println!("______________________GO : F1______________________");
 
     go_f1_test1();
-
+ /*
     println!("______________________GO : F2______________________");
     go_f2_test1();
  */

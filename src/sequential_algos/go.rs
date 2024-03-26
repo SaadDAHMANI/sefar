@@ -84,7 +84,7 @@ impl<'a, T : Problem> GO<'a, T> {
         a.iter().fold(0.0, |sum, x| sum + (x*x)).sqrt()
     }
 
-    fn transform2binary(self, solution : &mut Genome, rng : &mut ThreadRng){
+    fn transform2binary(&self, solution : &mut Genome, rng : &mut ThreadRng){
         //V(i,:)=abs((2/pi)*atan((pi/2)*DeltaC(i,:)));
         let d : usize = solution.get_dimensions();
 
@@ -99,8 +99,20 @@ impl<'a, T : Problem> GO<'a, T> {
             if intervall_01.sample(rng) < 0.5 {
                 for j in 0..d {
                     if intervall_01.sample(rng) < t_vec[j] {
-
+                        if solution.genes[j].round() == 0.0 {
+                            solution.genes[j] = 1.0;
+                        } 
+                        else {
+                            solution.genes[j] = 0.0;
+                        }
                     }
+                }
+            }
+            else {
+                for j in 0..d {
+                    //if intervall_01.sample(rng) < t_vec[j] {
+                        solution.genes[j] = intervall_01.sample(rng).round();
+                    //}
                 }
             }
 
@@ -120,6 +132,9 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         let ub = self.params.upper_bounds;
         let lb = self.params.lower_bounds;
 
+        #[cfg(feature = "binary")] let ub : Vec<f64> = vec![1.0; d];
+        #[cfg(feature = "binary")] let lb : Vec<f64> = vec![0.0; d];
+        
         let mut iter : usize = 0;        
         //Parameter setting
         const P1 : usize = 5;
@@ -153,6 +168,8 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
 
         //Initialization
         let mut x = self.initialize(self.params, crate::core::eoa::InitializationMode::RealUniform);
+        
+        #[cfg(feature="binary")] let mut x = self.initialize(self.params, crate::core::eoa::InitializationMode::BinaryUnifrom);
         
         //Evaluation of search agents
         for i in 0..n {
@@ -262,6 +279,10 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                 }
 
                 //newfitness= ObjectiveFunction(newx(i,:)); 
+                //__________________________Binary ________________________________________
+
+                #[cfg(feature ="binary")] self.transform2binary(&mut new_x[i], &mut rng);
+                //_________________________________________________________________________
 
                 let new_fitness = self.problem.objectivefunction(&new_x[i].genes);
                 fes +=1.0;
@@ -319,11 +340,10 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                }
                //_______________________ Binary bloc _______________________________________
 
-               //#[cfg(feature ="binary")]{
-                    
-               //}
+                //__________________________Binary ________________________________________
 
-               //___________________________________________________________________________
+                #[cfg(feature ="binary")] self.transform2binary(&mut new_x[i], &mut rng);
+                //___________________________________________________________________________
                //  newfitness= ObjectiveFunction(newx(i,:));
                let new_fitness = self.problem.objectivefunction(&new_x[i].genes);
                //FEs=FEs+1;
@@ -357,6 +377,9 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
 
         let duration = chronos.elapsed();
         //println!("Iter : {}, FES: {}, Max_FES {}", iter, fes, max_fes);
+
+        // Compute the best fitness for the best solution
+        best_x.fitness = Some(self.problem.objectivefunction(&best_x.genes));
 
         let result : OptimizationResult = OptimizationResult {
             best_genome : Some(best_x),
