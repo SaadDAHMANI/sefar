@@ -85,6 +85,7 @@ impl<'a, T : Problem> GO<'a, T> {
     }
 
     #[cfg(feature = "binary")]
+    #[allow(dead_code)]
     fn transform2binary(&self, solution : &mut Genome, rng : &mut ThreadRng){
         //V(i,:)=abs((2/pi)*atan((pi/2)*DeltaC(i,:)));
         let d : usize = solution.get_dimensions();
@@ -119,8 +120,12 @@ impl<'a, T : Problem> GO<'a, T> {
 
         }
 
+    ///
+    /// The S-Shape-V2() function is used to perform a binary optimization.
+    /// S-Shape-V2(x) = 1/(1+e^(-x))
+    /// 
     #[cfg(feature = "binary")]
-    fn shape_s2(&self, solution : &mut Genome, rng : &mut ThreadRng){
+    fn s_shape_v2(&self, solution : &mut Genome, rng : &mut ThreadRng){
             //V(i,:)=abs((2/pi)*atan((pi/2)*DeltaC(i,:)));
             let d : usize = solution.get_dimensions();
     
@@ -207,8 +212,7 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
 
         gbesthistory[0] = gbestfitness;
 
-        println!("Best_fitness : {}", gbestfitness);
-
+        //println!("Best_fitness : {}", gbestfitness);
 
         while  iter < max_iter {
 
@@ -305,7 +309,7 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                 //__________________________Binary ________________________________________
 
                 // #[cfg(feature ="binary")] self.transform2binary(&mut new_x[i], &mut rng);
-                 #[cfg(feature ="binary")] self.shape_s2(&mut new_x[i], &mut rng);
+                 #[cfg(feature ="binary")] self.s_shape_v2(&mut new_x[i], &mut rng);
                 //_________________________________________________________________________
 
                 let new_fitness = self.problem.objectivefunction(&new_x[i].genes);
@@ -366,7 +370,7 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                 //__________________________Binary ________________________________________
 
                 //#[cfg(feature ="binary")] self.transform2binary(&mut new_x[i], &mut rng);
-                #[cfg(feature ="binary")] self.shape_s2(&mut new_x[i], &mut rng);
+                #[cfg(feature ="binary")] self.s_shape_v2(&mut new_x[i], &mut rng);
                 //___________________________________________________________________________
                //  newfitness= ObjectiveFunction(newx(i,:));
                let new_fitness = self.problem.objectivefunction(&new_x[i].genes);
