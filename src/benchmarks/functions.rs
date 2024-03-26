@@ -14,8 +14,7 @@ impl Problem for Sphere{
         
         println!("Genome in objective function : {:?}", genome);
 
-        f64::abs(fitness - 2.0)
-
+        f64::abs(fitness - 0.0)
     }
 }
 

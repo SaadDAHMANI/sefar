@@ -304,7 +304,8 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                 //newfitness= ObjectiveFunction(newx(i,:)); 
                 //__________________________Binary ________________________________________
 
-                #[cfg(feature ="binary")] self.transform2binary(&mut new_x[i], &mut rng);
+                // #[cfg(feature ="binary")] self.transform2binary(&mut new_x[i], &mut rng);
+                 #[cfg(feature ="binary")] self.shape_s2(&mut new_x[i], &mut rng);
                 //_________________________________________________________________________
 
                 let new_fitness = self.problem.objectivefunction(&new_x[i].genes);
@@ -353,7 +354,6 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                             new_x[i].genes[j] = lb[j] + (ub[j] - lb[j])*intervall01.sample(&mut rng); 
                         }
                     } 
-
                 }
 
                 // Space bound
@@ -365,7 +365,8 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
 
                 //__________________________Binary ________________________________________
 
-                #[cfg(feature ="binary")] self.transform2binary(&mut new_x[i], &mut rng);
+                //#[cfg(feature ="binary")] self.transform2binary(&mut new_x[i], &mut rng);
+                #[cfg(feature ="binary")] self.shape_s2(&mut new_x[i], &mut rng);
                 //___________________________________________________________________________
                //  newfitness= ObjectiveFunction(newx(i,:));
                let new_fitness = self.problem.objectivefunction(&new_x[i].genes);
