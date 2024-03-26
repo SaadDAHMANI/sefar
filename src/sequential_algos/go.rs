@@ -11,6 +11,9 @@ use crate::core::problem::Problem;
 use crate::core::optimization_result::OptimizationResult;
 use crate::common::*;
 
+const A : f64 = 2.0/3.141592653589793238462;
+const B : f64 = 3.141592653589793238462/2.0;
+
 ///
 /// GO : Growth Optimizer  
 /// Reference:
@@ -81,6 +84,28 @@ impl<'a, T : Problem> GO<'a, T> {
         a.iter().fold(0.0, |sum, x| sum + (x*x)).sqrt()
     }
 
+    fn transform2binary(self, solution : &mut Genome, rng : &mut ThreadRng){
+        //V(i,:)=abs((2/pi)*atan((pi/2)*DeltaC(i,:)));
+        let d : usize = solution.get_dimensions();
+
+        let mut t_vec : Vec<f64> = vec![0.0; d];
+        
+        for j in 0..d {
+            t_vec[j] =f64::abs(A*f64::atan(B*solution.genes[j]));
+        };
+
+        let intervall_01 : Uniform<f64> = Uniform::from(0.0..=1.0);
+
+            if intervall_01.sample(rng) < 0.5 {
+                for j in 0..d {
+                    if intervall_01.sample(rng) < t_vec[j] {
+
+                    }
+                }
+            }
+
+        }
+
 }
 
 impl<'a, T : Problem> EOA for GO<'a, T> {
@@ -127,11 +152,9 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         let mut new_x : Vec<Genome> = self.get_empty_solutions(n);
 
         //Initialization
-        let mut x = self.initialize(self.params);
+        let mut x = self.initialize(self.params, crate::core::eoa::InitializationMode::RealUniform);
         
-
         //Evaluation of search agents
-
         for i in 0..n {
             fitness[i] = self.problem.objectivefunction(&x[i].genes);
             fes +=1.0;
@@ -294,7 +317,13 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                     new_x[i].genes[j] = f64::min( new_x[i].genes[j], ub[j]);
                     new_x[i].genes[j] = f64::max(new_x[i].genes[j], lb[j]);                 
                }
+               //_______________________ Binary bloc _______________________________________
 
+               //#[cfg(feature ="binary")]{
+                    
+               //}
+
+               //___________________________________________________________________________
                //  newfitness= ObjectiveFunction(newx(i,:));
                let new_fitness = self.problem.objectivefunction(&new_x[i].genes);
                //FEs=FEs+1;

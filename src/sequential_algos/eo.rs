@@ -7,7 +7,7 @@ use rand::distributions::{Distribution, Uniform};
 //use rand::prelude::ThreadRng;
 use std::time::Instant;
 
-use crate::core::eoa::EOA;
+use crate::core::eoa::{EOA, InitializationMode};
 use crate::core::genome::Genome;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
@@ -132,7 +132,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 //let chronos = Instant::now();
                 
                 //C=initialization(Particles_no,dim,ub,lb);
-                let mut c = self.initialize(self.params);
+                let mut c = self.initialize(self.params, InitializationMode::RealUniform);
         
                 // the main loop of EO
                 while iter < max_iter {

@@ -7,7 +7,7 @@ extern crate rand;
 //use rand::prelude::ThreadRng;
 use std::time::Instant;
 
-use crate::core::eoa::EOA;
+use crate::core::eoa::{EOA, InitializationMode};
 use crate::core::genome::Genome;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
@@ -87,10 +87,10 @@ impl<'a, T: Problem> EOA for PSO <'a, T> {
                                    
                 // PSO algorithm     
                 // Particles initialization
-                let mut particles = self.initialize(self.params);
+                let mut particles = self.initialize(self.params, InitializationMode::RealUniform);
 
                 //initialize pbest_x population with (fitness = f64::MAX)
-                let mut pbest_x = self.initialize(self.params);
+                let mut pbest_x = self.initialize(self.params, InitializationMode::RealUniform);
 
                 // Main PSO loop 
                 for t in 0..max_iter {       

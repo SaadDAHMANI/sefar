@@ -7,7 +7,7 @@ use rand::distributions::{Distribution, Uniform};
 //use rand::prelude::ThreadRng;
 use std::time::Instant;
 
-use crate::core::eoa::EOA;
+use crate::core::eoa::{EOA, InitializationMode};
 use crate::core::genome::Genome;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
@@ -133,7 +133,7 @@ impl<'a, T: Problem> EOA for MEO<'a, T> {
             //let chronos = Instant::now();
             
             // Step 1: initialize the population randomly within the solution space 
-            let mut c = self.initialize(self.params);
+            let mut c = self.initialize(self.params, InitializationMode::RealUniform);
               
             // Step 2 : Evaluate the fitness value of each candidate soluion
             for genom in c.iter_mut(){

@@ -8,27 +8,51 @@ use rand::distributions::{Distribution, Uniform};
 /// 
 pub trait EOA {
     
-    fn initialize<P: Parameters>(&self, params: &P)-> Vec<Genome>{
+    fn initialize<P: Parameters>(&self, params: &P, mode : InitializationMode)-> Vec<Genome>{
 
-       let n: usize = params.get_population_size();
+       let n: usize = params.get_population_size(); 
        let dim: usize = params.get_dimensions();
-       let lb = &params.get_lower_bounds();
-       let ub = &params.get_upper_bounds();
-    
        let mut positions : Vec<Genome> = Vec::with_capacity(n);
 
        let intervall01 = Uniform::from(0.0f64..=1.0f64);
-       let mut rng = rand::thread_rng();              
-  
-       for i in 0..n{
-             let mut sln = Genome::new(i, dim); 
-            
-             for  j in 0..dim {   
-              //  positions[i][j]= intervall01.sample(&mut rng)*(ub-lb)+lb;                         
-              sln.genes[j]= intervall01.sample(&mut rng)*(ub[j]-lb[j]) + lb[j];   
+       let mut rng = rand::thread_rng();    
+
+        match mode {
+            InitializationMode::RealUniform => {
+               
+                let lb = &params.get_lower_bounds();
+                let ub = &params.get_upper_bounds();
+         
+                          
+           
+                for i in 0..n{
+                      let mut sln = Genome::new(i, dim); 
+                     
+                      for  j in 0..dim {   
+                       //  positions[i][j]= intervall01.sample(&mut rng)*(ub-lb)+lb;                         
+                       sln.genes[j]= intervall01.sample(&mut rng)*(ub[j]-lb[j]) + lb[j];   
+                     }
+                     positions.push(sln);
+                 } 
+            },
+
+            InitializationMode::BinaryUnifrom => {
+                for i in 0..n {
+                    let mut sln = Genome::new(i, dim); 
+                    for j in 0..dim {
+                        if intervall01.sample(&mut rng) < 0.5 {
+                            sln.genes[j] = 0.0;
+                        }
+                        else {
+                            sln.genes[j] = 1.0;
+                        }
+                    }
+                    positions.push(sln);
+                }
             }
-            positions.push(sln);
-        }        
+        }
+      
+       
         positions
     }    
     
@@ -54,6 +78,9 @@ pub trait EOA {
             *item = between.sample(&mut rng);
         }     
     }
+}
 
-
+pub enum InitializationMode {
+    RealUniform, 
+    BinaryUnifrom,
 }

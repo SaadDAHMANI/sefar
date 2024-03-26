@@ -6,7 +6,7 @@ use rand::rngs::ThreadRng;
 //use rand::prelude::ThreadRng;
 use std::time::Instant;
 
-use crate::core::eoa::EOA;
+use crate::core::eoa::{EOA, InitializationMode};
 use crate::core::genome::Genome;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
@@ -154,7 +154,7 @@ impl <'a, T : Problem> EOA for QAGO<'a, T>{
         //let mut better_x : Vec<Genome> = Vec::new();
 
         // Step 1 : Initialization
-        let mut x = self.initialize(self.params);
+        let mut x = self.initialize(self.params, InitializationMode::RealUniform);
 
         //Evaluation of candidate solution using the objective function
         for i in 0..n {
