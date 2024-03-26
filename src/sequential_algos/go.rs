@@ -11,8 +11,8 @@ use crate::core::problem::Problem;
 use crate::core::optimization_result::OptimizationResult;
 use crate::common::*;
 
-const A : f64 = 2.0/3.141592653589793238462;
-const B : f64 = 3.141592653589793238462/2.0;
+#[cfg(feature="binary")] const A : f64 = 2.0/3.141592653589793238462;
+#[cfg(feature="binary")] const B : f64 = 3.141592653589793238462/2.0;
 
 ///
 /// GO : Growth Optimizer  
@@ -84,6 +84,7 @@ impl<'a, T : Problem> GO<'a, T> {
         a.iter().fold(0.0, |sum, x| sum + (x*x)).sqrt()
     }
 
+    #[cfg(feature = "binary")]
     fn transform2binary(&self, solution : &mut Genome, rng : &mut ThreadRng){
         //V(i,:)=abs((2/pi)*atan((pi/2)*DeltaC(i,:)));
         let d : usize = solution.get_dimensions();
@@ -110,9 +111,9 @@ impl<'a, T : Problem> GO<'a, T> {
             }
             else {
                 for j in 0..d {
-                    //if intervall_01.sample(rng) < t_vec[j] {
+                    if intervall_01.sample(rng) < t_vec[j] {
                         solution.genes[j] = intervall_01.sample(rng).round();
-                    //}
+                    }
                 }
             }
 
