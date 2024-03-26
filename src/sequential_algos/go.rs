@@ -4,7 +4,7 @@ use std::time::Instant;
 use rand::rngs::ThreadRng;
 use rand_distr::{Distribution, Uniform};
 
-use crate::core::eoa::EOA;
+use crate::core::eoa::{EOA, InitializationMode};
 use crate::core::genome::Genome;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
@@ -15,7 +15,7 @@ use crate::common::*;
 #[cfg(feature="binary")] const B : f64 = 3.141592653589793238462/2.0;
 
 ///
-/// GO : Growth Optimizer  
+/// GO : Growth Optimizer & Binary-GO  
 /// Reference:
 /// Growth Optimizer: A powerful metaheuristic algorithm for solving continuous and 
 /// discrete global optimization problems.
@@ -119,6 +119,28 @@ impl<'a, T : Problem> GO<'a, T> {
 
         }
 
+        #[cfg(feature = "binary")]
+        fn shape_s2(&self, solution : &mut Genome, rng : &mut ThreadRng){
+            //V(i,:)=abs((2/pi)*atan((pi/2)*DeltaC(i,:)));
+            let d : usize = solution.get_dimensions();
+    
+            let mut t_vec : Vec<f64> = vec![0.0; d];
+            
+            for j in 0..d {
+                t_vec[j] = 1.0/ (1.0 + f64::exp(-1.0* solution.genes[j]));
+            };
+    
+            let intervall_01 : Uniform<f64> = Uniform::from(0.0..=1.0);
+            
+            for j in 0..d {
+                if intervall_01.sample(rng) < t_vec[j] {
+                    solution.genes[j] = 1.0;
+                }
+                else {
+                    solution.genes[j] = 0.0;
+                } 
+            }
+        }
 }
 
 impl<'a, T : Problem> EOA for GO<'a, T> {
@@ -168,9 +190,9 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         let mut new_x : Vec<Genome> = self.get_empty_solutions(n);
 
         //Initialization
-        let mut x = self.initialize(self.params, crate::core::eoa::InitializationMode::RealUniform);
+        let mut x = self.initialize(self.params, InitializationMode::RealUniform);
         
-        #[cfg(feature="binary")] let mut x = self.initialize(self.params, crate::core::eoa::InitializationMode::BinaryUnifrom);
+        #[cfg(feature="binary")] let mut x = self.initialize(self.params, InitializationMode::BinaryUnifrom);
         
         //Evaluation of search agents
         for i in 0..n {

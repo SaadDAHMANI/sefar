@@ -11,7 +11,11 @@ pub struct Sphere{}
 impl Problem for Sphere{
     fn objectivefunction(&mut self, genome : &[f64]) ->f64 {
         let fitness = genome.iter().fold(0.0f64, |sum, g| sum + g.powi(2));
-        fitness
+        
+        println!("Genome in objective function : {:?}", genome);
+
+        f64::abs(fitness - 2.0)
+
     }
 }
 
