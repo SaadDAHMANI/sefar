@@ -119,8 +119,8 @@ impl<'a, T : Problem> GO<'a, T> {
 
         }
 
-        #[cfg(feature = "binary")]
-        fn shape_s2(&self, solution : &mut Genome, rng : &mut ThreadRng){
+    #[cfg(feature = "binary")]
+    fn shape_s2(&self, solution : &mut Genome, rng : &mut ThreadRng){
             //V(i,:)=abs((2/pi)*atan((pi/2)*DeltaC(i,:)));
             let d : usize = solution.get_dimensions();
     
@@ -190,7 +190,7 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         let mut new_x : Vec<Genome> = self.get_empty_solutions(n);
 
         //Initialization
-        let mut x = self.initialize(self.params, InitializationMode::RealUniform);
+        #[cfg(not(feature = "binary"))] let mut x = self.initialize(self.params, InitializationMode::RealUniform);
         
         #[cfg(feature="binary")] let mut x = self.initialize(self.params, InitializationMode::BinaryUnifrom);
         
