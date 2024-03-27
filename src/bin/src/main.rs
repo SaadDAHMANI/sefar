@@ -5,13 +5,13 @@ include!("dataset.rs");
 use sefar::core::eoa::EOA;
 use sefar::benchmarks::functions::{Sphere, F2};
 use sefar::core::optimization_result::OptimizationResult;
-use sefar::sequential_algos::eo::{EO, EOparams};
-use sefar::sequential_algos::pso::{PSO, PSOparams};
+use sefar::sequential::eo::{EO, EOparams};
+use sefar::sequential::pso::{PSO, PSOparams};
 //use sefar::sequential_algos::pco::{PCO, PCOparams};
 
-use sefar::sequential_algos::meo::MEO;
-use sefar::sequential_algos::qago::{QAGOparams, QAGO};
-use sefar::sequential_algos::go::{GOparams, GO};
+use sefar::sequential::meo::MEO;
+use sefar::sequential::qago::{QAGOparams, QAGO};
+use sefar::sequential::go::{GOparams, GO};
 
 const DIM : usize = 7;
 const POP_SIZE : usize = 15;

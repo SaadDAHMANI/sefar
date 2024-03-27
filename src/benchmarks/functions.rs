@@ -26,4 +26,4 @@ impl Problem for F2 {
       let prod = genome.iter().fold(1.0f64, |prod, g| prod* f64::abs(*g));
       sum + prod
     }
-}
+} 

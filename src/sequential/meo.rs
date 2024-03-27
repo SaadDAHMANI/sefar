@@ -13,7 +13,7 @@ use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
 use crate::core::optimization_result::OptimizationResult;
 use crate::common::*;
-use crate::sequential_algos::eo::EOparams;
+use crate::sequential::eo::EOparams;
 
 ///
 /// Sequential Modified Equilibrium Optimizer (MEO)

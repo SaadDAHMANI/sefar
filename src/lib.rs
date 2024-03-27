@@ -1,6 +1,6 @@
 pub mod benchmarks;
 pub mod core;
-pub mod sequential_algos;
+pub mod sequential;
 pub mod parallel_algos;
 //mod parallel_algos;
 mod common;
@@ -12,9 +12,9 @@ mod common;
 mod tests {
     use crate::benchmarks::functions::Sphere;
     use crate::core::eoa::EOA;
-    use crate::sequential_algos::eo::EO;
-    use crate::sequential_algos::eo::EOparams;
-    use crate::sequential_algos::pso::*;
+    use crate::sequential::eo::EO;
+    use crate::sequential::eo::EOparams;
+    use crate::sequential::pso::*;
     //use super::*;
 
     #[test]
