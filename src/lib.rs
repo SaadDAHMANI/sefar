@@ -1,7 +1,7 @@
 pub mod benchmarks;
 pub mod core;
 pub mod sequential;
-pub mod parallel_algos;
+pub mod parallel;
 //mod parallel_algos;
 mod common;
 
