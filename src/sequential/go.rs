@@ -201,22 +201,29 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         #[cfg(feature="binary")] let mut x = self.initialize(self.params, InitializationMode::BinaryUnifrom);
         
         //Evaluation of search agents
-        for i in 0..n {
+        #[cfg(not(feature="parallel"))] for i in 0..n {
             fitness[i] = self.problem.objectivefunction(&x[i].genes);
-            fes +=1.0;
-
-            if gbestfitness > fitness[i] {
-                gbestfitness = fitness[i];
-                copy_vector(&x[i].genes, &mut gbest_x.genes,d);
-            }
+            fes +=1.0;           
         }
 
         //___________Parallel test________________
 
-        x.par_iter_mut().for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));
-
-        
+        #[cfg(feature="parallel")]{ x.par_iter_mut().for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));}
+            for i in 0..n {
+                match x[i].fitness {
+                    None => fitness[i] = f64::MAX,
+                    Some(fit) => fitness[i] = fit,
+                };
+            };    
         //________________________________________
+
+        // Save the best solution 
+        for i in 0..n {
+            if gbestfitness > fitness[i] {
+                gbestfitness = fitness[i];
+                copy_vector(&x[i].genes, &mut gbest_x.genes,d);
+            }
+        }    
 
         gbesthistory[0] = gbestfitness;
 
