@@ -3,7 +3,8 @@ use std::time::Instant;
 
 use rand::rngs::ThreadRng;
 use rand_distr::{Distribution, Uniform};
-use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
+
+#[cfg(feature="parallel")] use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
 
 use crate::core::eoa::{EOA, InitializationMode};
 use crate::core::genome::Genome;
@@ -201,20 +202,23 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         #[cfg(feature="binary")] let mut x = self.initialize(self.params, InitializationMode::BinaryUnifrom);
         
         //Evaluation of search agents
+        // Sequential mode
         #[cfg(not(feature="parallel"))] for i in 0..n {
             fitness[i] = self.problem.objectivefunction(&x[i].genes);
             fes +=1.0;           
         }
 
-        //___________Parallel test________________
-
-        #[cfg(feature="parallel")]{ x.par_iter_mut().for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));}
+        //___________Parallel mode________________
+        
+        #[cfg(feature="parallel")] {x.par_iter_mut().for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));
+            
             for i in 0..n {
                 match x[i].fitness {
                     None => fitness[i] = f64::MAX,
                     Some(fit) => fitness[i] = fit,
                 };
-            };    
+            };
+        }    
         //________________________________________
 
         // Save the best solution 
@@ -404,7 +408,6 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                     copy_solution(&new_x[i], &mut x[i], d);
                 }
             }
-
                 // Save the best solution
                 if gbestfitness > fitness[i] {
                     gbestfitness = fitness[i];
