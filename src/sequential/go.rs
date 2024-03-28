@@ -3,6 +3,7 @@ use std::time::Instant;
 
 use rand::rngs::ThreadRng;
 use rand_distr::{Distribution, Uniform};
+use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
 
 use crate::core::eoa::{EOA, InitializationMode};
 use crate::core::genome::Genome;
@@ -209,6 +210,13 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                 copy_vector(&x[i].genes, &mut gbest_x.genes,d);
             }
         }
+
+        //___________Parallel test________________
+
+        x.par_iter_mut().for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));
+
+        
+        //________________________________________
 
         gbesthistory[0] = gbestfitness;
 
