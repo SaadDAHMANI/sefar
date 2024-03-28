@@ -3,8 +3,8 @@
 //
 
 
-pub trait Problem : Send + Sync + Clone { //+ 'static {
-    fn objectivefunction(&mut self, genome : &[f64])->f64 {         
+pub trait Problem : Send + Sync + Clone + 'static {
+    fn objectivefunction(&self, genome : &[f64])->f64 {         
         genome.iter().fold(0.0f64, |sum, x| sum +x)
     }    
 }

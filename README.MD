@@ -8,4 +8,4 @@
 
 - [X] Particle Swarm Optimization (PSO);   
 - [X] Equilibrium optimizer (EO);
-
+- [X] Growth Optimizer (GO).
