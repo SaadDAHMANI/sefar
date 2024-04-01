@@ -6,8 +6,18 @@
 
  Sefar supports currently : 
 
-- [X] Particle Swarm Optimization (PSO);   
-- [X] Equilibrium optimizer (EO);
-- [X] Growth Optimizer (GO).
+- [X] Particle Swarm Optimization ([PSO](https://doi.org/10.1109/ICNN.1995.488968));   
+- [X] Equilibrium optimizer ([EO](https://doi.org/10.1016/j.knosys.2019.105190));
+- [X] Growth Optimizer ([GO](https://doi.org/10.1016/j.knosys.2022.110206)).
 
+## Binary optimization
+In the current version 
+
+
+## Supported features
+
+|Feature        | Designation  |
+| ------------- | --------------------- |
+| *_binary_*    | run binary optimization using **S-Shape** function. Use : *_cargo run --features "binary"_* | 
+| *_parallel_*  | run optimization in parallel mode | 
 
