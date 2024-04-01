@@ -129,7 +129,9 @@ impl Regression {
 }
 
 impl Problem for Regression {
-    fn objectivefunction(&self, genome : &[f64]) ->f64 {
+    
+    #[cfg(not(feature ="parallel"))]
+    fn objectivefunction(&mut self, genome : &[f64]) ->f64 {
               
         let n = self.learn_in.len();
         let mut computed : Vec<f64> = Vec::new();

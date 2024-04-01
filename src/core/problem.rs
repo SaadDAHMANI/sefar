@@ -4,9 +4,15 @@
 
 
 pub trait Problem : Send + Sync + Clone {
+    #[cfg(not(feature="parallel"))] 
+    fn objectivefunction(&mut self, genome : &[f64])->f64 {         
+        genome.iter().fold(0.0f64, |sum, x| sum +x)
+    }
+
+    #[cfg(feature ="parallel")]
     fn objectivefunction(&self, genome : &[f64])->f64 {         
         genome.iter().fold(0.0f64, |sum, x| sum +x)
-    }    
+    }
 }
 
 //pub trait ParaObjectivefunction : Send + Sync + 'static {
