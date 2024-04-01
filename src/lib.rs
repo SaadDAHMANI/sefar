@@ -1,20 +1,19 @@
 pub mod benchmarks;
 pub mod core;
-pub mod sequential;
-pub mod parallel;
+pub mod algos;
+//pub mod parallel;
 //mod parallel_algos;
 mod common;
 
 //mod paracommon;
 
-
 #[cfg(test)]
 mod tests {
     use crate::benchmarks::functions::Sphere;
     use crate::core::eoa::EOA;
-    use crate::sequential::eo::EO;
-    use crate::sequential::eo::EOparams;
-    use crate::sequential::pso::*;
+    use crate::algos::eo::EO;
+    use crate::algos::eo::EOparams;
+    use crate::algos::pso::*;
     //use super::*;
 
     #[test]

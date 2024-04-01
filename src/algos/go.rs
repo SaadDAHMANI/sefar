@@ -441,8 +441,6 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
 } 
 
 
-
-
 #[derive(Debug, Clone)]
 pub struct GOparams<'a> {
     pub population_size : usize,
