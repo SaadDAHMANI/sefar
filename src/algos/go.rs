@@ -450,6 +450,20 @@ pub struct GOparams<'a> {
     pub upper_bounds : &'a [f64],
 }
 
+impl<'a> GOparams<'a> {
+    
+    #[allow(dead_code)]
+    fn new(pop_size : usize, dim : usize, max_iter : usize, lb : &'a [f64], ub : &'a [f64])-> Self {
+        GOparams { 
+            population_size: pop_size,
+            dimensions: dim, 
+            max_iterations: max_iter, 
+            lower_bounds: lb, 
+            upper_bounds: ub,
+        }
+    }
+}
+
 impl<'a> Parameters for GOparams<'a> {
     fn get_dimensions(&self)->usize {
          self.dimensions    
