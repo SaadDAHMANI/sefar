@@ -11,8 +11,9 @@
 - [X] Growth Optimizer ([GO](https://doi.org/10.1016/j.knosys.2022.110206)).
 
 ## Binary optimization
-In the current version 
+In the current version, the binarization is made using the S-Shape function given bellow:
 
+$S(x) = 1/1-e^{(-x)}$
 
 ## Supported features
 
