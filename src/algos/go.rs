@@ -13,8 +13,8 @@ use crate::core::problem::Problem;
 use crate::core::optimization_result::OptimizationResult;
 use crate::common::*;
 
-#[cfg(feature="binary")] const A : f64 = 2.0/3.141592653589793238462;
-#[cfg(feature="binary")] const B : f64 = 3.141592653589793238462/2.0;
+//#[cfg(feature="binary")] const A : f64 = 2.0/3.141592653589793238462;
+//#[cfg(feature="binary")] const B : f64 = 3.141592653589793238462/2.0;
 
 ///
 /// GO : Growth Optimizer & Binary-GO  
@@ -28,13 +28,24 @@ use crate::common::*;
 /// 
 #[derive(Debug)]
 pub struct GO<'a, T : Problem> {
+
+    /// The problem to optimize. It must define the Problem trait.
      pub problem : &'a mut T,
+
+     /// Define the parameters of GO algorithm.
      pub params : &'a GOparams<'a>,
+
+     /// Give the optimization results.
      pub optimization_result : OptimizationResult,
 }
 
 impl<'a, T : Problem> GO<'a, T> {
-
+    
+    ///
+    /// Return a new instance of the Growth Optimizer (GO) algorithm.
+    /// settings: The optimization parameters,
+    /// problem: The problem to optimize.
+    /// 
     pub fn new(settings :&'a GOparams, problem : &'a mut T )->Self{       
         let result = OptimizationResult{
             best_genome : None,
@@ -64,7 +75,7 @@ impl<'a, T : Problem> GO<'a, T> {
     /// Generate 2 random values in [0, maxi[ differ from index_differ.
     /// 
     fn select_id(&self, index_differ : usize, maxi : usize, rng : &mut ThreadRng)-> (usize, usize) {
-
+        
         let mut l1 : usize = index_differ;
         let mut l2 : usize = index_differ;
         
@@ -151,6 +162,9 @@ impl<'a, T : Problem> GO<'a, T> {
 }
 
 impl<'a, T : Problem> EOA for GO<'a, T> {
+    ///
+    /// Call this function to execute GO algorithm.
+    /// 
     fn run(&mut self)-> OptimizationResult {
 
         let chronos = Instant::now();
@@ -434,24 +448,43 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
             computation_time : Some(duration),
             err_report : None,
         };
-
+        
         result
 
     }
 } 
 
-
+///
+/// Define parameters for the Growth Optimizer (GO) algorithm.
+///  
 #[derive(Debug, Clone)]
 pub struct GOparams<'a> {
+    /// The number of search agents.
     pub population_size : usize,
+    
+    /// The dimension of the optimization problem (i.e., the length of the solution).
     pub dimensions : usize,
+    
+    /// The maximum number of iterations serves as the stopping criterion for the optimization process. 
     pub max_iterations: usize,
+
+    /// The lower bounds of the search space.
     pub lower_bounds : &'a [f64],
+
+    /// The upper bounds of the search space.
     pub upper_bounds : &'a [f64],
 }
 
 impl<'a> GOparams<'a> {
     
+    /// 
+    /// Create a new instance of GO parameters:
+    /// pop_size : The number of search agents.
+    /// dim : The dimension of the optimization problem.
+    /// max_iter : The maximum number of iterations serves as the stopping criterion.
+    /// lb : The lower bounds of the search space.
+    /// ub : The upper bounds of the search space.
+    ///  
     #[allow(dead_code)]
     fn new(pop_size : usize, dim : usize, max_iter : usize, lb : &'a [f64], ub : &'a [f64])-> Self {
         GOparams { 
@@ -489,13 +522,13 @@ impl<'a> Parameters for GOparams<'a> {
 impl<'a> Default for GOparams<'a>{
 
     ///
-    /// Return default values of parameters, as following :
+    /// Return the default values of parameters, as follows:
     /// 
     /// ~~~
     /// 
-    ///  use sefar::sequential_algos::go::*;
-    /// 
-    ///  GOparams{
+    ///  use sefar::algos::go::*;
+    ///   
+    ///  GOparams {
     ///     population_size : 10,
     ///     dimensions : 3,
     ///     max_iterations : 100,
@@ -506,7 +539,7 @@ impl<'a> Default for GOparams<'a>{
     /// 
     fn default()->Self{
         GOparams {
-            population_size : 10,
+            population_size : 20,
             dimensions : 3,
             max_iterations : 1,
             lower_bounds : &[-100.0f64, -100.0, -100.0],
