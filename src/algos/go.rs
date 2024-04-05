@@ -21,8 +21,8 @@ use crate::common::*;
 /// Reference:
 /// Growth Optimizer: A powerful metaheuristic algorithm for solving continuous and 
 /// discrete global optimization problems.
-/// Paper link : https://doi.org/10.1016/j.knosys.2022.110206 
-/// Matlab original code : https://github.com/tsingke/Growth-Optimizer
+/// Paper link : <https://doi.org/10.1016/j.knosys.2022.110206> 
+/// Matlab original code : <https://github.com/tsingke/Growth-Optimizer>
 /// 
 /// Written in Rust by Saad Dahmani <sd.dahmani2000@gmail.com>
 /// 

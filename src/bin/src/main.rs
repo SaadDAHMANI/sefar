@@ -23,9 +23,9 @@ fn main() {
     println!("Evaluation with Max_Iter = {}", KMAX);
     println!("______________________GO : F1______________________");
 
-    //go_f1_test1();
+    go_f1_test1();
 
-    #[cfg(feature ="binary")] go_f1_binary_test();
+   // #[cfg(feature ="binary")] go_f1_binary_test();
 
  /*
     println!("______________________GO : F2______________________");

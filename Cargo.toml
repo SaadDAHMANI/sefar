@@ -2,7 +2,11 @@
 name = "sefar"
 version = "0.1.0"
 edition = "2021"
-#authors = {"Saad Dahmani <sd.dahmani2000>"}
+authors = ["Saad Dahmani <sd.dahmani2000@gmail.com>"] 
+description ="sefar is library for evolutionary optimization algorithms."
+keywords = ["optimization", "metaheuristic", "evolutionary", "algorithm"] 
+license = "MIT"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
