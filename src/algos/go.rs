@@ -13,8 +13,8 @@ use crate::core::problem::Problem;
 use crate::core::optimization_result::OptimizationResult;
 use crate::common::*;
 
-//#[cfg(feature="binary")] const A : f64 = 2.0/3.141592653589793238462;
-//#[cfg(feature="binary")] const B : f64 = 3.141592653589793238462/2.0;
+#[cfg(feature="binary")] const A : f64 = 2.0/3.141592653589793238462;
+#[cfg(feature="binary")] const B : f64 = 3.141592653589793238462/2.0;
 
 ///
 /// GO : Growth Optimizer & Binary-GO  
@@ -486,7 +486,7 @@ impl<'a> GOparams<'a> {
     /// ub : The upper bounds of the search space.
     ///  
     #[allow(dead_code)]
-    fn new(pop_size : usize, dim : usize, max_iter : usize, lb : &'a [f64], ub : &'a [f64])-> Self {
+    pub fn new(pop_size : usize, dim : usize, max_iter : usize, lb : &'a [f64], ub : &'a [f64])-> Self {
         GOparams { 
             population_size: pop_size,
             dimensions: dim, 
@@ -539,7 +539,7 @@ impl<'a> Default for GOparams<'a>{
     /// 
     fn default()->Self{
         GOparams {
-            population_size : 20,
+            population_size : 20, 
             dimensions : 3,
             max_iterations : 1,
             lower_bounds : &[-100.0f64, -100.0, -100.0],

@@ -23,9 +23,9 @@ fn main() {
     println!("Evaluation with Max_Iter = {}", KMAX);
     println!("______________________GO : F1______________________");
 
-    go_f1_test1();
+    //go_f1_test1();
 
-   
+    #[cfg(feature ="binary")] go_f1_binary_test();
 
  /*
     println!("______________________GO : F2______________________");
@@ -50,6 +50,35 @@ fn main() {
 
   }
 
+  ///
+  /// run the binary version of Growth Optimizer (Binary-GO).
+  /// 
+  #[cfg(feature = "binary")]
+  fn go_f1_binary_test(){
+
+    // Define the parameters of GO:
+    let search_agents : usize = 20;
+    let dim : usize = 10;
+    let max_iterations : usize = 50;
+    let lb = vec![0.0; dim];
+    let ub = vec![1.0; dim];
+    
+    // Build the parameter struct:
+    let mut settings : GOparams = GOparams::new(search_agents, dim, max_iterations, &lb, &ub);
+    
+    // Define the problem to optimize:
+    let mut fo = Sphere{};
+  
+    // Build the optimizer:
+    let mut algo : GO<Sphere> = GO::new(&settings, &mut fo);
+    
+    // Run the GO algorithm: 
+    let result : OptimizationResult = algo.run();
+
+    // Print the results:
+    println!("The optimization results of Binary-GO : {}", result.to_string());
+
+  } 
 
   #[allow(dead_code)]
   fn go_f1_test1(){

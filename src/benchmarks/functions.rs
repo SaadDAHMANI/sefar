@@ -1,26 +1,31 @@
 use crate::core::problem::Problem;
 //use crate::core::genome::Genome;
 
-#[derive(Debug,Clone)]
 
 ///
-/// Sphere enchmark function (F1)
+/// Sphere benchmark function (F1). 
+/// Fi(X) = Sum(|X|)
+/// where X = {x1, x2, ..... xd}, and 'd' is the problem dimension.
 /// 
+#[derive(Debug,Clone)]
 pub struct Sphere{}
 
 impl Problem for Sphere{
-    #[cfg(not(feature="parallel"))]
-    fn objectivefunction(&mut self, genome : &[f64]) ->f64 {
-        let fitness = genome.iter().fold(0.0f64, |sum, g| sum + g.powi(2));
-        fitness        
-    }
+  ///
+  /// Define the objective function. The later is called in sequential mode. 
+  ///   
+  #[cfg(not(feature="parallel"))]
+  fn objectivefunction(&mut self, genome : &[f64]) ->f64 {
+    let fitness = genome.iter().fold(0.0f64, |sum, g| sum + g.powi(2));
+      fitness        
+  }
 
-    #[cfg(feature="parallel")]
-    fn objectivefunction(&self, genome : &[f64]) ->f64 {
-        let fitness = genome.iter().fold(0.0f64, |sum, g| sum + g.powi(2));
-        fitness        
-    }    
-
+  
+  #[cfg(feature="parallel")]
+  fn objectivefunction(&self, genome : &[f64]) ->f64 {
+    let fitness = genome.iter().fold(0.0f64, |sum, g| sum + g.powi(2));
+      fitness        
+  }   
 }
 
 ///
