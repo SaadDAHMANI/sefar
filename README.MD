@@ -11,9 +11,11 @@
 - [X] Growth Optimizer ([GO](https://doi.org/10.1016/j.knosys.2022.110206)).
 
 ## Binary optimization
-In the current version, the binarization is made using the S-Shape function given bellow:
+In the current version, binarization is performed using the S-Shape function provided below:
 
 $S(x) = 1/(1 + e^{(-x)})$
+
+In this context, *x* represents a "gene" and signifies each element in the candidate solution *X* ("genome") within a search space of length *d*, where $X= \{x_1, x_2, ..., x_d\}$. 
 
 The Binary optimization can be executed using the **binary** feature.
 
@@ -21,7 +23,6 @@ The Binary optimization can be executed using the **binary** feature.
 
 ```Rust
 use sefar::core::eoa::EOA;
-use sefar::benchmarks::functions::{Sphere, F2};
 use sefar::core::optimization_result::OptimizationResult;
 use sefar::algos::go::{GOparams, GO};
 
