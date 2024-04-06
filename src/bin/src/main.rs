@@ -23,7 +23,7 @@ fn main() {
     println!("Evaluation with Max_Iter = {}", KMAX);
     println!("______________________GO : F1______________________");
 
-    go_f1_test1();
+    //go_f1_test1();
 
    // #[cfg(feature ="binary")] go_f1_binary_test();
 
@@ -37,7 +37,7 @@ fn main() {
 
     //pco_f1_test1();
     
-    //eo_f1_test1();
+    eo_f1_test1();
 
   
 
