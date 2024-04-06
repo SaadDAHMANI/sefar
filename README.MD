@@ -4,7 +4,9 @@
 
 ## Current state (Under development)
 
- In this version, [Sefar](https://github.com/SaadDAHMANI/sefar) supports: 
+1. [Sefar](https://github.com/SaadDAHMANI/sefar) perfoms **minimization** by default. In the case of **maximization**, the objective function $f(X)$ can be expressed as $-f(X)$.
+
+2. In this version, [Sefar](https://github.com/SaadDAHMANI/sefar) supports: 
 
 - [X] Particle Swarm Optimization ([PSO](https://doi.org/10.1109/ICNN.1995.488968));   
 - [X] Equilibrium optimizer ([EO](https://doi.org/10.1016/j.knosys.2019.105190));
@@ -20,68 +22,12 @@ In this context, *x* represents a "gene" and signifies each element in the candi
 The Binary optimization can be executed using the **binary** feature.
 
 ### Example
+1. Import [Sefar](https://github.com/SaadDAHMANI/sefar) with **binary** feature in the *Cargo.Toml* file of your project.
+
+2. In the *main.rs* file :
 
 ```Rust
-use sefar::core::eoa::EOA;
-use sefar::core::optimization_result::OptimizationResult;
-use sefar::algos::go::{GOparams, GO};
 
-fn main() {
-    println!("Hello, sefar !");
-   
-    #[cfg(feature ="binary")] go_f1_binary_test();
-}
-
-///
-/// run the binary version of Growth Optimizer (Binary-GO).
-/// 
-#[cfg(feature = "binary")]
-fn go_f1_binary_test(){
-
-    // Define the parameters of GO:
-    let search_agents : usize = 20;
-    let dim : usize = 10;
-    let max_iterations : usize = 50;
-    let lb = vec![0.0; dim];
-    let ub = vec![1.0; dim];
-    
-    // Build the parameter struct:
-    let mut settings : GOparams = GOparams::new(search_agents, dim, max_iterations, &lb, &ub);
-    
-    // Define the problem to optimize:
-    let mut fo = Sphere{};
-  
-    // Build the optimizer:
-    let mut algo : GO<Sphere> = GO::new(&settings, &mut fo);
-    
-    // Run the GO algorithm: 
-    let result : OptimizationResult = algo.run();
-
-    // Print the results:
-    println!("The optimization results of Binary-GO : {}", result.to_string());
-} 
-
-///
-/// Sphere benchmark function (F1). 
-/// Fi(X) = Sum(|X|)
-/// where X = {x1, x2, ..... xd}, and 'd' is the problem dimension.
-/// 
-#[derive(Debug,Clone)]
-pub struct Sphere{}
-
-impl Problem for Sphere{
-    #[cfg(not(feature="parallel"))]
-    fn objectivefunction(&mut self, genome : &[f64]) ->f64 {
-        let fitness = genome.iter().fold(0.0f64, |sum, g| sum + g.powi(2));
-        fitness        
-    }
-
-    #[cfg(feature="parallel")]
-    fn objectivefunction(&self, genome : &[f64]) ->f64 {
-        let fitness = genome.iter().fold(0.0f64, |sum, g| sum + g.powi(2));
-        fitness        
-    }   
-}
 
 ```
 
