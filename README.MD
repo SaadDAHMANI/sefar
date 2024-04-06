@@ -110,6 +110,5 @@ impl Problem for F1 {
 
 |Feature        | Designation                                         |
 | ------------- | --------------------------------------------------- |
-| *_binary_*    | run binary optimization using **S-Shape** function (only with GO) |
-| *_parallel_*  | run optimization in parallel mode using Rayon crate (only with GO)| 
-
+| *_binary_*    | run binary optimization using **S-Shape** function (**only with GO**) |
+| *_parallel_*  | run optimization in parallel mode using Rayon crate (**only with GO**)| 
