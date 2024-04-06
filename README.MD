@@ -12,7 +12,12 @@
 - [X] Equilibrium optimizer ([EO](https://doi.org/10.1016/j.knosys.2019.105190));
 - [X] Growth Optimizer ([GO](https://doi.org/10.1016/j.knosys.2022.110206)).
 
+# Important
+
+**In the current version, binary and parallel optimization are implemented exclusively for the Growth Optimizer (GO). Soon, these features will be available for the other algorithms as well.**
+
 ## Binary optimization
+
 In the current version, binarization is performed using the S-Shape function provided below:
 
 $S(x) = 1/(1 + e^{(-x)})$
