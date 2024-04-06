@@ -10,11 +10,12 @@
 
 - [X] Particle Swarm Optimization ([PSO](https://doi.org/10.1109/ICNN.1995.488968));   
 - [X] Equilibrium optimizer ([EO](https://doi.org/10.1016/j.knosys.2019.105190));
+- [] Modified Equilibrium optimizer ([MEO](https://doi.org/10.1016/j.asoc.2020.106542));
 - [X] Growth Optimizer ([GO](https://doi.org/10.1016/j.knosys.2022.110206)).
 
 # Important
 
-**In the current version, binary and parallel optimization are implemented exclusively for the Equilibrium Optimizer (EO) and Growth Optimizer (GO) . Soon, these features will be available for the other algorithms as well.**
+**In the current version, binary and parallel optimization are implemented exclusively for the Equilibrium Optimizer (EO) and the Growth Optimizer (GO). Soon, these features will be available for the other algorithms as well.**
 
 ## Binary optimization
 
@@ -107,8 +108,8 @@ impl Problem for F1 {
 
 ## Supported features
 
-|Feature        | Designation                                                           |
+|Features        | Designation                                                           |
 | ------------- | --------------------------------------------------------------------------- |
-| *_binary_*    | Run binary optimization using **S-Shape** function (**only with GO & EO**)  |
-| *_parallel_*  | Run optimization in parallel mode using Rayon crate (**only with GO & EO**) | 
+| *_binary_*    | Run binary optimization using **S-Shape** function (**only with EO & GO**)  |
+| *_parallel_*  | Run optimization in parallel mode using Rayon crate (**only with EO & GO**) | 
 | *_report_*    | Show the evolution of the optimization process at each iteration            | 
