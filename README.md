@@ -32,7 +32,7 @@ The Binary optimization can be executed using the **binary** feature.
 ```toml
 
 [dependencies]
-sefar = {version = "0.1.1", features = ["binary"]}
+sefar = {version = "0.1.2", features = ["binary"]}
 ```
 
 2. In the *main.rs* file :
