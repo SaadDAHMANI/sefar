@@ -24,13 +24,82 @@ The Binary optimization can be executed using the **binary** feature.
 ### Example
 1. Import [Sefar](https://github.com/SaadDAHMANI/sefar) with **binary** feature in the *Cargo.Toml* file of your project.
 
+```toml
+...
+
+[dependencies]
+sefar = {version = "0.1.0", features = ["binary"]}
+```
+
 2. In the *main.rs* file :
 
 ```Rust
+extern crate sefar;
+use sefar::core::eoa::EOA;
+use sefar::core::optimization_result::OptimizationResult;
+use sefar::algos::go::{GOparams, GO};
+use sefar::core::problem::Problem;
 
+fn main() {
 
+    println!("Binary optimization using Growth optimizer in Sefar crate:");
+   
+    go_f1_binary_test();
+}
+
+///
+/// run the binary version of Growth Optimizer (Binary-GO).
+/// 
+fn go_f1_binary_test(){
+
+    // Define the parameters of GO:
+    let search_agents : usize = 20;
+    let dim : usize = 10;
+    let max_iterations : usize = 50;
+    let lb = vec![0.0; dim];
+    let ub = vec![1.0; dim];
+    
+    // Build the parameter struct:
+    let settings : GOparams = GOparams::new(search_agents, dim, max_iterations, &lb, &ub);
+    
+    // Define the problem to optimize:
+    let mut fo = F1{};
+  
+    // Build the optimizer:
+    let mut algo : GO<F1> = GO::new(&settings, &mut fo);
+    
+    // Run the GO algorithm: 
+    let result : OptimizationResult = algo.run();
+
+    // Print the results:
+    println!("The optimization results of Binary-GO : {}", result.to_string());
+
+    // The results show something like :
+    // Binary optimization using Growth optimizer in Sefar crate:
+    // The optimization results of Binary-GO : Best-fitness : Some(0.0) 
+    // ; Best-solution : Some(Genome { id: 22, genes: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], fitness: Some(0.0) }) 
+    // ; Time : Some(3.326498ms) 
+    // ; Err-report: None
+
+    
+} 
+
+// Define the objective function to minimize. Here, the Sphere function is implemented.
+
+///
+/// F1 : Sphere benchmark function. 
+/// Fi(X) = Sum(|X|)
+/// where X = {x1, x2, ..... xd}, and 'd' is the problem dimension.
+/// 
+#[derive(Debug,Clone)]
+pub struct F1{}
+
+impl Problem for F1 {
+    fn objectivefunction(&mut self, genome : &[f64])->f64 {         
+       genome.iter().fold(0.0f64, |sum, x| sum +x)
+    }
+}
 ```
-
 
 ## Supported features
 
