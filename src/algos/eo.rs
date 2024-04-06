@@ -7,6 +7,8 @@ use rand::distributions::{Distribution, Uniform};
 //use rand::prelude::ThreadRng;
 use std::time::Instant;
 
+#[cfg(feature="parallel")] use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
+
 use crate::core::eoa::{EOA, InitializationMode};
 use crate::core::genome::Genome;
 use crate::core::parameters::Parameters;
@@ -135,13 +137,14 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
 
                     // Parallel mode 
                     //___________Parallel mode________________        
-                    #[cfg(feature="parallel")] {x.par_iter_mut().for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));            
-                        for i in 0..n {
-                            match x[i].fitness {
+                    #[cfg(feature="parallel")] {c.par_iter_mut().for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));            
+                        for i in 0..particles_no {
+                            match c[i].fitness {
                                 None => fitness[i] = f64::MAX,
                                 Some(fit) => fitness[i] = fit,
                             };
                         };
+                        //println!("EO: Parallel objective function evaluation was done.");
                     }    
                     //________________________________________
                     
