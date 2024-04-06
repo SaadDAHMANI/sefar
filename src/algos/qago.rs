@@ -21,7 +21,7 @@ use crate::common::*;
 /// 
 /// 
 /// 
-#[deprecated(note = "This version of QAGO is note checked. Please use GO either.")]
+#[deprecated(note = "This version of QAGO is note checked. Please use GO instead.")]
 #[derive(Debug)]
 pub struct QAGO<'a, T : Problem> {
      pub problem : &'a mut T,

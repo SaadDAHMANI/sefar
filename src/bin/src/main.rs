@@ -3,60 +3,65 @@ use sefar::benchmarks::functions::{Sphere, F2};
 use sefar::core::optimization_result::OptimizationResult;
 use sefar::algos::eo::{EO, EOparams};
 use sefar::algos::pso::{PSO, PSOparams};
-//use sefar::sequential_algos::pco::{PCO, PCOparams};
 
 use sefar::algos::meo::MEO;
-use sefar::algos::qago::{QAGOparams, QAGO};
+// use sefar::algos::qago::{QAGOparams, QAGO};
 use sefar::algos::go::{GOparams, GO};
 
-const DIM : usize = 7;
-const POP_SIZE : usize = 15;
-const KMAX : usize = 500; //1000*DIM/POP_SIZE;
+const DIM : usize = 10;
+const POP_SIZE : usize = 30;
+const KMAX : usize = 200; 
 
 fn main() {
     println!("Hello, sefar !");
    
     println!("Evaluation with Max_Iter = {}", KMAX);
+
     println!("______________________GO : F1______________________");
 
     //go_f1_test1();
-
-   // #[cfg(feature ="binary")] go_f1_binary_test();
-
- /*
+   
+    /*
     println!("______________________GO : F2______________________");
     go_f2_test1();
- */
+   */
     //println!("_______________________QAGO : F1______________________");
 
     //qago_f1_test1();
 
     //pco_f1_test1();
     
-    eo_f1_test1();
+    //eo_f1_test1();
 
     //peo_f1_test1();
 
     //meo_test1();
-                                             
 
+    #[cfg(feature ="binary")] {
+        println!("Run Binary tests");
+        eo_f1_binary_test();
+        println!("_________________________________________________________________");                                 
+        go_f1_binary_test();
+    }
+    
   }
 
   ///
   /// run the binary version of Growth Optimizer (Binary-GO).
   /// 
   #[cfg(feature = "binary")]
+  #[allow(dead_code)]
   fn go_f1_binary_test(){
 
     // Define the parameters of GO:
-    let search_agents : usize = 20;
-    let dim : usize = 10;
-    let max_iterations : usize = 50;
-    let lb = vec![0.0; dim];
-    let ub = vec![1.0; dim];
+    let search_agents : usize = POP_SIZE;
+    let dim : usize = DIM;
+    let max_iterations : usize = KMAX;
+    let lb = vec![0.0; DIM];
+    let ub = vec![1.0; DIM];
     
     // Build the parameter struct:
-    let mut settings : GOparams = GOparams::new(search_agents, dim, max_iterations, &lb, &ub);
+    let settings : GOparams = GOparams::new(search_agents, dim, max_iterations, &lb, &ub);
     
     // Define the problem to optimize:
     let mut fo = Sphere{};
@@ -108,7 +113,6 @@ fn main() {
       println!("Growth optimizer (GO) : F1 (Sphere) test; Result: {:?}", result.to_string());
 }
 
-
 #[allow(dead_code)]
 fn go_f2_test1(){
     let mut settings : GOparams = GOparams::default();
@@ -144,9 +148,7 @@ fn go_f2_test1(){
     println!("Growth Optimizer (GO) : F2 test; Result: {:?}", result.to_string());
 }
   
-
-
-#[allow(dead_code)]
+/* #[allow(dead_code)]
 fn qago_f1_test1(){
     let mut settings : QAGOparams = QAGOparams::default();
     
@@ -178,11 +180,10 @@ fn qago_f1_test1(){
         Some(bg)=> println!("QAGO: best-genome {:?}", bg),
     };
     */
-
     println!("QAGO : F1 (Sphere) test; Result: {:?}", result.to_string());
-}
+} */
 
-#[allow(dead_code)]
+/* #[allow(dead_code)]
 fn qago_f2_test1(){
     let mut settings : QAGOparams = QAGOparams::default();
     
@@ -216,7 +217,7 @@ fn qago_f2_test1(){
 
     println!("QAGO : F2 test; Result: {:?}", result.to_string());
 }
-
+ */
 #[allow(dead_code)]
 fn eo_f1_test1(){
 
@@ -243,6 +244,32 @@ fn eo_f1_test1(){
     println!("Err : {:?}", result.err_report);
 }
 
+#[cfg(feature="binary")]
+#[allow(dead_code)]
+fn eo_f1_binary_test(){
+
+    let mut settings : EOparams = EOparams::default();
+    
+    settings.population_size = POP_SIZE;
+    settings.dimensions = DIM;    
+    settings.max_iterations = KMAX; 
+    
+    let lb =vec![0.0f64; DIM];
+    let ub =vec![1.0f64; DIM];
+
+    settings.lower_bounds = lb.as_slice();
+    settings.upper_bounds = ub.as_slice();    
+
+    let mut fo = Sphere{};
+
+    let mut eo : EO<Sphere> = EO::new(&settings, &mut fo);
+    
+    let result = eo.run();
+       
+    println!("Binary-EO result : \n best fitness : {:?} \n best genome : {:?}", result.best_fitness, result.best_genome);
+    println!("Computation time : {:?}", result.computation_time);
+    println!("Err : {:?}", result.err_report);
+}
 
 #[allow(dead_code)]
 fn peo_f1_test1(){

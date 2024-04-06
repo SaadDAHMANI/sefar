@@ -28,6 +28,7 @@ use crate::common::*;
 /// Original Matlab code:
 /// https://github.com/iman-aliabdi/PCO-Plant-Competition-Optimization
 /// 
+#[deprecated(note = "This version of PCO is note checked. Please use EO, PSO or GO instead.")]
 #[derive(Debug)]
 #[allow(dead_code)]
 pub struct PCO<'a, T : Problem> {

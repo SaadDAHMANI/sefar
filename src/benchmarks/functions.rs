@@ -19,7 +19,6 @@ impl Problem for Sphere{
     let fitness = genome.iter().fold(0.0f64, |sum, g| sum + g.powi(2));
       fitness        
   }
-
   
   #[cfg(feature="parallel")]
   fn objectivefunction(&self, genome : &[f64]) ->f64 {

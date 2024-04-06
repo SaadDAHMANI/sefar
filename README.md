@@ -14,7 +14,7 @@
 
 # Important
 
-**In the current version, binary and parallel optimization are implemented exclusively for the Growth Optimizer (GO). Soon, these features will be available for the other algorithms as well.**
+**In the current version, binary and parallel optimization are implemented exclusively for the Equilibrium Optimizer (EO) and Growth Optimizer (GO) . Soon, these features will be available for the other algorithms as well.**
 
 ## Binary optimization
 
@@ -59,7 +59,7 @@ fn go_f1_binary_test(){
     // Define the parameters of GO:
     let search_agents : usize = 20;
     let dim : usize = 10;
-    let max_iterations : usize = 50;
+    let max_iterations : usize = 100;
     let lb = vec![0.0; dim];
     let ub = vec![1.0; dim];
     
@@ -107,7 +107,8 @@ impl Problem for F1 {
 
 ## Supported features
 
-|Feature        | Designation                                         |
-| ------------- | --------------------------------------------------- |
-| *_binary_*    | run binary optimization using **S-Shape** function (**only with GO**) |
-| *_parallel_*  | run optimization in parallel mode using Rayon crate (**only with GO**)| 
+|Feature        | Designation                                                           |
+| ------------- | --------------------------------------------------------------------------- |
+| *_binary_*    | Run binary optimization using **S-Shape** function (**only with GO & EO**)  |
+| *_parallel_*  | Run optimization in parallel mode using Rayon crate (**only with GO & EO**) | 
+| *_report_*    | Show the evolution of the optimization process at each iteration            | 

@@ -120,33 +120,7 @@ impl<'a, T : Problem> GO<'a, T> {
             }
 
         }
-
-    ///
-    /// The S-Shape-V2() function is used to perform a binary optimization.
-    /// S-Shape-V2(x) = 1/(1+e^(-x))
-    /// 
-    #[cfg(feature = "binary")]
-    fn s_shape_v2(&self, solution : &mut Genome, rng : &mut ThreadRng){
-            //V(i,:)=abs((2/pi)*atan((pi/2)*DeltaC(i,:)));
-            let d : usize = solution.get_dimensions();
     
-            let mut t_vec : Vec<f64> = vec![0.0; d];
-            
-            for j in 0..d {
-                t_vec[j] = 1.0/ (1.0 + f64::exp(-1.0* solution.genes[j]));
-            };
-    
-            let intervall_01 : Uniform<f64> = Uniform::from(0.0..=1.0);
-            
-            for j in 0..d {
-                if intervall_01.sample(rng) < t_vec[j] {
-                    solution.genes[j] = 1.0;
-                }
-                else {
-                    solution.genes[j] = 0.0;
-                } 
-            }
-        }
 }
 
 impl<'a, T : Problem> EOA for GO<'a, T> {
@@ -161,8 +135,8 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         let d : usize = self.params.dimensions;
         let max_iter : usize = self.params.max_iterations;
 
-        let ub = self.params.upper_bounds;
-        let lb = self.params.lower_bounds;
+        #[cfg(not(feature = "binary"))] let ub = self.params.upper_bounds;
+        #[cfg(not(feature = "binary"))] let lb = self.params.lower_bounds;
 
         #[cfg(feature = "binary")] let ub : Vec<f64> = vec![1.0; d];
         #[cfg(feature = "binary")] let lb : Vec<f64> = vec![0.0; d];
@@ -328,7 +302,7 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                 //__________________________Binary ________________________________________
 
                 // #[cfg(feature ="binary")] self.transform2binary(&mut new_x[i], &mut rng);
-                 #[cfg(feature ="binary")] self.s_shape_v2(&mut new_x[i], &mut rng);
+                 #[cfg(feature ="binary")] s_shape_v2(&mut new_x[i], &mut rng);
                 //_________________________________________________________________________
 
                 let new_fitness = self.problem.objectivefunction(&new_x[i].genes);
@@ -389,7 +363,7 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                 //__________________________Binary ________________________________________
 
                 //#[cfg(feature ="binary")] self.transform2binary(&mut new_x[i], &mut rng);
-                #[cfg(feature ="binary")] self.s_shape_v2(&mut new_x[i], &mut rng);
+                #[cfg(feature ="binary")] s_shape_v2(&mut new_x[i], &mut rng);
                 //___________________________________________________________________________
                //  newfitness= ObjectiveFunction(newx(i,:));
                let new_fitness = self.problem.objectivefunction(&new_x[i].genes);
