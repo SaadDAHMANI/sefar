@@ -24,24 +24,14 @@ use crate::common::*;
 pub struct EO<'a, T : Problem> {
      pub problem : &'a mut T,
      pub params : &'a EOparams<'a>,
-     pub optimization_result : OptimizationResult,
 }
 
 impl<'a, T : Problem> EO<'a, T>{
 
-    pub fn new(settings :&'a EOparams, problem : &'a mut T )->Self{       
-        let result = OptimizationResult{
-            best_genome : None,
-            best_fitness :None,
-            convergence_trend : None,
-            computation_time : None,
-            err_report : None, 
-        };
-       
+    pub fn new(settings :&'a EOparams, problem : &'a mut T )-> Self{    
         EO { 
-             problem,
-             params: settings,
-             optimization_result: result,            
+            problem,
+            params: settings,             
         }
     }   
 }
@@ -137,6 +127,24 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 // the main loop of EO
                 while iter < max_iter {
                 
+                    // compute fitness for search agents
+                    // Sequential mode
+                    #[cfg(not(feature="parallel"))] for i in 0..particles_no {
+                        fitness[i] = self.problem.objectivefunction(&c[i].genes); //fobj(&c[i]);
+                    }
+
+                    // Parallel mode 
+                    //___________Parallel mode________________        
+                    #[cfg(feature="parallel")] {x.par_iter_mut().for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));            
+                        for i in 0..n {
+                            match x[i].fitness {
+                                None => fitness[i] = f64::MAX,
+                                Some(fit) => fitness[i] = fit,
+                            };
+                        };
+                    }    
+                    //________________________________________
+                    
                     for i in 0..c.len() {
                 
                         // space bound
@@ -145,11 +153,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                             
                             if c[i].genes[j] > ub[j] { c[i].genes[j] = ub[j];}
                         }
-                
-                        // compute fitness for agents
-                        
-                        fitness[i] = self.problem.objectivefunction(&c[i].genes); //fobj(&c[i]);
-                
+                                        
                         // check fitness with best 
                         if fitness[i] < ceq1_fit {
                             ceq1_index = i;
@@ -182,7 +186,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 
                     for i in 0..particles_no {
                         if fit_old[i] < fitness[i] {
-                            fitness[i]=fit_old[i];
+                            fitness[i] = fit_old[i];
                             copy_vector2genome(&c_old[i], &mut c[i]);
                         }
                     }
@@ -267,12 +271,8 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 };
                 return result;   
             }
-
         }
     }
-
-
-
 }
 
 

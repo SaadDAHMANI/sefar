@@ -34,9 +34,6 @@ pub struct GO<'a, T : Problem> {
 
      /// Define the parameters of GO algorithm.
      pub params : &'a GOparams<'a>,
-
-     /// Give the optimization results.
-     pub optimization_result : OptimizationResult,
 }
 
 impl<'a, T : Problem> GO<'a, T> {
@@ -47,18 +44,9 @@ impl<'a, T : Problem> GO<'a, T> {
     /// problem: The problem to optimize.
     /// 
     pub fn new(settings :&'a GOparams, problem : &'a mut T )->Self{       
-        let result = OptimizationResult{
-            best_genome : None,
-            best_fitness :None,
-            convergence_trend : None,
-            computation_time : None,
-            err_report : None, 
-        };
-       
         GO{ 
              problem,
              params: settings,
-             optimization_result: result,            
         }
     }
 
@@ -222,10 +210,8 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
             fes +=1.0;           
         }
 
-        //___________Parallel mode________________
-        
-        #[cfg(feature="parallel")] {x.par_iter_mut().for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));
-            
+        //___________Parallel mode________________        
+        #[cfg(feature="parallel")] {x.par_iter_mut().for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));            
             for i in 0..n {
                 match x[i].fitness {
                     None => fitness[i] = f64::MAX,

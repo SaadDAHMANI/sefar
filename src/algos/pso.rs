@@ -17,24 +17,14 @@ use crate::core::optimization_result::OptimizationResult;
 pub struct PSO<'a, T: Problem> {
     pub problem : &'a mut T,
     pub params : &'a PSOparams<'a>,
-    pub optimization_result : OptimizationResult, 
 }
 
 impl<'a, T : Problem> PSO<'a, T> {
 
     pub fn new(settings :&'a PSOparams, problem : &'a mut T )->Self{       
-        let result = OptimizationResult{
-            best_genome : None,
-            best_fitness :None,
-            convergence_trend : None,
-            computation_time : None,
-            err_report : None, 
-        };
-       
         PSO{ 
              problem,
              params: settings,
-             optimization_result: result,            
         }
     }
 } 
@@ -161,19 +151,17 @@ impl<'a, T: Problem> EOA for PSO <'a, T> {
                     }
                     cgcurve[t]= gbest_x.fitness.unwrap();  
                 }
-
-                let bestfit =  gbest_x.fitness.unwrap(); 
+                
                 //return results
                 let duration = chronos.elapsed();
                 let result = OptimizationResult{
+                    best_fitness : gbest_x.fitness,
                     best_genome : Some(gbest_x),
-                    best_fitness : Some(bestfit),
                     convergence_trend : Some(cgcurve),
                     computation_time : Some(duration),
                     err_report : None,
                 };
                 // copy result to PSO struct
-                self.optimization_result = result.clone();
                 result
            } 
         }  
