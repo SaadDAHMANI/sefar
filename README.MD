@@ -30,10 +30,9 @@ The Binary optimization can be executed using the **binary** feature.
 1. Import [Sefar](https://github.com/SaadDAHMANI/sefar) with **binary** feature in the *Cargo.Toml* file of your project.
 
 ```toml
-...
 
 [dependencies]
-sefar = {version = "0.1.0", features = ["binary"]}
+sefar = {version = "0.1.1", features = ["binary"]}
 ```
 
 2. In the *main.rs* file :
