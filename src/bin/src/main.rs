@@ -8,8 +8,8 @@ use sefar::algos::meo::MEO;
 // use sefar::algos::qago::{QAGOparams, QAGO};
 use sefar::algos::go::{GOparams, GO};
 
-const DIM : usize = 10;
-const POP_SIZE : usize = 30;
+const DIM : usize = 20;
+const POP_SIZE : usize = 15;
 const KMAX : usize = 200; 
 
 fn main() {
@@ -31,7 +31,7 @@ fn main() {
 
     //pco_f1_test1();
     
-    //eo_f1_test1();
+    eo_f1_test1();
 
     //peo_f1_test1();
 
