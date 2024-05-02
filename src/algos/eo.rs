@@ -139,7 +139,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                     } 
                     //_________________________________________________________________________
  
-                                                            // compute fitness for search agents
+                    // compute fitness for search agents
                     // Sequential mode
                     #[cfg(not(feature="parallel"))] for i in 0..particles_no {
                         fitness[i] = self.problem.objectivefunction(&c[i].genes); //fobj(&c[i]);
@@ -166,34 +166,36 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                             
                             if c[i].genes[j] > ub[j] { c[i].genes[j] = ub[j];}
                         }
-                                        
+
+                        // fitness[i] = self.problem.objectivefunction(&c[i].genes);
+
                         // check fitness with best 
                         if fitness[i] < ceq1_fit {
                             ceq1_index = i;
                             ceq1_fit= fitness[i];
-                            copy_vector(&c[i].genes, &mut ceq1, dim);
+                            copy_vector(&c[i].genes, &mut ceq1);
                         }
                         else if (fitness[i] < ceq2_fit) & (fitness[i] > ceq1_fit) {
                             //ceq2_index = i;
                             ceq2_fit= fitness[i];
-                            copy_vector(&c[i].genes, &mut ceq2, dim);            
+                            copy_vector(&c[i].genes, &mut ceq2);            
                         }
                         else if (fitness[i] < ceq3_fit) & (fitness[i] > ceq2_fit) & (fitness[i] > ceq1_fit) {
                             //ceq3_index = i;
                             ceq3_fit= fitness[i];
-                            copy_vector(&c[i].genes, &mut ceq3, dim);
+                            copy_vector(&c[i].genes, &mut ceq3);
                         }
                         else if (fitness[i] < ceq4_fit) & (fitness[i] > ceq3_fit) & (fitness[i] > ceq2_fit) & (fitness[i] > ceq1_fit) {
                             //ceq4_index = i;
                             ceq4_fit= fitness[i];
-                            copy_vector(&c[i].genes, &mut ceq4, dim);
+                            copy_vector(&c[i].genes, &mut ceq4);
                         }
                     }
     
                     //-- Memory saving---
                 
                     if iter == 0 {
-                        copy_vector(&fitness, &mut fit_old, dim);
+                        copy_vector(&fitness, &mut fit_old);
                         copy_matrix(&c, &mut c_old);
                     }
                 
@@ -205,7 +207,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                     }
                 
                     copy_matrix(&c, &mut c_old);
-                    copy_vector(&fitness, &mut fit_old, dim);
+                    copy_vector(&fitness, &mut fit_old);
                 
                     // compute averaged candidate Ceq_ave 
                     for i in 0..dim {
@@ -236,7 +238,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                         // Ceq=C_pool(randi(size(C_pool,1)),:); 
                         // random selection of one candidate from the pool
                         _index = interval.sample(&mut rng);
-                        copy_vector(&c_pool[_index], &mut ceq, dim);
+                        copy_vector(&c_pool[_index], &mut ceq);
                         //--------------------------------------------------------
                         // compute F using Eq(11) 
                         for j in 0..dim {

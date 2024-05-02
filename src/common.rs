@@ -108,12 +108,17 @@ pub fn rand_matrix(min_value: f64, max_value : f64, rows : usize, cols : usize)-
    matrix
 }
 
-pub fn copy_vector(source : & Vec<f64>, destination : &mut Vec<f64>, dim : usize){
+pub fn copy_vector(source : & Vec<f64>, destination : &mut Vec<f64>){
      
     //for i in 0..source.len() {
     //    destination[i]=source[i];
     //}
-    destination[..dim].clone_from_slice(&source[..dim]);
+    if source.len()!=destination.len() {panic!("vectors have not the same length !!!");}
+    else {
+        destination[..source.len()].clone_from_slice(&source[..source.len()]);
+    }
+
+    
 }
 
 pub fn copy_solution(source : &Genome, destination : &mut Genome, dim: usize){

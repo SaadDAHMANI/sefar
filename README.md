@@ -38,7 +38,7 @@ sefar = {version = "0.1.3", features = ["binary"]}
 
 2. In the *main.rs* file :
 
-```Rust
+```rust
 extern crate sefar;
 use sefar::core::eoa::EOA;
 use sefar::core::optimization_result::OptimizationResult;
@@ -84,10 +84,8 @@ fn go_f1_binary_test(){
     // The optimization results of Binary-GO : Best-fitness : Some(0.0) 
     // ; Best-solution : Some(Genome { id: 22, genes: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], fitness: Some(0.0) }) 
     // ; Time : Some(3.326498ms) 
-    // ; Err-report: None
-
-    
-} 
+    // ; Err-report: None   
+}
 
 // Define the objective function to minimize. Here, the Sphere function is implemented.
 
@@ -108,8 +106,8 @@ impl Problem for F1 {
 
 ## Supported features
 
-|Features        | Designation                                                           |
+Features        | Designation                                                           |
 | ------------- | --------------------------------------------------------------------------- |
 | *_binary_*    | Run binary optimization using **S-Shape** function (**only with EO & GO**)  |
 | *_parallel_*  | Run optimization in parallel mode using Rayon crate (**only with EO & GO**) | 
-| *_report_*    | Show the evolution of the optimization process at each iteration            | 
+| *_report_*    | Show the evolution of the optimization process at each iteration            |

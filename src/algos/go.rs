@@ -199,7 +199,7 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
         for i in 0..n {
             if gbestfitness > fitness[i] {
                 gbestfitness = fitness[i];
-                copy_vector(&x[i].genes, &mut gbest_x.genes,d);
+                copy_vector(&x[i].genes, &mut gbest_x.genes);
             }
         }    
 
@@ -217,7 +217,7 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
            //println!("ind : {:?}", ind); 
 
            // Save best solution 
-           copy_vector(&x[ind[0]].genes, &mut best_x.genes, d);
+           copy_vector(&x[ind[0]].genes, &mut best_x.genes);
 
             // Learning phase
             let interval_worst = Uniform::from(n-P1..n);
@@ -227,11 +227,11 @@ impl<'a, T : Problem> EOA for GO<'a, T> {
                 
                 //  Worst_X = x(ind(randi([popsize-P1+1,popsize],1)),:);
                 let wors_index : usize = interval_worst.sample(&mut rng);
-                copy_vector(&x[ind[wors_index]].genes, &mut worst_x.genes, d);
+                copy_vector(&x[ind[wors_index]].genes, &mut worst_x.genes);
 
                 // Better_X=x(ind(randi([2,P1],1)),:);
                 let better_index : usize = interval_better.sample(&mut rng);
-                copy_vector(&x[ind[better_index]].genes, &mut better_x.genes, d);
+                copy_vector(&x[ind[better_index]].genes, &mut better_x.genes);
                 
                 //random=selectID(popsize,i,2); L1=random(1); L2=random(2);
                 let (l1, l2 ) = self.select_id(i, n, &mut rng);
