@@ -29,6 +29,21 @@ pub struct GSK<'a, T: Problem> {
     /// Define the parameters of GO algorithm.
     pub params: &'a GSKparams<'a>,
 }
+
+impl<'a, T: Problem> GSK<'a, T> {
+    ///
+    /// Return a new instance of the Gaining-Sharing Knowledge Optimizer (GSK).
+    /// settings: The optimization parameters,
+    /// problem: The problem to optimize.
+    ///
+    pub fn new(settings: &'a GSKparams, problem: &'a mut T) -> Self {
+        GSK {
+            problem,
+            params: settings,
+        }
+    }
+}
+
 impl<'a, T: Problem> EOA for GSK<'a, T> {
     fn run(&mut self) -> OptimizationResult {
         let result: OptimizationResult = OptimizationResult::get_none(String::from("n/a"));
@@ -55,6 +70,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         // Objective function evaluation:
         for i in 0..pop_size {
             fitness[i] = self.problem.objectivefunction(&pop[i].genes);
+            println!("fitness[{}] = {}", i, fitness[i]);
         }
 
         //--------------------------------------------------
