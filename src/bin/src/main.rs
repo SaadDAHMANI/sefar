@@ -54,7 +54,7 @@ fn main() {
 
 #[allow(dead_code)]
 fn gsk_f1_test1() {
-    let mut settings: GSKparams = GSKparams::default();
+    let settings: GSKparams = GSKparams::default();
 
     /* settings.population_size = POP_SIZE;
     settings.dimensions = DIM;

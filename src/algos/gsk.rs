@@ -52,9 +52,12 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         let pop_size: usize = self.params.population_size;
         let max_iter: usize = self.params.max_iterations;
         let dim: usize = self.params.dimensions;
-        let max_nfes: usize = pop_size * max_iter;
+        let max_nfes: usize = pop_size * (max_iter + 1);
         //--------------------------------------------------
+        let mut nfes: usize = 0; // function evaluation counter.
+        let mut bsf_fit_var: f64 = f64::MAX; // the best fitness value.
         let mut fitness: Vec<f64> = vec![0.0f64; pop_size];
+        let mut run_funcvals: Vec<f64> = vec![0.0f64; max_iter];
         //--------------------------------------------------
 
         let g_max_f64: f64 = max_nfes as f64 / pop_size as f64;
@@ -70,8 +73,24 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         // Objective function evaluation:
         for i in 0..pop_size {
             fitness[i] = self.problem.objectivefunction(&pop[i].genes);
-            println!("fitness[{}] = {}", i, fitness[i]);
+            nfes += 1;
+            //println!("fitness[{}] = {}", i, fitness[i]);
         }
+        // Save the best fitness value for convergence trend:
+        for i in 0..pop_size {
+            if fitness[i] < bsf_fit_var {
+                bsf_fit_var = fitness[i];
+            }
+        }
+        run_funcvals[0] = bsf_fit_var; //save history of convergence.
+
+        //--------------------------------------------------
+        let kf = 0.5; //Knowledge Factor.
+        let kr = 0.9; //Knowledge Ratio.
+        let k = vec![10.0; pop_size];
+        let g: usize = 0;
+
+        //THE MAIN LOOP
 
         //--------------------------------------------------
 
