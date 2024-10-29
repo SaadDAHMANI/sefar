@@ -42,6 +42,55 @@ impl<'a, T: Problem> GSK<'a, T> {
             params: settings,
         }
     }
+
+    fn clone_population(&mut self, source: &Vec<Genome>, destination: &mut Vec<Genome>) {
+        for i in 0..source.len() {
+            for j in 0..source[i].genes.len() {
+                destination[i].genes[j] = source[i].genes[j];
+            }
+        }
+    }
+
+    fn gained_shared_senior_r1r2r3(ind_best: Vec<i32>) -> (Vec<i32>, Vec<i32>, Vec<i32>) {
+        let pop_size = ind_best.len();
+
+        // Calculate the ranges for R1, R2, and R3
+        let r1_size = (pop_size as f64 * 0.1).round() as usize;
+        let r2_size = (pop_size as f64 * 0.8).round() as usize;
+
+        let mut rng = rand::thread_rng();
+
+        // R1: First 10% of `ind_best`, then shuffle with random indices
+        let r1_slice = &ind_best[0..r1_size];
+        let interval_1 = Uniform::from(0..r1_slice.len());
+
+        let mut r1 = Vec::with_capacity(pop_size);
+        for _ in 0..pop_size {
+            let random_index = interval_1.sample(&mut rng); //rng.gen_range(0..r1_slice.len());
+            r1.push(r1_slice[random_index]);
+        }
+
+        // R2: Next 80% of `ind_best`, then shuffle with random indices
+        let r2_slice = &ind_best[r1_size..r1_size + r2_size];
+        let mut r2 = Vec::with_capacity(pop_size);
+        let interval_2 = Uniform::from(0..r2_slice.len());
+
+        for _ in 0..pop_size {
+            let random_index = interval_2.sample(&mut rng);
+            r2.push(r2_slice[random_index]);
+        }
+
+        // R3: Last 10% of `ind_best`, then shuffle with random indices
+        let r3_slice = &ind_best[r1_size + r2_size..];
+        let mut r3 = Vec::with_capacity(pop_size);
+        let interval_3 = Uniform::from(0..r3_slice.len());
+        for _ in 0..pop_size {
+            let random_index = interval_3.sample(&mut rng); //rng.gen_range(0..r3_slice.len());
+            r3.push(r3_slice[random_index]);
+        }
+
+        (r1, r2, r3)
+    }
 }
 
 impl<'a, T: Problem> EOA for GSK<'a, T> {
@@ -51,7 +100,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         //-------------------------------------------------
         let pop_size: usize = self.params.population_size;
         let max_iter: usize = self.params.max_iterations;
-        let dim: usize = self.params.dimensions;
+        let problem_size: usize = self.params.dimensions;
         let max_nfes: usize = pop_size * (max_iter + 1);
         //--------------------------------------------------
         let mut nfes: usize = 0; // function evaluation counter.
@@ -74,7 +123,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         for i in 0..pop_size {
             fitness[i] = self.problem.objectivefunction(&pop[i].genes);
             nfes += 1;
-            //println!("fitness[{}] = {}", i, fitness[i]);
+            println!("fitness[{}] = {}", i, fitness[i]);
         }
         // Save the best fitness value for convergence trend:
         for i in 0..pop_size {
@@ -88,9 +137,35 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         let kf = 0.5; //Knowledge Factor.
         let kr = 0.9; //Knowledge Ratio.
         let k = vec![10.0; pop_size];
-        let g: usize = 0;
+        let mut g: usize = 0;
+
+        let mut d_gained_shared_junior = vec![0.0f64; pop_size];
+        let mut d_gained_shared_senior = vec![0.0f64; pop_size];
 
         //THE MAIN LOOP
+        while nfes < max_nfes {
+            g += 1;
+            // D_Gained_Shared_Junior=ceil((problem_size)*(1-g/G_Max).^K);
+            //   D_Gained_Shared_Senior=problem_size-D_Gained_Shared_Junior;
+            for j in 0..pop_size {
+                d_gained_shared_junior[j] =
+                    problem_size as f64 * (1.0 - g as f64 / g_max as f64).powf(k[j]);
+                //println!("d_gained_shared_junior[{}] = {}",j, d_gained_shared_junior[j]);
+                d_gained_shared_senior[j] = problem_size as f64 - d_gained_shared_junior[j];
+            }
+
+            // clone the old_population to the current one
+            self.clone_population(&popold, &mut pop);
+
+            //------------------------------------------------------------
+            //Sorte and sorting indexes:
+            let mut indexes: Vec<usize> = (0..fitness.len()).collect();
+            indexes.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
+            //println!("sort indexes are : {:?}", indexes);
+            //------------------------------------------------------------
+
+            nfes += 1;
+        } // THE MAIN LOOP
 
         //--------------------------------------------------
 
