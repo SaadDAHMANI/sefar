@@ -417,7 +417,7 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
 }
 
 ///
-/// Define parameters for the Growth Optimizer (GO) algorithm.
+/// Define parameters for the Growth (GO) algorithm.
 ///
 #[derive(Debug, Clone)]
 pub struct GOparams<'a> {
@@ -489,7 +489,7 @@ impl<'a> Default for GOparams<'a> {
     ///  use sefar::algos::go::*;
     ///
     ///  GOparams {
-    ///     population_size : 10,
+    ///     population_size : 20,
     ///     dimensions : 3,
     ///     max_iterations : 100,
     ///     lower_bounds : &[100.0f64, 100.0, 100.0],
@@ -501,7 +501,7 @@ impl<'a> Default for GOparams<'a> {
         GOparams {
             population_size: 20,
             dimensions: 3,
-            max_iterations: 1,
+            max_iterations: 100,
             lower_bounds: &[-100.0f64, -100.0, -100.0],
             upper_bounds: &[100.0f64, 100.0, 100.0],
         }
