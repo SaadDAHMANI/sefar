@@ -19,7 +19,7 @@ const B: f64 = 3.141592653589793238462 / 2.0;
 /// GO : Growth Optimizer & Binary-GO
 /// Reference:
 /// Growth Optimizer: A powerful metaheuristic algorithm for solving continuous and
-/// discrete global optimization problems.
+/// discrete global optimization problems (2023).
 /// Paper link : <https://doi.org/10.1016/j.knosys.2022.110206>
 /// Matlab original code : <https://github.com/tsingke/Growth-Optimizer>
 ///
