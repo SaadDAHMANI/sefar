@@ -235,6 +235,9 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             let (rg1, rg2, rg3) = self.gained_shared_junior_r1r2r3(&ind_best);
             let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best);
 
+            //Gained_Shared_Junior=zeros(pop_size, problem_size);
+            let gained_shared_junior = vec![vec![0.0f64; problem_size]; pop_size];
+
             nfes += 1;
         } // THE MAIN LOOP
 
