@@ -51,7 +51,76 @@ impl<'a, T: Problem> GSK<'a, T> {
         }
     }
 
-    fn gained_shared_senior_r1r2r3(ind_best: Vec<i32>) -> (Vec<i32>, Vec<i32>, Vec<i32>) {
+    fn gained_shared_junior_r1r2r3(
+        &self,
+        ind_best: &Vec<usize>,
+    ) -> (Vec<usize>, Vec<usize>, Vec<usize>) {
+        let pop_size = ind_best.len();
+        let mut rng = rand::thread_rng();
+
+        // Initialize R1, R2, R3
+        let mut r1 = vec![0; pop_size];
+        let mut r2 = vec![0; pop_size];
+
+        let interval3 = Uniform::from(1..=pop_size);
+
+        let mut r3: Vec<usize> = (0..pop_size).map(|_| interval3.sample(&mut rng)).collect();
+
+        // R0: Vector from 1 to pop_size
+        let r0: Vec<usize> = (1..=pop_size).collect();
+
+        // Fill R1 and R2 according to the position of each element in `ind_best`
+        for i in 0..pop_size {
+            let ind = ind_best
+                .iter()
+                .position(|&x| x == i + 1)
+                .unwrap_or_default();
+
+            if ind == 0 {
+                // Best
+                r1[i] = ind_best[1];
+                r2[i] = ind_best[2];
+            } else if ind == pop_size - 1 {
+                // Worst
+                r1[i] = ind_best[pop_size - 2];
+                r2[i] = ind_best[pop_size - 1];
+            } else {
+                // Middle
+                r1[i] = ind_best[ind - 1];
+                r2[i] = ind_best[ind + 1];
+            }
+        }
+
+        // Generate R3 such that it does not overlap with R1, R2, or R0
+        let mut iterations = 0;
+        loop {
+            let mut conflicts = false;
+
+            for i in 0..pop_size {
+                if r3[i] == r1[i] || r3[i] == r2[i] || r3[i] == r0[i] {
+                    r3[i] = interval3.sample(&mut rng); //rng.gen_range(1..=pop_size);
+                    conflicts = true;
+                }
+            }
+
+            if !conflicts {
+                break;
+            }
+
+            iterations += 1;
+            if iterations > 1000 {
+                //break;
+                panic!("Cannot generate R3 without conflicts in 1000 iterations");
+            }
+        }
+
+        (r1, r2, r3)
+    }
+
+    fn gained_shared_senior_r1r2r3(
+        &self,
+        ind_best: &Vec<usize>,
+    ) -> (Vec<usize>, Vec<usize>, Vec<usize>) {
         let pop_size = ind_best.len();
 
         // Calculate the ranges for R1, R2, and R3
@@ -88,7 +157,6 @@ impl<'a, T: Problem> GSK<'a, T> {
             let random_index = interval_3.sample(&mut rng); //rng.gen_range(0..r3_slice.len());
             r3.push(r3_slice[random_index]);
         }
-
         (r1, r2, r3)
     }
 }
@@ -159,10 +227,13 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 
             //------------------------------------------------------------
             //Sorte and sorting indexes:
-            let mut indexes: Vec<usize> = (0..fitness.len()).collect();
-            indexes.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
+            let mut ind_best: Vec<usize> = (0..fitness.len()).collect();
+            ind_best.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
             //println!("sort indexes are : {:?}", indexes);
             //------------------------------------------------------------
+
+            let (rg1, rg2, rg3) = self.gained_shared_junior_r1r2r3(&ind_best);
+            let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best);
 
             nfes += 1;
         } // THE MAIN LOOP
