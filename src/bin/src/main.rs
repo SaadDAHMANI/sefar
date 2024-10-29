@@ -16,9 +16,13 @@ const KMAX: usize = 200;
 fn main() {
     println!("Hello, sefar !");
 
-    println!("Evaluation with Max_Iter = {}", KMAX);
+    //-----------------------------------------------------------------------
+    gsk_f1_test1();
 
-    println!("______________________GO : F1______________________");
+    //--------------------------------------------------------------------
+    //println!("Evaluation with Max_Iter = {}", KMAX);
+
+    // println!("______________________GO : F1______________________");
 
     //go_f1_test1();
 
@@ -32,19 +36,20 @@ fn main() {
 
     //pco_f1_test1();
 
-    eo_f1_test1();
+    //eo_f1_test1();
 
     //peo_f1_test1();
 
     //meo_test1();
 
+    /*
     #[cfg(feature = "binary")]
     {
         println!("Run Binary tests");
         eo_f1_binary_test();
         println!("_________________________________________________________________");
         go_f1_binary_test();
-    }
+    }*/
 }
 
 #[allow(dead_code)]

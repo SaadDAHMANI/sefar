@@ -124,7 +124,7 @@ impl<'a> Default for GSKparams<'a> {
     /// ~~~
     ///
     fn default() -> Self {
-        GOparams {
+        GSKparams {
             population_size: 12,
             dimensions: 3,
             max_iterations: 1,
