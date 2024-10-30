@@ -62,12 +62,12 @@ impl<'a, T: Problem> GSK<'a, T> {
         let mut r1 = vec![0; pop_size];
         let mut r2 = vec![0; pop_size];
 
-        let interval3 = Uniform::from(1..=pop_size);
+        let interval3 = Uniform::from(0..pop_size);
 
         let mut r3: Vec<usize> = (0..pop_size).map(|_| interval3.sample(&mut rng)).collect();
 
-        // R0: Vector from 1 to pop_size
-        let r0: Vec<usize> = (1..=pop_size).collect();
+        // R0: Vector from 0 to pop_size-1
+        let r0: Vec<usize> = (0..pop_size).collect();
 
         // Fill R1 and R2 according to the position of each element in `ind_best`
         for i in 0..pop_size {
@@ -355,6 +355,8 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             // check the lower and the upper bound.
             self.bound_constraint(&mut gained_shared_junior, &pop);
             self.bound_constraint(&mut gained_shared_senior, &pop);
+
+            println!("gained_sharied_junior = {:?}", gained_shared_junior);
 
             nfes += 1;
         } // THE MAIN LOOP
