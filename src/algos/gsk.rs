@@ -286,7 +286,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best);
             //println!("Rg3 : {:?}", rg3);
 
-            // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE
+            // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE:
             //Gained_Shared_Junior=zeros(pop_size, problem_size);
             let mut gained_shared_junior = vec![vec![0.0f64; problem_size]; pop_size];
             for i in 0..pop_size {
@@ -306,7 +306,25 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                 }
             }
 
-            // PSEUDO-CODE FOR  GAINING SHARING KNOWLEDGE PHASE
+            // PSEUDO-CODE FOR SENIOR GAINING SHARING KNOWLEDGE PHASE:
+            // Gained_Shared_Senior(ind,:) = pop(ind,:) + KF*ones(sum(ind), problem_size) .* (pop(R1(ind),:) - pop(ind,:) + pop(R2(ind),:) - pop(R3(ind), :)) ;
+            let mut gained_shared_senior = vec![vec![0.0f64; problem_size]; pop_size];
+            for i in 0..pop_size {
+                if fitness[i] > fitness[r2[i]] {
+                    for j in 0..problem_size {
+                        gained_shared_senior[i][j] = pop[i].genes[j]
+                            + kf * (pop[r1[i]].genes[j] - pop[i].genes[j] + pop[r2[i]].genes[j]
+                                - pop[r3[i]].genes[j]);
+                    }
+                } else {
+                    // Gained_Shared_Senior(ind,:) = pop(ind,:) + KF*ones(sum(ind), problem_size) .* (pop(R1(ind),:) - pop(R2(ind),:) + pop(ind,:) - pop(R3(ind), :)) ;
+                    for j in 0..problem_size {
+                        gained_shared_senior[i][j] = pop[i].genes[j]
+                            + kf * (pop[r1[i]].genes[j] - pop[r2[i]].genes[j] + pop[i].genes[j]
+                                - pop[r3[i]].genes[j]);
+                    }
+                }
+            }
 
             nfes += 1;
         } // THE MAIN LOOP
