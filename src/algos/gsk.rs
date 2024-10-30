@@ -290,43 +290,22 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             //println!("Rg3 : {:?}", rg3);
             let mut ind1: Vec<bool> = vec![false; pop_size];
             let mut sum_ind1: usize = 0;
-            for j in 0..pop_size {
-                if fitness[j] > fitness[rg3[j]] {
-                    ind1[j] = true;
-                    sum_ind1 += 1;
+            for i in 0..pop_size {
+                if fitness[i] > fitness[rg3[i]] {
+                    for j in 0..problem_size {
+                        gained_shared_junior[i][j] = pop[i].genes[j]
+                            + kf * (pop[rg1[i]].genes[j] - pop[rg2[i]].genes[j]
+                                + pop[rg3[i]].genes[j]
+                                - pop[i].genes[j]);
+                    }
+                } else {
+                    for j in 0..problem_size {
+                        gained_shared_junior[i][j] = pop[i].genes[j]
+                            + kf * ((pop[rg1[i]].genes[j] - pop[rg2[i]].genes[j])
+                                + (pop[i].genes[j] - pop[rg3[i]].genes[j]));
+                    }
                 }
             }
-            if sum_ind1 > 0 {
-                //Gained_Shared_Junior (ind1,:)= pop(ind1,:) + KF*ones(sum(ind1), problem_size) .* (pop(Rg1(ind1),:) - pop(Rg2(ind1),:)+pop(Rg3(ind1), :)-pop(ind1,:)) ;
-                self.update_gained_shared_junior_1(
-                    &mut gained_shared_junior,
-                    &pop,
-                    kf,
-                    &ind1,
-                    &rg1,
-                    &rg2,
-                    &rg3,
-                );
-            }
-
-            //ind1=~ind1;
-            sum_ind1 = 0;
-            for j in 0..pop_size {
-                ind1[j] = !ind1[j];
-                if ind1[j] {
-                    sum_ind1 += 1;
-                }
-            }
-
-            self.update_gained_shared_junior_2(
-                &mut gained_shared_junior,
-                &pop,
-                kf,
-                &ind1,
-                &rg1,
-                &rg2,
-                &rg3,
-            );
 
             nfes += 1;
         } // THE MAIN LOOP
