@@ -184,6 +184,59 @@ impl<'a, T: Problem> GSK<'a, T> {
         }
     }
 
+    fn generate_d_gained_shared_junior_mask(
+        &self,
+        d_gained_shared_junior: &Vec<f64>,
+    ) -> Vec<Vec<bool>> {
+        let pop_size: usize = self.params.population_size;
+        let problem_size: usize = self.params.dimensions;
+
+        // Initialize the mask matrix
+        let mut mask = vec![vec![false; problem_size]; pop_size];
+        let interval01 = Uniform::from(0.0f64..1.0f64);
+        let mut rng = rand::thread_rng();
+
+        for i in 0..pop_size {
+            for j in 0..problem_size {
+                let random_value: f64 = interval01.sample(&mut rng);
+                // Compare random value to (D_Gained_Shared_Junior[i] / problem_size)
+                mask[i][j] = random_value <= (d_gained_shared_junior[i] / problem_size as f64);
+            }
+        }
+        mask
+    }
+
+    fn generate_d_gained_shared_junior_rand_mask(&self, kr: f64) -> Vec<Vec<bool>> {
+        let pop_size: usize = self.params.population_size;
+        let problem_size: usize = self.params.dimensions;
+        let interval01 = Uniform::from(0.0f64..1.0f64);
+        let mut rng = rand::thread_rng();
+
+        let mut mask = vec![vec![false; problem_size]; pop_size];
+
+        for i in 0..pop_size {
+            for j in 0..problem_size {
+                let random_value: f64 = interval01.sample(&mut rng);
+                mask[i][j] = random_value <= kr;
+            }
+        }
+        mask
+    }
+
+    fn and_masks(&self, mask1: &Vec<Vec<bool>>, mask2: &Vec<Vec<bool>>) -> Vec<Vec<bool>> {
+        let pop_size: usize = self.params.population_size;
+        let problem_size: usize = self.params.dimensions;
+
+        let mut result_mask = vec![vec![false; problem_size]; pop_size];
+
+        for i in 0..pop_size {
+            for j in 0..problem_size {
+                result_mask[i][j] = mask1[i][j] && mask2[i][j];
+            }
+        }
+        result_mask
+    }
+
     fn update_gained_shared_junior_1(
         &self,
         gained_shared_junior: &mut Vec<Vec<f64>>,
@@ -248,6 +301,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         let mut nfes: usize = 0; // function evaluation counter.
         let mut bsf_fit_var: f64 = f64::MAX; // the best fitness value.
         let mut fitness: Vec<f64> = vec![0.0f64; pop_size];
+        let mut children_fitness: Vec<f64> = vec![0.0f64; pop_size];
         let mut run_funcvals: Vec<f64> = vec![0.0f64; max_iter];
         //--------------------------------------------------
 
@@ -356,12 +410,62 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             self.bound_constraint(&mut gained_shared_junior, &pop);
             self.bound_constraint(&mut gained_shared_senior, &pop);
 
-            println!("gained_sharied_junior = {:?}", gained_shared_junior);
+            //println!("gained_sharied_junior = {:?}", gained_shared_junior);
+            //-------------------------------------------------------------------------------
+            // D_Gained_Shared_Junior_mask=rand(pop_size, problem_size)<=(D_Gained_Shared_Junior(:, ones(1, problem_size))./problem_size);
+            let d_gained_shared_junior_mask =
+                self.generate_d_gained_shared_junior_mask(&d_gained_shared_junior);
+            //D_Gained_Shared_Senior_mask=~D_Gained_Shared_Junior_mask;
+            let mut d_gained_shared_senior_mask: Vec<Vec<bool>> =
+                vec![vec![false; problem_size]; pop_size];
+            for i in 0..pop_size {
+                for j in 0..problem_size {
+                    d_gained_shared_senior_mask[i][j] = !d_gained_shared_junior_mask[i][j];
+                }
+            }
+
+            let d_gained_shared_junior_rand_mask =
+                self.generate_d_gained_shared_junior_rand_mask(kr);
+
+            let d_gained_shared_junior_mask = self.and_masks(
+                &d_gained_shared_junior_mask,
+                &d_gained_shared_junior_rand_mask,
+            );
+            let d_gained_shared_senior_rand_mask =
+                self.generate_d_gained_shared_junior_rand_mask(kr);
+            // D_Gained_Shared_Senior_mask=and(D_Gained_Shared_Senior_mask,D_Gained_Shared_Senior_rand_mask);
+            let d_gained_shared_senior_mask = self.and_masks(
+                &d_gained_shared_senior_mask,
+                &d_gained_shared_senior_rand_mask,
+            );
+
+            //ui=pop;
+            //ui(D_Gained_Shared_Junior_mask) = Gained_Shared_Junior(D_Gained_Shared_Junior_mask);
+            let mut ui = pop.clone();
+            for i in 0..pop_size {
+                for j in 0..problem_size {
+                    if d_gained_shared_junior_mask[i][j] {
+                        ui[i].genes[j] = gained_shared_junior[i][j];
+                    }
+                }
+            }
+
+            //ui(D_Gained_Shared_Senior_mask) = Gained_Shared_Senior(D_Gained_Shared_Senior_mask);
+            for i in 0..pop_size {
+                for j in 0..problem_size {
+                    if d_gained_shared_senior_mask[i][j] {
+                        ui[i].genes[j] = gained_shared_senior[i][j];
+                    }
+                }
+            }
+
+            //  children_fitness = feval(ui); %
+            for i in 0..pop_size {
+                children_fitness[i] = self.problem.objectivefunction(&ui[i].genes);
+            }
 
             nfes += 1;
         } // THE MAIN LOOP
-
-        //--------------------------------------------------
 
         result
     }
