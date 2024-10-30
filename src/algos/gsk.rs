@@ -160,6 +160,30 @@ impl<'a, T: Problem> GSK<'a, T> {
         (r1, r2, r3)
     }
 
+    fn bound_constraint(&self, vi: &mut Vec<Vec<f64>>, pop: &Vec<Genome>) {
+        let np = self.params.population_size; // Population size
+        let d = self.params.dimensions; //pop[0].len(); // Dimension
+        let lb = self.params.get_lower_bounds();
+        let ub = self.params.get_upper_bounds();
+
+        // Check the lower bound
+        for i in 0..np {
+            for j in 0..d {
+                if vi[i][j] < lb[j] {
+                    vi[i][j] = (pop[i].genes[j] + lb[j]) / 2.0;
+                }
+            }
+        }
+        // Check the upper bound
+        for i in 0..np {
+            for j in 0..d {
+                if vi[i][j] > ub[j] {
+                    vi[i][j] = (pop[i].genes[j] + ub[j]) / 2.0;
+                }
+            }
+        }
+    }
+
     fn update_gained_shared_junior_1(
         &self,
         gained_shared_junior: &mut Vec<Vec<f64>>,
@@ -292,6 +316,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             for i in 0..pop_size {
                 if fitness[i] > fitness[rg3[i]] {
                     for j in 0..problem_size {
+                        //Gained_Shared_Junior (ind1,:)= pop(ind1,:) + KF*ones(sum(ind1), problem_size) .* (pop(Rg1(ind1),:) - pop(Rg2(ind1),:)+pop(Rg3(ind1), :)-pop(ind1,:)) ;
                         gained_shared_junior[i][j] = pop[i].genes[j]
                             + kf * (pop[rg1[i]].genes[j] - pop[rg2[i]].genes[j]
                                 + pop[rg3[i]].genes[j]
@@ -299,6 +324,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                     }
                 } else {
                     for j in 0..problem_size {
+                        // Gained_Shared_Junior(ind1,:) = pop(ind1,:) + KF*ones(sum(ind1), problem_size) .* (pop(Rg1(ind1),:) - pop(Rg2(ind1),:)+pop(ind1,:)-pop(Rg3(ind1), :)) ;
                         gained_shared_junior[i][j] = pop[i].genes[j]
                             + kf * ((pop[rg1[i]].genes[j] - pop[rg2[i]].genes[j])
                                 + (pop[i].genes[j] - pop[rg3[i]].genes[j]));
@@ -307,10 +333,10 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             }
 
             // PSEUDO-CODE FOR SENIOR GAINING SHARING KNOWLEDGE PHASE:
-            // Gained_Shared_Senior(ind,:) = pop(ind,:) + KF*ones(sum(ind), problem_size) .* (pop(R1(ind),:) - pop(ind,:) + pop(R2(ind),:) - pop(R3(ind), :)) ;
             let mut gained_shared_senior = vec![vec![0.0f64; problem_size]; pop_size];
             for i in 0..pop_size {
                 if fitness[i] > fitness[r2[i]] {
+                    // Gained_Shared_Senior(ind,:) = pop(ind,:) + KF*ones(sum(ind), problem_size) .* (pop(R1(ind),:) - pop(ind,:) + pop(R2(ind),:) - pop(R3(ind), :)) ;
                     for j in 0..problem_size {
                         gained_shared_senior[i][j] = pop[i].genes[j]
                             + kf * (pop[r1[i]].genes[j] - pop[i].genes[j] + pop[r2[i]].genes[j]
@@ -325,6 +351,10 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                     }
                 }
             }
+
+            // check the lower and the upper bound.
+            self.bound_constraint(&mut gained_shared_junior, &pop);
+            self.bound_constraint(&mut gained_shared_senior, &pop);
 
             nfes += 1;
         } // THE MAIN LOOP
