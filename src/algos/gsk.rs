@@ -284,12 +284,11 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 
             let (rg1, rg2, rg3) = self.gained_shared_junior_r1r2r3(&ind_best);
             let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best);
+            //println!("Rg3 : {:?}", rg3);
 
+            // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE
             //Gained_Shared_Junior=zeros(pop_size, problem_size);
             let mut gained_shared_junior = vec![vec![0.0f64; problem_size]; pop_size];
-            //println!("Rg3 : {:?}", rg3);
-            let mut ind1: Vec<bool> = vec![false; pop_size];
-            let mut sum_ind1: usize = 0;
             for i in 0..pop_size {
                 if fitness[i] > fitness[rg3[i]] {
                     for j in 0..problem_size {
@@ -306,6 +305,8 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                     }
                 }
             }
+
+            // PSEUDO-CODE FOR  GAINING SHARING KNOWLEDGE PHASE
 
             nfes += 1;
         } // THE MAIN LOOP
