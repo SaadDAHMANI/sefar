@@ -9,9 +9,9 @@ use sefar::algos::meo::MEO;
 use sefar::algos::go::{GOparams, GO};
 use sefar::algos::gsk::{GSKparams, GSK};
 
-const DIM: usize = 20;
-const POP_SIZE: usize = 15;
-const KMAX: usize = 200;
+const DIM: usize = 4;
+const POP_SIZE: usize = 12;
+const KMAX: usize = 2;
 
 fn main() {
     println!("Hello, sefar !");
@@ -54,18 +54,18 @@ fn main() {
 
 #[allow(dead_code)]
 fn gsk_f1_test1() {
-    let settings: GSKparams = GSKparams::default();
-    /*
+    let mut settings: GSKparams = GSKparams::default();
+
     settings.population_size = POP_SIZE;
     settings.dimensions = DIM;
     settings.max_iterations = KMAX;
 
-    let lb = vec![-100.0f64; DIM];
-    let ub = vec![100.0f64; DIM];
+    let lb = vec![-10.0f64; DIM];
+    let ub = vec![10.0f64; DIM];
 
     settings.lower_bounds = lb.as_slice();
     settings.upper_bounds = ub.as_slice();
-    */
+
     let mut fo = Sphere {};
 
     let mut algo: GSK<Sphere> = GSK::new(&settings, &mut fo);

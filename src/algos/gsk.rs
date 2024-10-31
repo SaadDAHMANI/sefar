@@ -51,11 +51,18 @@ impl<'a, T: Problem> GSK<'a, T> {
         }
     }
 
+    fn find_indices(&self, x: &Vec<usize>, target: usize) -> Vec<usize> {
+        x.iter()
+            .enumerate()
+            .filter_map(|(index, &value)| if value == target { Some(index) } else { None })
+            .collect()
+    }
+
     fn gained_shared_junior_r1r2r3(
         &self,
         ind_best: &Vec<usize>,
     ) -> (Vec<usize>, Vec<usize>, Vec<usize>) {
-        let pop_size = ind_best.len();
+        let pop_size = self.params.population_size;
         let mut rng = rand::thread_rng();
 
         // Initialize R1, R2, R3
@@ -71,11 +78,15 @@ impl<'a, T: Problem> GSK<'a, T> {
 
         // Fill R1 and R2 according to the position of each element in `ind_best`
         for i in 0..pop_size {
-            let ind = ind_best
-                .iter()
-                .position(|&x| x == i + 1)
-                .unwrap_or_default();
+            let ind = self.find_indices(&ind_best, i)[0];
 
+            println!(
+                "let ind = self.find_indices(&ind_best, [{}])[0]= {};",
+                i, ind
+            );
+            //.iter()
+            //.position(|&x| x == i + 1)
+            //.unwrap_or_default();
             if ind == 0 {
                 // Best
                 r1[i] = ind_best[1];
@@ -90,6 +101,8 @@ impl<'a, T: Problem> GSK<'a, T> {
                 r2[i] = ind_best[ind + 1];
             }
         }
+
+        println!("R1 : {:?} \n R2 : {:?}", r1, r2);
 
         // Generate R3 such that it does not overlap with R1, R2, or R0
         let mut iterations = 0;
@@ -299,36 +312,37 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         let pop_size: usize = self.params.population_size;
         let max_iter: usize = self.params.max_iterations;
         let problem_size: usize = self.params.dimensions;
-        let max_nfes: usize = pop_size * (max_iter + 1);
+        //let max_nfes: usize = pop_size * (max_iter + 1);
         //--------------------------------------------------
-        let mut nfes: usize = 0; // function evaluation counter.
+        //let mut nfes: usize = 0; // function evaluation counter.
         let mut bsf_fit_var: f64 = f64::MAX; // the best fitness value.
-        let mut bsf_solution: Genome = Genome::new(100, problem_size); // the best solution
+        let mut bsf_solution: Genome = Genome::new(pop_size + 1, problem_size); // the best solution
         let mut fitness: Vec<f64> = vec![0.0f64; pop_size];
         let mut children_fitness: Vec<f64> = vec![0.0f64; pop_size];
         let mut run_funcvals: Vec<f64> = vec![0.0f64; max_iter + 1];
         //--------------------------------------------------
 
-        let g_max_f64: f64 = max_nfes as f64 / pop_size as f64;
-        let g_max: usize = g_max_f64.trunc() as usize;
-
+        let g_max_f64: f64 = max_iter as f64;
         // Initialize the main population:
         // Initialize the old population
         let mut popold = self.initialize(self.params, InitializationMode::RealUniform);
 
         // Initialize the current population
-        let mut pop = popold.clone();
+        let mut pop = self.initialize(self.params, InitializationMode::RealUniform); //popold.clone();
 
         // Objective function evaluation:
         for i in 0..pop_size {
             fitness[i] = self.problem.objectivefunction(&pop[i].genes);
-            nfes += 1;
+            pop[i].fitness = Some(fitness[i]);
+            //nfes += 1;
             //println!("fitness[{}] = {}", i, fitness[i]);
         }
         // Save the best fitness value for convergence trend:
         for i in 0..pop_size {
             if fitness[i] < bsf_fit_var {
                 bsf_fit_var = fitness[i];
+                // save the best solution
+                //copy_solution(&pop[i], &mut bsf_solution, problem_size);
             }
         }
         run_funcvals[0] = bsf_fit_var; //save history of convergence.
@@ -336,22 +350,26 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         //--------------------------------------------------
         let kf = 0.5; //Knowledge Factor.
         let kr = 0.9; //Knowledge Ratio.
-        let k = vec![10.0; pop_size];
+        let k = 10.0;
         let mut g: usize = 0;
 
         let mut d_gained_shared_junior = vec![0.0f64; pop_size];
         let mut d_gained_shared_senior = vec![0.0f64; pop_size];
 
+        let problem_size_f64: f64 = problem_size as f64;
+
         //THE MAIN LOOP
-        while nfes < max_nfes {
+        while g < max_iter {
             g += 1;
             // D_Gained_Shared_Junior=ceil((problem_size)*(1-g/G_Max).^K);
             //   D_Gained_Shared_Senior=problem_size-D_Gained_Shared_Junior;
+
+            let d_gained_shared_value =
+                problem_size_f64 * ((g_max_f64 - g as f64) / g_max_f64).powf(k);
             for j in 0..pop_size {
-                d_gained_shared_junior[j] =
-                    problem_size as f64 * (1.0 - g as f64 / g_max as f64).powf(k[j]);
+                d_gained_shared_junior[j] = d_gained_shared_value;
                 //println!("d_gained_shared_junior[{}] = {}",j, d_gained_shared_junior[j]);
-                d_gained_shared_senior[j] = problem_size as f64 - d_gained_shared_junior[j];
+                d_gained_shared_senior[j] = problem_size_f64 - d_gained_shared_junior[j];
             }
 
             // clone the old_population to the current one
@@ -361,12 +379,12 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             //Sorte and sorting indexes:
             let mut ind_best: Vec<usize> = (0..fitness.len()).collect();
             ind_best.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
-            //println!("sort indexes are : {:?}", indexes);
+            println!("fit : {:?} \n sort indexes are : {:?}", fitness, ind_best);
             //------------------------------------------------------------
 
             let (rg1, rg2, rg3) = self.gained_shared_junior_r1r2r3(&ind_best);
+            println!("Rg3 : {:?}", rg3);
             let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best);
-            //println!("Rg3 : {:?}", rg3);
 
             // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE:
             //Gained_Shared_Junior=zeros(pop_size, problem_size);
@@ -466,7 +484,8 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             //  children_fitness = feval(ui); %
             for i in 0..pop_size {
                 children_fitness[i] = self.problem.objectivefunction(&ui[i].genes);
-                nfes += 1;
+                ui[i].fitness = Some(children_fitness[i]);
+                //nfes += 1;
             }
 
             // SAVE THE BEST SOLUTION:
@@ -483,6 +502,11 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             // SAVE THE BEST- FITNESS (convergence trend):
             //run_funcvals = [run_funcvals;bsf_fit_var];
             run_funcvals[g] = bsf_fit_var;
+
+            println!(
+                "iter : {} -- best_fit : {} -- best_sol:{:?}",
+                g, bsf_fit_var, bsf_solution
+            );
 
             // UPDATE THE SEARCH POPULATION:
             for i in 0..pop_size {
