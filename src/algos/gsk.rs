@@ -300,6 +300,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         //--------------------------------------------------
         let mut nfes: usize = 0; // function evaluation counter.
         let mut bsf_fit_var: f64 = f64::MAX; // the best fitness value.
+        let mut bsf_solution: Genome = Genome::new(100, problem_size); // the best solution
         let mut fitness: Vec<f64> = vec![0.0f64; pop_size];
         let mut children_fitness: Vec<f64> = vec![0.0f64; pop_size];
         let mut run_funcvals: Vec<f64> = vec![0.0f64; max_iter];
@@ -462,9 +463,34 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             //  children_fitness = feval(ui); %
             for i in 0..pop_size {
                 children_fitness[i] = self.problem.objectivefunction(&ui[i].genes);
+                nfes += 1;
             }
 
-            nfes += 1;
+            // SAVE THE BEST SOLUTION:
+            // if children_fitness(i) < bsf_fit_var
+            //    bsf_fit_var = children_fitness(i);
+            //    bsf_solution = ui(i, :);
+            // end
+            for i in 0..pop_size {
+                if children_fitness[i] < bsf_fit_var {
+                    bsf_fit_var = children_fitness[i];
+                    copy_solution(&ui[i], &mut bsf_solution, problem_size);
+                }
+            }
+            // SAVE THE BEST- FITNESS (convergence trend):
+            //run_funcvals = [run_funcvals;bsf_fit_var];
+            run_funcvals[g] = bsf_fit_var;
+
+            // UPDATE THE SEARCH POPULATION:
+            for i in 0..pop_size {
+                if children_fitness[i] < fitness[i] {
+                    //  popold[i] = ui[i].clone();
+                    copy_solution(&ui[i], &mut popold[i], problem_size);
+                } else {
+                    //popold[i] = pop[i].clone();
+                    copy_solution(&pop[i], &mut popold[i], problem_size);
+                }
+            }
         } // THE MAIN LOOP
 
         result
