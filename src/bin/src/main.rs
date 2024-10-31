@@ -55,8 +55,8 @@ fn main() {
 #[allow(dead_code)]
 fn gsk_f1_test1() {
     let settings: GSKparams = GSKparams::default();
-
-    /* settings.population_size = POP_SIZE;
+    /*
+    settings.population_size = POP_SIZE;
     settings.dimensions = DIM;
     settings.max_iterations = KMAX;
 

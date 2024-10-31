@@ -4,7 +4,7 @@ use crate::core::genome::Genome;
 use crate::core::optimization_result::OptimizationResult;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
-use rand::rngs::ThreadRng;
+//use rand::rngs::ThreadRng;
 use rand_distr::{Distribution, Uniform};
 //#[cfg(feature = "parallel")]
 //use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
@@ -237,6 +237,7 @@ impl<'a, T: Problem> GSK<'a, T> {
         result_mask
     }
 
+    #[allow(dead_code)]
     fn update_gained_shared_junior_1(
         &self,
         gained_shared_junior: &mut Vec<Vec<f64>>,
@@ -262,6 +263,7 @@ impl<'a, T: Problem> GSK<'a, T> {
         }
     }
 
+    #[allow(dead_code)]
     fn update_gained_shared_junior_2(
         &self,
         gained_shared_junior: &mut Vec<Vec<f64>>,
@@ -290,7 +292,8 @@ impl<'a, T: Problem> GSK<'a, T> {
 
 impl<'a, T: Problem> EOA for GSK<'a, T> {
     fn run(&mut self) -> OptimizationResult {
-        let result: OptimizationResult = OptimizationResult::get_none(String::from("n/a"));
+        let mut result: OptimizationResult = OptimizationResult::get_none(String::from("n/a"));
+        let chronos = Instant::now();
 
         //-------------------------------------------------
         let pop_size: usize = self.params.population_size;
@@ -303,7 +306,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         let mut bsf_solution: Genome = Genome::new(100, problem_size); // the best solution
         let mut fitness: Vec<f64> = vec![0.0f64; pop_size];
         let mut children_fitness: Vec<f64> = vec![0.0f64; pop_size];
-        let mut run_funcvals: Vec<f64> = vec![0.0f64; max_iter];
+        let mut run_funcvals: Vec<f64> = vec![0.0f64; max_iter + 1];
         //--------------------------------------------------
 
         let g_max_f64: f64 = max_nfes as f64 / pop_size as f64;
@@ -320,7 +323,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         for i in 0..pop_size {
             fitness[i] = self.problem.objectivefunction(&pop[i].genes);
             nfes += 1;
-            println!("fitness[{}] = {}", i, fitness[i]);
+            //println!("fitness[{}] = {}", i, fitness[i]);
         }
         // Save the best fitness value for convergence trend:
         for i in 0..pop_size {
@@ -493,7 +496,13 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             }
         } // THE MAIN LOOP
 
-        result
+        let duration = chronos.elapsed();
+        result.best_genome = Some(bsf_solution);
+        result.best_fitness = Some(bsf_fit_var);
+        result.convergence_trend = Some(run_funcvals);
+        result.computation_time = Some(duration);
+        result.err_report = None;
+        return result;
     }
 }
 
