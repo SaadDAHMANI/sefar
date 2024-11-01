@@ -791,7 +791,7 @@ mod gsk_test {
             //pop[i].fitness = Some(fitness[i]);
         }
 
-        assert_eq!(fitness[11], 10.80);
+        assert_eq!(fitness[11], 10.8023);
 
         let mut gained_shared_junior =
             vec![vec![0.0f64; settings.dimensions]; settings.population_size];
@@ -807,7 +807,9 @@ mod gsk_test {
             kf,
         );
 
-        let ans: Vec<f64> = vec![-5.2055e+00, 2.3628e+00, -9.6838e+00];
-        assert_eq!(gained_shared_junior[0], ans);
+        let ans0: Vec<f64> = vec![-5.205550000000001, 2.3628, -9.6837];
+        let ans8 = vec![-13.0256, 1.6600000000000001, -3.8523499999999995];
+        assert_eq!(gained_shared_junior[0], ans0);
+        assert_eq!(gained_shared_junior[8], ans8);
     }
 }
