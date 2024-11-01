@@ -9,7 +9,7 @@ use sefar::algos::meo::MEO;
 use sefar::algos::go::{GOparams, GO};
 use sefar::algos::gsk::{GSKparams, GSK};
 
-const DIM: usize = 4;
+const DIM: usize = 3;
 const POP_SIZE: usize = 12;
 const KMAX: usize = 2;
 

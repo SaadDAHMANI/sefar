@@ -711,16 +711,92 @@ mod gsk_test {
         let mut fo = Sphere {};
         let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
 
-        let ind_best: Vec<usize> = vec![5, 0, 8, 7, 9, 4, 6, 10, 1, 3, 11, 2];
+        let ind_best: Vec<usize> = vec![8, 2, 0, 11, 9, 4, 3, 6, 5, 7, 1, 10];
 
-        let ans_r1: Vec<usize> = vec![5, 10, 3, 1, 9, 0, 4, 8, 0, 7, 6, 3];
+        //let ans_r1: Vec<usize> = vec![5, 10, 3, 1, 9, 0, 4, 8, 0, 7, 6, 3];
 
-        let ans_r2: Vec<usize> = vec![8, 3, 11, 11, 6, 8, 10, 9, 7, 4, 1, 2];
+        //let ans_r2: Vec<usize> = vec![8, 3, 11, 11, 6, 8, 10, 9, 7, 4, 1, 2];
 
-        let (rg1, rg2, rg3) = gsk.gained_shared_junior_r1r2r3(&ind_best);
+        let (rg1, rg2, _rg3) = gsk.gained_shared_junior_r1r2r3(&ind_best);
+        //let rg1 : Vec<usize> = vec![]
+        let rg3: Vec<usize> = vec![9, 3, 9, 7, 7, 0, 11, 0, 3, 8, 5, 4];
 
-        let mut gained_shared_senior =
+        let mut g1: Genome = Genome {
+            id: 1,
+            genes: vec![-2.7754, 3.7144, -3.2501],
+            fitness: None,
+        };
+        let mut g2: Genome = Genome {
+            id: 2,
+            genes: vec![-4.0784, 6.5339, 8.2745],
+            fitness: None,
+        };
+        let mut g3: Genome = Genome {
+            id: 3,
+            genes: vec![-5.3083, 2.0748, -1.5022],
+            fitness: None,
+        };
+        let mut g4: Genome = Genome {
+            id: 4,
+            genes: vec![5.1778, -1.5360, 8.6996],
+            fitness: None,
+        };
+        let mut g5: Genome = Genome {
+            id: 5,
+            genes: vec![-3.2613, -8.8368, -0.6691],
+            fitness: None,
+        };
+        let mut g6: Genome = Genome {
+            id: 6,
+            genes: vec![-6.7042, -7.6470, 3.2823],
+            fitness: None,
+        };
+
+        let mut g7: Genome = Genome {
+            id: 7,
+            genes: vec![-4.3057, 4.6932, -7.0230],
+            fitness: None,
+        };
+        let mut g8: Genome = Genome {
+            id: 8,
+            genes: vec![-0.8740, 9.1076, -7.8404],
+            fitness: None,
+        };
+        let mut g9: Genome = Genome {
+            id: 9,
+            genes: vec![-6.1135, 1.1412, -0.2510],
+            fitness: None,
+        };
+
+        let mut g10: Genome = Genome {
+            id: 10,
+            genes: vec![0.8960, 7.1767, 2.7477],
+            fitness: None,
+        };
+        let mut g11: Genome = Genome {
+            id: 11,
+            genes: vec![-4.6326, -9.1553, -5.7893],
+            fitness: None,
+        };
+        let mut g12: Genome = Genome {
+            id: 12,
+            genes: vec![-4.1194, 1.3157, 5.3672],
+            fitness: None,
+        };
+
+        let pop: Vec<Genome> = vec![g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g11, g12];
+        let mut fitness: Vec<f64> = vec![0.0; settings.population_size];
+        for i in 0..settings.population_size {
+            fitness[i] = gsk.problem.objectivefunction(&pop[i].genes);
+            //pop[i].fitness = Some(fitness[i]);
+        }
+
+        assert_eq!(fitness[11], 10.80);
+
+        let mut gained_shared_junior =
             vec![vec![0.0f64; settings.dimensions]; settings.population_size];
+        let kf: f64 = 0.5;
+
         gsk.update_gained_shared_junior(
             &mut gained_shared_junior,
             &pop,
@@ -730,5 +806,8 @@ mod gsk_test {
             &rg3,
             kf,
         );
+
+        let ans: Vec<f64> = vec![-5.2055e+00, 2.3628e+00, -9.6838e+00];
+        assert_eq!(gained_shared_junior[0], ans);
     }
 }
