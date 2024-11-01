@@ -247,54 +247,74 @@ impl<'a, T: Problem> GSK<'a, T> {
         result_mask
     }
 
-    #[allow(dead_code)]
-    fn update_gained_shared_junior_1(
+    fn update_gained_shared_junior(
         &self,
         gained_shared_junior: &mut Vec<Vec<f64>>,
         pop: &Vec<Genome>,
-        kf: f64,
-        ind1: &Vec<bool>,
+        fitness: &Vec<f64>,
         rg1: &Vec<usize>,
         rg2: &Vec<usize>,
         rg3: &Vec<usize>,
+        kf: f64,
     ) {
-        let problem_size = self.params.dimensions; // pop[0].len();
+        let pop_size = self.params.population_size;
+        let problem_size = self.params.dimensions;
 
-        for (i, &flag) in ind1.iter().enumerate() {
-            if flag {
-                //let mut new_row = vec![0.0; problem_size];
+        for i in 0..pop_size {
+            if fitness[i] > fitness[rg3[i]] {
                 for j in 0..problem_size {
+                    //Gained_Shared_Junior (ind1,:)= pop(ind1,:) +
+                    // KF*ones(sum(ind1), problem_size) .* (pop(Rg1(ind1),:) - pop(Rg2(ind1),:)+
+                    // pop(Rg3(ind1), :)-pop(ind1,:)) ;
                     gained_shared_junior[i][j] = pop[i].genes[j]
-                        + kf * (pop[rg1[i]].genes[j] - pop[rg2[i]].genes[j] + pop[rg3[i]].genes[j]
-                            - pop[i].genes[j]);
+                        + kf * ((pop[rg1[i]].genes[j] - pop[rg2[i]].genes[j])
+                            + (pop[rg3[i]].genes[j] - pop[i].genes[j]));
                 }
-                //gained_shared_junior[i] = new_row;
-            }
-        }
-    }
-
-    #[allow(dead_code)]
-    fn update_gained_shared_junior_2(
-        &self,
-        gained_shared_junior: &mut Vec<Vec<f64>>,
-        pop: &Vec<Genome>,
-        kf: f64,
-        ind1: &Vec<bool>,
-        rg1: &Vec<usize>,
-        rg2: &Vec<usize>,
-        rg3: &Vec<usize>,
-    ) {
-        let problem_size = self.params.dimensions; // pop[0].len();
-
-        for (i, &flag) in ind1.iter().enumerate() {
-            if flag {
-                //let mut new_row = vec![0.0; problem_size];
+            } else {
                 for j in 0..problem_size {
+                    // Gained_Shared_Junior(ind1,:) = pop(ind1,:) +
+                    // KF*ones(sum(ind1), problem_size) .* (pop(Rg1(ind1),:)
+                    // - pop(Rg2(ind1),:)+pop(ind1,:)-pop(Rg3(ind1), :)) ;
                     gained_shared_junior[i][j] = pop[i].genes[j]
                         + kf * ((pop[rg1[i]].genes[j] - pop[rg2[i]].genes[j])
                             + (pop[i].genes[j] - pop[rg3[i]].genes[j]));
                 }
-                //gained_shared_junior[i] = new_row;
+            }
+        }
+    }
+
+    fn update_gained_shared_senior(
+        &self,
+        gained_shared_senior: &mut Vec<Vec<f64>>,
+        pop: &Vec<Genome>,
+        fitness: &Vec<f64>,
+        r1: &Vec<usize>,
+        r2: &Vec<usize>,
+        r3: &Vec<usize>,
+        kf: f64,
+    ) {
+        let pop_size = self.params.population_size;
+        let problem_size = self.params.dimensions;
+
+        for i in 0..pop_size {
+            if fitness[i] > fitness[r2[i]] {
+                for j in 0..problem_size {
+                    // Gained_Shared_Senior(ind,:) = pop(ind,:) +
+                    // KF*ones(sum(ind), problem_size) .* (pop(R1(ind),:) - pop(ind,:) +
+                    // pop(R2(ind),:) - pop(R3(ind), :)) ;
+                    gained_shared_senior[i][j] = pop[i].genes[j]
+                        + kf * ((pop[r1[i]].genes[j] - pop[r2[i]].genes[j])
+                            + (pop[r2[i]].genes[j] - pop[r3[i]].genes[j]));
+                }
+            } else {
+                for j in 0..problem_size {
+                    // Gained_Shared_Senior(ind,:) = pop(ind,:) +
+                    // KF*ones(sum(ind), problem_size) .* (pop(R1(ind),:) - pop(R2(ind),:) +
+                    // pop(ind,:) - pop(R3(ind), :)) ;
+                    gained_shared_senior[i][j] = pop[i].genes[j]
+                        + kf * ((pop[r1[i]].genes[j] - pop[r2[i]].genes[j])
+                            + (pop[i].genes[j] - pop[r3[i]].genes[j]));
+                }
             }
         }
     }
@@ -376,7 +396,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             //Sorte and sorting indexes:
             let mut ind_best: Vec<usize> = (0..fitness.len()).collect();
             ind_best.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
-            println!("fit : {:?} \n sort indexes are : {:?}", fitness, ind_best);
+            //println!("fit : {:?} \n sort indexes are : {:?}", fitness, ind_best);
             //------------------------------------------------------------
 
             let (rg1, rg2, rg3) = self.gained_shared_junior_r1r2r3(&ind_best);
@@ -384,46 +404,29 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best);
 
             // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE:
-            //Gained_Shared_Junior=zeros(pop_size, problem_size);
+            // Gained_Shared_Junior=zeros(pop_size, problem_size);
             let mut gained_shared_junior = vec![vec![0.0f64; problem_size]; pop_size];
-            for i in 0..pop_size {
-                if fitness[i] > fitness[rg3[i]] {
-                    for j in 0..problem_size {
-                        //Gained_Shared_Junior (ind1,:)= pop(ind1,:) + KF*ones(sum(ind1), problem_size) .* (pop(Rg1(ind1),:) - pop(Rg2(ind1),:)+pop(Rg3(ind1), :)-pop(ind1,:)) ;
-                        gained_shared_junior[i][j] = pop[i].genes[j]
-                            + kf * (pop[rg1[i]].genes[j] - pop[rg2[i]].genes[j]
-                                + pop[rg3[i]].genes[j]
-                                - pop[i].genes[j]);
-                    }
-                } else {
-                    for j in 0..problem_size {
-                        // Gained_Shared_Junior(ind1,:) = pop(ind1,:) + KF*ones(sum(ind1), problem_size) .* (pop(Rg1(ind1),:) - pop(Rg2(ind1),:)+pop(ind1,:)-pop(Rg3(ind1), :)) ;
-                        gained_shared_junior[i][j] = pop[i].genes[j]
-                            + kf * ((pop[rg1[i]].genes[j] - pop[rg2[i]].genes[j])
-                                + (pop[i].genes[j] - pop[rg3[i]].genes[j]));
-                    }
-                }
-            }
+            self.update_gained_shared_junior(
+                &mut gained_shared_junior,
+                &pop,
+                &fitness,
+                &rg1,
+                &rg2,
+                &rg3,
+                kf,
+            );
 
             // PSEUDO-CODE FOR SENIOR GAINING SHARING KNOWLEDGE PHASE:
             let mut gained_shared_senior = vec![vec![0.0f64; problem_size]; pop_size];
-            for i in 0..pop_size {
-                if fitness[i] > fitness[r2[i]] {
-                    // Gained_Shared_Senior(ind,:) = pop(ind,:) + KF*ones(sum(ind), problem_size) .* (pop(R1(ind),:) - pop(ind,:) + pop(R2(ind),:) - pop(R3(ind), :)) ;
-                    for j in 0..problem_size {
-                        gained_shared_senior[i][j] = pop[i].genes[j]
-                            + kf * (pop[r1[i]].genes[j] - pop[i].genes[j] + pop[r2[i]].genes[j]
-                                - pop[r3[i]].genes[j]);
-                    }
-                } else {
-                    // Gained_Shared_Senior(ind,:) = pop(ind,:) + KF*ones(sum(ind), problem_size) .* (pop(R1(ind),:) - pop(R2(ind),:) + pop(ind,:) - pop(R3(ind), :)) ;
-                    for j in 0..problem_size {
-                        gained_shared_senior[i][j] = pop[i].genes[j]
-                            + kf * (pop[r1[i]].genes[j] - pop[r2[i]].genes[j] + pop[i].genes[j]
-                                - pop[r3[i]].genes[j]);
-                    }
-                }
-            }
+            self.update_gained_shared_senior(
+                &mut gained_shared_senior,
+                &pop,
+                &fitness,
+                &r1,
+                &r2,
+                &r3,
+                kf,
+            );
 
             // check the lower and the upper bound.
             self.bound_constraint(&mut gained_shared_junior, &pop);
@@ -699,5 +702,33 @@ mod gsk_test {
             assert_ne!(r1[i], r2[i]);
             assert_ne!(r3[i], r2[i]);
         }
+    }
+
+    #[test]
+    fn update_gained_shared_junior_test_1() {
+        let settings: GSKparams = GSKparams::default();
+
+        let mut fo = Sphere {};
+        let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
+
+        let ind_best: Vec<usize> = vec![5, 0, 8, 7, 9, 4, 6, 10, 1, 3, 11, 2];
+
+        let ans_r1: Vec<usize> = vec![5, 10, 3, 1, 9, 0, 4, 8, 0, 7, 6, 3];
+
+        let ans_r2: Vec<usize> = vec![8, 3, 11, 11, 6, 8, 10, 9, 7, 4, 1, 2];
+
+        let (rg1, rg2, rg3) = gsk.gained_shared_junior_r1r2r3(&ind_best);
+
+        let mut gained_shared_senior =
+            vec![vec![0.0f64; settings.dimensions]; settings.population_size];
+        gsk.update_gained_shared_junior(
+            &mut gained_shared_junior,
+            &pop,
+            &fitness,
+            &rg1,
+            &rg2,
+            &rg3,
+            kf,
+        );
     }
 }
