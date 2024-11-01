@@ -581,7 +581,7 @@ impl<'a> Default for GSKparams<'a> {
     ///
     ///  use sefar::algos::gsk::*;
     ///
-    ///  GOparams {
+    ///  GSKparams {
     ///     population_size : 12,
     ///     dimensions : 3,
     ///     max_iterations : 1,
@@ -598,5 +598,27 @@ impl<'a> Default for GSKparams<'a> {
             lower_bounds: &[-100.0f64, -100.0, -100.0],
             upper_bounds: &[100.0f64, 100.0, 100.0],
         }
+    }
+}
+
+#[cfg(test)]
+mod gsk_test {
+    use crate::benchmarks::functions::Sphere;
+
+    use super::*;
+
+    #[test]
+    fn gained_shared_junior_r1r2r3_test_1() {
+        let settings: GSKparams = GSKparams::default();
+        let mut fo = Sphere {};
+        let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
+        let ind_best: Vec<usize> = vec![5, 0, 8, 7, 9, 4, 6, 10, 1, 3, 11, 2];
+
+        let (r1, _r2, _r3) = gsk.gained_shared_junior_r1r2r3(&ind_best);
+
+        //assert_eq!(gsk.params.population_size, ind_best.len());
+        //assert_eq!(r1.len(), ind_best.len());
+        assert_eq!(r1[1], 10);
+        assert_eq!(r1[0], 5);
     }
 }
