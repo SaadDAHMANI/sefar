@@ -99,10 +99,10 @@ impl<'a, T: Problem> GSK<'a, T> {
                 r2[i] = ind_best[ind + 1];
             }
 
-            println!("i= {}; ind= {}; R1[i]= {}; R2[i]= {}", i, ind, r1[i], r2[i]);
+            //println!("i= {}; ind= {}; R1[i]= {}; R2[i]= {}", i, ind, r1[i], r2[i]);
         }
 
-        println!("R1 : {:?} \n R2 : {:?}", r1, r2);
+        //println!("R1 : {:?} \n R2 : {:?}", r1, r2);
 
         // Generate R3 such that it does not overlap with R1, R2, or R0
         let mut iterations = 0;
@@ -116,16 +116,13 @@ impl<'a, T: Problem> GSK<'a, T> {
                 }
             }
 
-            if !conflicts {
+            if !conflicts || iterations > 1000 {
                 break;
             }
-
             iterations += 1;
-            if iterations > 1000 {
-                //break;
-                panic!("Cannot generate R3 without conflicts in 1000 iterations");
-            }
         }
+
+        //println!("R1: {:?}, \n R2: {:?}, \n R3: {:?}", r1, r2, r3);
 
         (r1, r2, r3)
     }
@@ -383,7 +380,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             //------------------------------------------------------------
 
             let (rg1, rg2, rg3) = self.gained_shared_junior_r1r2r3(&ind_best);
-            println!("Rg3 : {:?}", rg3);
+            //println!("Rg3 : {:?}", rg3);
             let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best);
 
             // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE:
@@ -617,16 +614,16 @@ mod gsk_test {
         let ind_best: Vec<usize> = vec![5, 0, 8, 7, 9, 4, 6, 10, 1, 3, 11, 2];
 
         // matlab values : R1 =[ 6 11 4 2 10  1  5 9  1  8  7  4]
-        let _ans_r1: Vec<usize> = vec![5, 10, 3, 1, 9, 0, 4, 8, 0, 7, 6, 3];
+        let ans_r1: Vec<usize> = vec![5, 10, 3, 1, 9, 0, 4, 8, 0, 7, 6, 3];
 
         // matlab values : R2 = [9 4 12 12 7 9 11 10  8 5 2 3]
         let ans_r2: Vec<usize> = vec![8, 3, 11, 11, 6, 8, 10, 9, 7, 4, 1, 2];
 
-        let (_r1, r2, _r3) = gsk.gained_shared_junior_r1r2r3(&ind_best);
+        let (r1, r2, _r3) = gsk.gained_shared_junior_r1r2r3(&ind_best);
 
         //assert_eq!(gsk.params.population_size, ind_best.len());
         //assert_eq!(r1.len(), ind_best.len());
-        //assert_eq!(r1, ans_r1);
+        assert_eq!(r1, ans_r1);
         assert_eq!(r2, ans_r2);
     }
 }

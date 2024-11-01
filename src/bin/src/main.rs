@@ -85,7 +85,7 @@ fn gsk_f1_test1() {
     */
 
     println!(
-        "Growth optimizer (GSK) : F1 (Sphere) test; Result: {:?}",
+        "Gaining-Sharing Knowledge optimizer (GSK) : F1 (Sphere) test; Result: {:?}",
         result.to_string()
     );
 }
