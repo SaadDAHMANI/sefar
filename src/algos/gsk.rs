@@ -603,7 +603,7 @@ impl<'a> Default for GSKparams<'a> {
 
 #[cfg(test)]
 mod gsk_test {
-    use crate::benchmarks::functions::Sphere;
+    use crate::benchmarks::functions::{Sphere, SumAbsFunction};
 
     use super::*;
 
@@ -708,8 +708,8 @@ mod gsk_test {
     fn update_gained_shared_junior_test_1() {
         let settings: GSKparams = GSKparams::default();
 
-        let mut fo = Sphere {};
-        let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
+        let mut fo = SumAbsFunction {};
+        let gsk: GSK<SumAbsFunction> = GSK::new(&settings, &mut fo);
 
         let ind_best: Vec<usize> = vec![8, 2, 0, 11, 9, 4, 3, 6, 5, 7, 1, 10];
 
