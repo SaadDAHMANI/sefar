@@ -626,4 +626,54 @@ mod gsk_test {
         assert_eq!(r1, ans_r1);
         assert_eq!(r2, ans_r2);
     }
+
+    #[test]
+    fn gained_shared_junior_r1r2r3_test_2() {
+        let mut settings: GSKparams = GSKparams::default();
+        settings.population_size = 15;
+
+        let mut fo = Sphere {};
+        let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
+
+        // matlab values : ind_best = [ 4    5   11   15   10   14    8    3   13    6    9   12    1    7    2]
+        let ind_best: Vec<usize> = vec![3, 4, 10, 14, 9, 13, 7, 2, 12, 5, 8, 11, 0, 6, 1];
+
+        let ans_r1: Vec<usize> = vec![11, 0, 7, 4, 3, 12, 0, 13, 5, 14, 4, 8, 2, 9, 10];
+
+        let ans_r2: Vec<usize> = vec![6, 6, 12, 10, 10, 8, 1, 2, 11, 13, 14, 0, 5, 7, 9];
+
+        let (r1, r2, _r3) = gsk.gained_shared_junior_r1r2r3(&ind_best);
+
+        //assert_eq!(gsk.params.population_size, ind_best.len());
+        //assert_eq!(r1.len(), ind_best.len());
+        assert_eq!(r1, ans_r1);
+        assert_eq!(r2, ans_r2);
+    }
+
+    #[test]
+    fn gained_shared_senior_r1r2r3_test_1() {
+        let settings: GSKparams = GSKparams::default();
+        let mut fo = Sphere {};
+        let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
+
+        // matlab values : ind_best = [ 6  1  9  8 10  5  7  11  2  4 12  3]
+        let ind_best: Vec<usize> = vec![5, 0, 8, 7, 9, 4, 6, 10, 1, 3, 11, 2];
+
+        // matlab values : R1 =[ 6   6   6   6   6   6   6   6   6   6   6   6]
+        let ans_r1: Vec<usize> = vec![5; settings.population_size];
+
+        // matlab values : R2 = [ 3   3   3   3   3   3   3   3   3   3   3   3]
+        let ans_r3: Vec<usize> = vec![2; settings.population_size];
+
+        let (r1, r2, r3) = gsk.gained_shared_senior_r1r2r3(&ind_best);
+
+        //assert_eq!(gsk.params.population_size, ind_best.len());
+        //assert_eq!(r1.len(), ind_best.len());
+        assert_eq!(r1, ans_r1);
+        assert_eq!(r3, ans_r3);
+        for i in 0..settings.population_size {
+            assert_ne!(r1[i], r2[i]);
+            assert_ne!(r3[i], r2[i]);
+        }
+    }
 }
