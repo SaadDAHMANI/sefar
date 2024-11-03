@@ -809,9 +809,15 @@ mod gsk_test {
         let ans0: Vec<f64> = vec![-5.205550000000001, 2.3628, -9.6837];
         let ans5 = vec![-6.45565, -4.173500000000001, 0.42479999999999984];
         let ans8 = vec![-13.0256, 1.6600000000000001, -3.8523499999999995];
+        let ans11 = vec![
+            -6.384176611900330e+00,
+            4.660816416144371e+00,
+            5.386444330215454e+00,
+        ];
 
         assert_eq!(gained_shared_junior[0], ans0);
         assert_eq!(gained_shared_junior[5], ans5);
         assert_eq!(gained_shared_junior[8], ans8);
+        assert_eq!(gained_shared_junior[11], ans11);
     }
 }
