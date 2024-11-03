@@ -1,6 +1,6 @@
 use sefar::algos::eo::{EOparams, EO};
 use sefar::algos::pso::{PSOparams, PSO};
-use sefar::benchmarks::functions::{Sphere, F2};
+use sefar::benchmarks::functions::{Sphere, SumAbsFunction, F2};
 use sefar::core::eoa::EOA;
 use sefar::core::optimization_result::OptimizationResult;
 
@@ -60,15 +60,15 @@ fn gsk_f1_test1() {
     settings.dimensions = DIM;
     settings.max_iterations = KMAX;
 
-    let lb = vec![-10.0f64; DIM];
-    let ub = vec![10.0f64; DIM];
+    let lb = vec![-100.0f64; DIM];
+    let ub = vec![100.0f64; DIM];
 
     settings.lower_bounds = lb.as_slice();
     settings.upper_bounds = ub.as_slice();
 
-    let mut fo = Sphere {};
+    let mut fo = SumAbsFunction {}; // Sphere{};
 
-    let mut algo: GSK<Sphere> = GSK::new(&settings, &mut fo);
+    let mut algo: GSK<SumAbsFunction> = GSK::new(&settings, &mut fo);
 
     let result: OptimizationResult = algo.run();
 
