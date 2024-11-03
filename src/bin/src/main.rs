@@ -9,9 +9,9 @@ use sefar::algos::meo::MEO;
 use sefar::algos::go::{GOparams, GO};
 use sefar::algos::gsk::{GSKparams, GSK};
 
-const DIM: usize = 5;
-const POP_SIZE: usize = 50;
-const KMAX: usize = 5000;
+const DIM: usize = 4;
+const POP_SIZE: usize = 20;
+const KMAX: usize = 100;
 
 fn main() {
     println!("Hello, sefar !");

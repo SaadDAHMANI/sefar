@@ -342,7 +342,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         let g_max_f64: f64 = max_iter as f64;
         // Initialize the main population:
         // Initialize the old population
-        let mut popold = self.initialize(self.params, InitializationMode::RealUniform);
+        //let mut popold = self.initialize(self.params, InitializationMode::RealUniform);
         let mut ui = self.initialize(self.params, InitializationMode::RealUniform);
 
         // Initialize the current population
@@ -391,7 +391,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             }
 
             // clone the old_population to the current one
-            self.clone_population(&popold, &mut pop);
+            // self.clone_population(&popold, &mut pop);
             /*
             // Objective function evaluation:
             for i in 0..pop_size {
@@ -540,13 +540,16 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             for i in 0..pop_size {
                 if children_fitness[i] < fitness[i] {
                     //  popold[i] = ui[i].clone();
-                    copy_solution(&ui[i], &mut popold[i], problem_size);
-                    // clone the fitness also:
+                    // copy_solution(&ui[i], &mut popold[i], problem_size);
+
+                    // COPY BETTER SOULTIONS TO THE SEARCH POPULATION:
+                    copy_solution(&ui[i], &mut pop[i], problem_size);
+                    // COPY THE FITNESS OF THE BETTER SOLUTION TOO:
                     fitness[i] = children_fitness[i];
-                } else {
-                    //popold[i] = pop[i].clone();
-                    copy_solution(&pop[i], &mut popold[i], problem_size);
-                }
+                } /* else {
+                      //popold[i] = pop[i].clone();
+                      copy_solution(&pop[i], &mut popold[i], problem_size);
+                  }*/
             }
         } // THE MAIN LOOP
 
