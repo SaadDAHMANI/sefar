@@ -180,7 +180,7 @@ impl<'a, T: Problem> GSK<'a, T> {
         for i in 0..np {
             for j in 0..d {
                 if vi[i][j] < lb[j] {
-                    vi[i][j] = (pop[i].genes[j] + lb[j]) / 2.0;
+                    vi[i][j] = lb[j]; // (pop[i].genes[j] + lb[j]) / 2.0;
                 }
             }
         }
@@ -188,7 +188,7 @@ impl<'a, T: Problem> GSK<'a, T> {
         for i in 0..np {
             for j in 0..d {
                 if vi[i][j] > ub[j] {
-                    vi[i][j] = (pop[i].genes[j] + ub[j]) / 2.0;
+                    vi[i][j] = ub[j]; //(pop[i].genes[j] + ub[j]) / 2.0;
                 }
             }
         }
@@ -216,7 +216,7 @@ impl<'a, T: Problem> GSK<'a, T> {
         mask
     }
 
-    fn generate_d_gained_shared_junior_rand_mask(&self, kr: f64) -> Vec<Vec<bool>> {
+    fn generate_d_gained_shared_rand_mask(&self, kr: f64) -> Vec<Vec<bool>> {
         let pop_size: usize = self.params.population_size;
         let problem_size: usize = self.params.dimensions;
         let interval01 = Uniform::from(0.0f64..1.0f64);
@@ -343,6 +343,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         // Initialize the main population:
         // Initialize the old population
         let mut popold = self.initialize(self.params, InitializationMode::RealUniform);
+        let mut ui = self.initialize(self.params, InitializationMode::RealUniform);
 
         // Initialize the current population
         let mut pop = self.initialize(self.params, InitializationMode::RealUniform); //popold.clone();
@@ -391,7 +392,15 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 
             // clone the old_population to the current one
             self.clone_population(&popold, &mut pop);
-
+            /*
+            // Objective function evaluation:
+            for i in 0..pop_size {
+                fitness[i] = self.problem.objectivefunction(&pop[i].genes);
+                pop[i].fitness = Some(fitness[i]);
+                //nfes += 1;
+                //println!("fitness[{}] = {}", i, fitness[i]);
+            }
+            */
             //------------------------------------------------------------
             //Sorte and sorting indexes:
             let mut ind_best: Vec<usize> = (0..fitness.len()).collect();
@@ -437,6 +446,12 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             // D_Gained_Shared_Junior_mask=rand(pop_size, problem_size)<=(D_Gained_Shared_Junior(:, ones(1, problem_size))./problem_size);
             let d_gained_shared_junior_mask =
                 self.generate_d_gained_shared_junior_mask(&d_gained_shared_junior);
+
+            /*println!(
+                "d_gained_shared_junior_mask = {:?}",
+                d_gained_shared_junior_mask
+            );*/
+
             //D_Gained_Shared_Senior_mask=~D_Gained_Shared_Junior_mask;
             let mut d_gained_shared_senior_mask: Vec<Vec<bool>> =
                 vec![vec![false; problem_size]; pop_size];
@@ -446,15 +461,23 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                 }
             }
 
-            let d_gained_shared_junior_rand_mask =
-                self.generate_d_gained_shared_junior_rand_mask(kr);
+            /*println!(
+                "d_gained_shared_senior_mask = {:?}",
+                d_gained_shared_senior_mask
+            );*/
+
+            let d_gained_shared_junior_rand_mask = self.generate_d_gained_shared_rand_mask(kr);
+            /* println!(
+                "d_gained_shared_junior_rand_mask : {:?}",
+                d_gained_shared_junior_rand_mask
+            ); */
 
             let d_gained_shared_junior_mask = self.and_masks(
                 &d_gained_shared_junior_mask,
                 &d_gained_shared_junior_rand_mask,
             );
-            let d_gained_shared_senior_rand_mask =
-                self.generate_d_gained_shared_junior_rand_mask(kr);
+            let d_gained_shared_senior_rand_mask = self.generate_d_gained_shared_rand_mask(kr);
+
             // D_Gained_Shared_Senior_mask=and(D_Gained_Shared_Senior_mask,D_Gained_Shared_Senior_rand_mask);
             let d_gained_shared_senior_mask = self.and_masks(
                 &d_gained_shared_senior_mask,
@@ -462,8 +485,13 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             );
 
             //ui=pop;
+
+            for i in 0..pop_size {
+                copy_solution(&pop[i], &mut ui[i], problem_size);
+            }
+
             //ui(D_Gained_Shared_Junior_mask) = Gained_Shared_Junior(D_Gained_Shared_Junior_mask);
-            let mut ui = pop.clone();
+
             for i in 0..pop_size {
                 for j in 0..problem_size {
                     if d_gained_shared_junior_mask[i][j] {
@@ -513,6 +541,8 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                 if children_fitness[i] < fitness[i] {
                     //  popold[i] = ui[i].clone();
                     copy_solution(&ui[i], &mut popold[i], problem_size);
+                    // clone the fitness also:
+                    fitness[i] = children_fitness[i];
                 } else {
                     //popold[i] = pop[i].clone();
                     copy_solution(&pop[i], &mut popold[i], problem_size);
