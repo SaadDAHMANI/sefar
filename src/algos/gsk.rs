@@ -941,4 +941,65 @@ mod gsk_test {
             assert_eq!(gained_shared_senior[i], ans[i]);
         }
     }
+
+    #[test]
+    fn gsk_bound_constraint_test_1() {
+        let mut junior_set: Vec<Vec<f64>> = vec![
+            vec![7.0330e+00, 5.0646e+00, 5.7840e-01],
+            vec![-5.1558e+00, -2.4062e+00, 6.3496e+00],
+            vec![8.8783e+00, 6.7982e-02, 1.6427e+00],
+            vec![1.2844e+01, 2.5021e+00, -1.3194e+01], // of g3
+        ];
+
+        let ans_bounded_set: Vec<Vec<f64>> = vec![
+            vec![7.033024, 5.064569, 0.578399],
+            vec![-5.155761, -2.406182, 6.349578],
+            vec![8.878307, 0.067982, 1.642746],
+            vec![9.927213, 2.502063, -6.805359],
+        ];
+
+        let mut settings: GSKparams = GSKparams::default();
+        let lb = vec![-10.0f64; settings.dimensions];
+        let ub = vec![10.0f64; settings.dimensions];
+        settings.population_size = 4;
+        settings.lower_bounds = &lb;
+        settings.upper_bounds = &ub;
+
+        let mut fo = SumAbsFunction {};
+        let gsk: GSK<SumAbsFunction> = GSK::new(&settings, &mut fo);
+
+        let g0: Genome = Genome {
+            id: 1,
+            genes: vec![9.0244, 3.7681, -3.4864],
+            fitness: None,
+        };
+        let g1: Genome = Genome {
+            id: 2,
+            genes: vec![9.7028, 1.0832, 4.8482],
+            fitness: None,
+        };
+        let g2: Genome = Genome {
+            id: 3,
+            genes: vec![5.5498, -4.0074, 7.0592],
+            fitness: None,
+        };
+        let g3: Genome = Genome {
+            id: 4,
+            genes: vec![9.8544, -2.9158, -3.6107],
+            fitness: None,
+        };
+
+        let pop: Vec<Genome> = vec![g0, g1, g2, g3];
+
+        gsk.bound_constraint(&mut junior_set, &pop);
+
+        for i in 0..settings.population_size {
+            for j in 0..settings.dimensions {
+                assert_eq!(
+                    (junior_set[i][j] * 100.0).round(),
+                    (ans_bounded_set[i][j] * 100.0).round()
+                );
+            }
+        }
+    }
 }
