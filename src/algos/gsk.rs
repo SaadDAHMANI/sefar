@@ -43,14 +43,6 @@ impl<'a, T: Problem> GSK<'a, T> {
         }
     }
 
-    fn clone_population(&mut self, source: &Vec<Genome>, destination: &mut Vec<Genome>) {
-        for i in 0..source.len() {
-            for j in 0..source[i].genes.len() {
-                destination[i].genes[j] = source[i].genes[j];
-            }
-        }
-    }
-
     fn find_indices(&self, x: &Vec<usize>, target: usize) -> usize {
         let y: Vec<usize> = x
             .iter()
