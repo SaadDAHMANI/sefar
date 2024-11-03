@@ -603,12 +603,11 @@ impl<'a> Default for GSKparams<'a> {
 
 #[cfg(test)]
 mod gsk_test {
+    use super::*;
     use crate::benchmarks::functions::{Sphere, SumAbsFunction};
 
-    use super::*;
-
     #[test]
-    fn gained_shared_junior_r1r2r3_test_1() {
+    fn gsk_gained_shared_junior_r1r2r3_test_1() {
         let settings: GSKparams = GSKparams::default();
         let mut fo = Sphere {};
         let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
@@ -631,7 +630,7 @@ mod gsk_test {
     }
 
     #[test]
-    fn gained_shared_junior_r1r2r3_test_2() {
+    fn gsk_gained_shared_junior_r1r2r3_test_2() {
         let mut settings: GSKparams = GSKparams::default();
         settings.population_size = 15;
 
@@ -651,7 +650,7 @@ mod gsk_test {
     }
 
     #[test]
-    fn gained_shared_senior_r1r2r3_test_1() {
+    fn gsk_gained_shared_senior_r1r2r3_test_1() {
         let settings: GSKparams = GSKparams::default();
         let mut fo = Sphere {};
         let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
@@ -673,7 +672,7 @@ mod gsk_test {
     }
 
     #[test]
-    fn gained_shared_senior_r1r2r3_test_2() {
+    fn gsk_gained_shared_senior_r1r2r3_test_2() {
         let mut settings: GSKparams = GSKparams::default();
         settings.population_size = 15;
 
@@ -705,7 +704,7 @@ mod gsk_test {
     }
 
     #[test]
-    fn update_gained_shared_junior_test_1() {
+    fn gsk_update_gained_shared_junior_test_1() {
         let settings: GSKparams = GSKparams::default();
 
         let mut fo = SumAbsFunction {};
@@ -721,64 +720,64 @@ mod gsk_test {
         //let rg1 : Vec<usize> = vec![]
         let rg3: Vec<usize> = vec![9, 3, 9, 7, 7, 0, 11, 0, 3, 8, 5, 4];
 
-        let mut g1: Genome = Genome {
+        let g1: Genome = Genome {
             id: 1,
             genes: vec![-2.7754, 3.7144, -3.2501],
             fitness: None,
         };
-        let mut g2: Genome = Genome {
+        let g2: Genome = Genome {
             id: 2,
             genes: vec![-4.0784, 6.5339, 8.2745],
             fitness: None,
         };
-        let mut g3: Genome = Genome {
+        let g3: Genome = Genome {
             id: 3,
             genes: vec![-5.3083, 2.0748, -1.5022],
             fitness: None,
         };
-        let mut g4: Genome = Genome {
+        let g4: Genome = Genome {
             id: 4,
             genes: vec![5.1778, -1.5360, 8.6996],
             fitness: None,
         };
-        let mut g5: Genome = Genome {
+        let g5: Genome = Genome {
             id: 5,
             genes: vec![-3.2613, -8.8368, -0.6691],
             fitness: None,
         };
-        let mut g6: Genome = Genome {
+        let g6: Genome = Genome {
             id: 6,
             genes: vec![-6.7042, -7.6470, 3.2823],
             fitness: None,
         };
 
-        let mut g7: Genome = Genome {
+        let g7: Genome = Genome {
             id: 7,
             genes: vec![-4.3057, 4.6932, -7.0230],
             fitness: None,
         };
-        let mut g8: Genome = Genome {
+        let g8: Genome = Genome {
             id: 8,
             genes: vec![-0.8740, 9.1076, -7.8404],
             fitness: None,
         };
-        let mut g9: Genome = Genome {
+        let g9: Genome = Genome {
             id: 9,
             genes: vec![-6.1135, 1.1412, -0.2510],
             fitness: None,
         };
 
-        let mut g10: Genome = Genome {
+        let g10: Genome = Genome {
             id: 10,
             genes: vec![0.8960, 7.1767, 2.7477],
             fitness: None,
         };
-        let mut g11: Genome = Genome {
+        let g11: Genome = Genome {
             id: 11,
             genes: vec![-4.6326, -9.1553, -5.7893],
             fitness: None,
         };
-        let mut g12: Genome = Genome {
+        let g12: Genome = Genome {
             id: 12,
             genes: vec![-4.1194, 1.3157, 5.3672],
             fitness: None,
@@ -808,8 +807,11 @@ mod gsk_test {
         );
 
         let ans0: Vec<f64> = vec![-5.205550000000001, 2.3628, -9.6837];
+        let ans5 = vec![-6.45565, -4.173500000000001, 0.42479999999999984];
         let ans8 = vec![-13.0256, 1.6600000000000001, -3.8523499999999995];
+
         assert_eq!(gained_shared_junior[0], ans0);
+        assert_eq!(gained_shared_junior[5], ans5);
         assert_eq!(gained_shared_junior[8], ans8);
     }
 }
