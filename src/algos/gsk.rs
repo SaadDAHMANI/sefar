@@ -180,7 +180,7 @@ impl<'a, T: Problem> GSK<'a, T> {
         for i in 0..np {
             for j in 0..d {
                 if vi[i][j] < lb[j] {
-                    vi[i][j] = lb[j]; // (pop[i].genes[j] + lb[j]) / 2.0;
+                    vi[i][j] = (pop[i].genes[j] + lb[j]) / 2.0;
                 }
             }
         }
@@ -188,7 +188,7 @@ impl<'a, T: Problem> GSK<'a, T> {
         for i in 0..np {
             for j in 0..d {
                 if vi[i][j] > ub[j] {
-                    vi[i][j] = ub[j]; //(pop[i].genes[j] + ub[j]) / 2.0;
+                    vi[i][j] = (pop[i].genes[j] + ub[j]) / 2.0;
                 }
             }
         }
