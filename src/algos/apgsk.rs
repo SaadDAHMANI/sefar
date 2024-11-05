@@ -19,6 +19,7 @@ use std::time::Instant;
 ///
 /// Written in Rust by Saad Dahmani <sd.dahmani2000@gmail.com>
 ///
+#[deprecated(note = "This version of APGSK is note checked. Please use GSK instead.")]
 #[derive(Debug)]
 pub struct APGSK<'a, T: Problem> {
     /// The problem to optimize. It must define the Problem trait.

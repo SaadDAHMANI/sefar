@@ -6,7 +6,7 @@ use sefar::core::optimization_result::OptimizationResult;
 
 use sefar::algos::meo::MEO;
 // use sefar::algos::qago::{QAGOparams, QAGO};
-use sefar::algos::apgsk::{APGSKparams, APGSK};
+// use sefar::algos::apgsk::{APGSKparams, APGSK};
 use sefar::algos::go::{GOparams, GO};
 use sefar::algos::gsk::{GSKparams, GSK};
 
@@ -58,7 +58,7 @@ fn main() {
 
 #[allow(dead_code)]
 fn apgsk_f1_test1() {
-    let mut settings: APGSKparams = APGSKparams::default();
+    let mut settings: GSKparams = GSKparams::default(); // APGSKparams = APGSKparams::default();
 
     settings.population_size = POP_SIZE;
     settings.dimensions = DIM;
@@ -74,7 +74,7 @@ fn apgsk_f1_test1() {
 
     let mut fo = SumAbsFunction {}; // Sphere{};
 
-    let mut algo: APGSK<SumAbsFunction> = APGSK::new(&settings, &mut fo);
+    let mut algo: GSK<SumAbsFunction> = GSK::new(&settings, &mut fo); //APGSK<SumAbsFunction> = APGSK::new(&settings, &mut fo);
 
     let result: OptimizationResult = algo.run();
 
