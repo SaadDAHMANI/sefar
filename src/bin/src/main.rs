@@ -11,7 +11,7 @@ use sefar::algos::gsk::{GSKparams, GSK};
 
 const DIM: usize = 5;
 const POP_SIZE: usize = 25;
-const KMAX: usize = 200;
+const KMAX: usize = 2;
 
 fn main() {
     println!("Hello, sefar !");
@@ -66,7 +66,7 @@ fn gsk_f1_test1() {
     settings.lower_bounds = lb.as_slice();
     settings.upper_bounds = ub.as_slice();
 
-    settings.partition_size_p = 0.10;
+    settings.partition_size_p = 0.2;
 
     let mut fo = SumAbsFunction {}; // Sphere{};
 

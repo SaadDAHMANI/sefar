@@ -122,9 +122,10 @@ impl<'a, T: Problem> GSK<'a, T> {
     fn gained_shared_senior_r1r2r3(
         &self,
         ind_best: &Vec<usize>,
+        p_ratio: f64,
     ) -> (Vec<usize>, Vec<usize>, Vec<usize>) {
         let pop_size = ind_best.len();
-        let p_ratio = self.params.get_partition_size_p();
+        //let p_ratio = self.params.get_partition_size_p();
         // Calculate the ranges for R1, R2, and R3
         let r1_size = (pop_size as f64 * p_ratio).round() as usize;
         let r2_size = (pop_size as f64 * (1.0 - 2.0 * p_ratio)).round() as usize;
@@ -358,6 +359,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         run_funcvals[0] = bsf_fit_var; //save history of convergence.
 
         //--------------------------------------------------
+        let p: f64 = self.params.get_partition_size_p();
         let kf = self.params.kf; //Knowledge Factor.
         let kr = self.params.kr; //Knowledge Ratio.
         let k = self.params.k; //Knowledge rate.
@@ -403,7 +405,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 
             let (rg1, rg2, rg3) = self.gained_shared_junior_r1r2r3(&ind_best);
             //println!("Rg3 : {:?}", rg3);
-            let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best);
+            let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best, p);
 
             // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE:
             // Gained_Shared_Junior=zeros(pop_size, problem_size);
@@ -628,7 +630,12 @@ impl<'a> GSKparams<'a> {
     }
 
     pub fn get_partition_size_p(&self) -> f64 {
-        if self.partition_size_p > 1.0 || self.partition_size_p < 0.0 {
+        let group1_size: f64 = (self.population_size as f64 * self.partition_size_p).round();
+        let group3_size: f64 = (self.population_size as f64 - 2.0 * group1_size).round();
+
+        println!("group1 : {}, group3: {}", group1_size, group3_size);
+
+        if group1_size < 1.0 || group3_size < 1.0 {
             0.1f64
         } else {
             self.partition_size_p
@@ -754,7 +761,9 @@ mod gsk_test {
 
         let ans_r3: Vec<usize> = vec![2; settings.population_size];
 
-        let (r1, r2, r3) = gsk.gained_shared_senior_r1r2r3(&ind_best);
+        let p = 0.1f64;
+
+        let (r1, r2, r3) = gsk.gained_shared_senior_r1r2r3(&ind_best, p);
 
         assert_eq!(r1, ans_r1);
         assert_eq!(r3, ans_r3);
@@ -775,8 +784,8 @@ mod gsk_test {
         let ind_best: Vec<usize> = vec![3, 4, 10, 14, 9, 13, 7, 2, 12, 5, 8, 11, 0, 6, 1];
 
         let ans_r3: Vec<usize> = vec![1; settings.population_size];
-
-        let (r1, r2, r3) = gsk.gained_shared_senior_r1r2r3(&ind_best);
+        let p = 0.1f64;
+        let (r1, r2, r3) = gsk.gained_shared_senior_r1r2r3(&ind_best, p);
 
         let x1: usize = 3;
         let x2: usize = 4;
@@ -919,7 +928,7 @@ mod gsk_test {
 
         let ind_best: Vec<usize> = vec![5, 9, 7, 4, 1, 0, 3, 2, 11, 10, 6, 8];
 
-        let (_r1, _r2, _r3) = gsk.gained_shared_senior_r1r2r3(&ind_best);
+        let (_r1, _r2, _r3) = gsk.gained_shared_senior_r1r2r3(&ind_best, 0.1);
 
         let r1: Vec<usize> = vec![5; settings.population_size];
         let r3: Vec<usize> = vec![8; settings.population_size];
