@@ -580,7 +580,7 @@ pub struct GSKparams<'a> {
     /// Number of best individuals = p*100%;
     /// Number of middle individuals = population_size - 2*p*100%;
     /// Number of worst individuals = p*100%.
-    pub p: f64,
+    pub partition_size_p: f64,
 
     /// kf is the knowledge factor parameter (kf > 0). The default value is kf = 0.5.
     pub kf: f64,
@@ -599,7 +599,7 @@ impl<'a> GSKparams<'a> {
     /// max_iter : maximum number of iterations (stopping criterion);
     /// lb: search space lower bound;
     /// ub: search space upper bound;
-    /// p : partition size ratio;
+    /// partition_size_p : partition size ratio;
     /// kf : knowledge factor;
     /// kr : knowledge ratio;
     /// k : knowledge rate.
@@ -620,7 +620,7 @@ impl<'a> GSKparams<'a> {
             max_iterations: max_iter,
             lower_bounds: lb,
             upper_bounds: ub,
-            p,
+            partition_size_p: p,
             kf,
             kr,
             k,
@@ -628,10 +628,10 @@ impl<'a> GSKparams<'a> {
     }
 
     pub fn get_partition_size_p(&self) -> f64 {
-        if self.p > 1.0 || self.p < 0.0 {
+        if self.partition_size_p > 1.0 || self.partition_size_p < 0.0 {
             0.1f64
         } else {
-            self.p
+            self.partition_size_p
         }
     }
 }
@@ -686,7 +686,7 @@ impl<'a> Default for GSKparams<'a> {
             max_iterations: 1,
             lower_bounds: &[-100.0f64, -100.0, -100.0],
             upper_bounds: &[100.0f64, 100.0, 100.0],
-            p: 0.1,
+            partition_size_p: 0.1,
             kf: 0.5f64,
             kr: 0.9f64,
             k: 10.0f64,
@@ -1099,10 +1099,10 @@ mod gsk_test {
     #[test]
     fn gsk_get_partition_size_p() {
         let mut params: GSKparams = GSKparams::default();
-        params.p = 1.2;
+        params.partition_size_p = 1.2;
         assert_eq!(params.get_partition_size_p(), 0.1);
 
-        params.p = -0.5;
+        params.partition_size_p = -0.5;
         assert_eq!(params.get_partition_size_p(), 0.1);
     }
 }
