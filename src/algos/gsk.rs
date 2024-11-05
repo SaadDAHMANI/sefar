@@ -358,7 +358,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         run_funcvals[0] = bsf_fit_var; //save history of convergence.
 
         //--------------------------------------------------
-        let kf = 0.5; //Knowledge Factor.
+        let kf = self.params.kf; //Knowledge Factor.
         let kr = 0.9; //Knowledge Ratio.
         let k = 10.0;
         let mut g: usize = 0;
@@ -574,6 +574,57 @@ pub struct GSKparams<'a> {
 
     /// The upper bounds of the search space.
     pub upper_bounds: &'a [f64],
+
+    /// p is the partition size ratio (p in [0, 1], i.e p varies from 0% to 100%).
+    /// Number of best individuals = p*100%;
+    /// Number of middle individuals = population_size - 2*p*100%;
+    /// Number of worst individuals = p*100%.
+    pub p: f64,
+
+    /// kf is the knowledge factor parameter (kf > 0). The default value is kf = 0.5.
+    pub kf: f64,
+
+    /// kr is the knowledge ratio (kr in [0, 1]). The default value is kr = 0.9.
+    pub kr: f64,
+
+    /// k is the knowedge rate (k>0). The default value is k=10.
+    pub k: f64,
+}
+
+impl<'a> GSKparams<'a> {
+    /// Build a new instance of GSKparams, where:
+    /// pop_size : population size, i.e., number of search agents;
+    /// problem_size : problem dimension, i.e., number of decision variables;
+    /// max_iter : maximum number of iterations (stopping criterion);
+    /// lb: search space lower bound;
+    /// ub: search space upper bound;
+    /// p : partition size ratio;
+    /// kf : knowledge factor;
+    /// kr : knowledge ratio;
+    /// k : knowledge rate.
+    pub fn new(
+        pop_size: usize,
+        problem_size: usize,
+        max_iter: usize,
+        lb: &'a [f64],
+        ub: &'a [f64],
+        p: f64,
+        kf: f64,
+        kr: f64,
+        k: f64,
+    ) -> Self {
+        Self {
+            population_size: pop_size,
+            dimensions: problem_size,
+            max_iterations: max_iter,
+            lower_bounds: lb,
+            upper_bounds: ub,
+            p,
+            kf,
+            kr,
+            k,
+        }
+    }
 }
 
 impl<'a> Parameters for GSKparams<'a> {
@@ -612,6 +663,10 @@ impl<'a> Default for GSKparams<'a> {
     ///     max_iterations : 1,
     ///     lower_bounds : &[100.0f64, 100.0, 100.0],
     ///     upper_bounds : &[-100.0f64, -100.0, -100.0],
+    ///     p : 0.1,
+    ///     kf : 0.5,
+    ///     kr : 0.9,
+    ///     k : 10.0,
     /// };
     /// ~~~
     ///
@@ -622,6 +677,10 @@ impl<'a> Default for GSKparams<'a> {
             max_iterations: 1,
             lower_bounds: &[-100.0f64, -100.0, -100.0],
             upper_bounds: &[100.0f64, 100.0, 100.0],
+            p: 0.1,
+            kf: 0.5f64,
+            kr: 0.9f64,
+            k: 10.0f64,
         }
     }
 }
