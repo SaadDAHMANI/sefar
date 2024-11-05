@@ -12,12 +12,13 @@ use sefar::algos::gsk::{GSKparams, GSK};
 
 const DIM: usize = 5;
 const POP_SIZE: usize = 12;
-const KMAX: usize = 2;
+const KMAX: usize = 200;
 
 fn main() {
     println!("Hello, sefar !");
 
     //-----------------------------------------------------------------------
+
     apgsk_f1_test1();
 
     //gsk_f1_test1();

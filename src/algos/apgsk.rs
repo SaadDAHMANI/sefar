@@ -246,7 +246,7 @@ impl<'a, T: Problem> APGSK<'a, T> {
         rg1: &Vec<usize>,
         rg2: &Vec<usize>,
         rg3: &Vec<usize>,
-        kf: f64,
+        kf: &Vec<f64>,
     ) {
         let pop_size = self.params.population_size;
         let problem_size = self.params.dimensions;
@@ -258,8 +258,9 @@ impl<'a, T: Problem> APGSK<'a, T> {
                     // KF*ones(sum(ind1), problem_size) .* (pop(Rg1(ind1),:) - pop(Rg2(ind1),:)+
                     // pop(Rg3(ind1), :)-pop(ind1,:)) ;
                     gained_shared_junior[i][j] = pop[i].genes[j]
-                        + kf * ((pop[rg1[i]].genes[j] - pop[rg2[i]].genes[j])
-                            + (pop[rg3[i]].genes[j] - pop[i].genes[j]));
+                        + kf[i]
+                            * ((pop[rg1[i]].genes[j] - pop[rg2[i]].genes[j])
+                                + (pop[rg3[i]].genes[j] - pop[i].genes[j]));
                 }
             } else {
                 for j in 0..problem_size {
@@ -267,8 +268,9 @@ impl<'a, T: Problem> APGSK<'a, T> {
                     // KF*ones(sum(ind1), problem_size) .* (pop(Rg1(ind1),:)
                     // - pop(Rg2(ind1),:)+pop(ind1,:)-pop(Rg3(ind1), :)) ;
                     gained_shared_junior[i][j] = pop[i].genes[j]
-                        + kf * ((pop[rg1[i]].genes[j] - pop[rg2[i]].genes[j])
-                            + (pop[i].genes[j] - pop[rg3[i]].genes[j]));
+                        + kf[i]
+                            * ((pop[rg1[i]].genes[j] - pop[rg2[i]].genes[j])
+                                + (pop[i].genes[j] - pop[rg3[i]].genes[j]));
                 }
             }
         }
@@ -282,7 +284,7 @@ impl<'a, T: Problem> APGSK<'a, T> {
         r1: &Vec<usize>,
         r2: &Vec<usize>,
         r3: &Vec<usize>,
-        kf: f64,
+        kf: &Vec<f64>,
     ) {
         let pop_size = self.params.population_size;
         let problem_size = self.params.dimensions;
@@ -294,8 +296,9 @@ impl<'a, T: Problem> APGSK<'a, T> {
                     // KF*ones(sum(ind), problem_size) .* (pop(R1(ind),:) - pop(ind,:) +
                     // pop(R2(ind),:) - pop(R3(ind), :)) ;
                     gained_shared_senior[i][j] = pop[i].genes[j]
-                        + kf * ((pop[r1[i]].genes[j] - pop[i].genes[j])
-                            + (pop[r2[i]].genes[j] - pop[r3[i]].genes[j]));
+                        + kf[i]
+                            * ((pop[r1[i]].genes[j] - pop[i].genes[j])
+                                + (pop[r2[i]].genes[j] - pop[r3[i]].genes[j]));
                 }
             } else {
                 for j in 0..problem_size {
@@ -303,14 +306,15 @@ impl<'a, T: Problem> APGSK<'a, T> {
                     // KF*ones(sum(ind), problem_size) .* (pop(R1(ind),:) - pop(R2(ind),:) +
                     // pop(ind,:) - pop(R3(ind), :)) ;
                     gained_shared_senior[i][j] = pop[i].genes[j]
-                        + kf * ((pop[r1[i]].genes[j] - pop[r2[i]].genes[j])
-                            + (pop[i].genes[j] - pop[r3[i]].genes[j]));
+                        + kf[i]
+                            * ((pop[r1[i]].genes[j] - pop[r2[i]].genes[j])
+                                + (pop[i].genes[j] - pop[r3[i]].genes[j]));
                 }
             }
         }
     }
 
-    fn init_kind_and_k(&self) -> (Vec<f64>, Vec<f64>) {
+    fn init_kind_and_k(&self) -> Vec<f64> {
         let between01 = Uniform::from(0.0f64..1.0f64);
         let between020 = Uniform::from(0usize..20usize);
         let mut rng = rand::thread_rng();
@@ -332,7 +336,231 @@ impl<'a, T: Problem> APGSK<'a, T> {
                 k[i] = between020.sample(&mut rng) as f64;
             }
         }
-        (kind, k)
+        k
+    }
+
+    fn update_kf_and_kr_10percent(
+        &self,
+        kf: &mut Vec<f64>,
+        kr: &mut Vec<f64>,
+        kf_pool: &Vec<f64>,
+        kr_pool: &Vec<f64>,
+        pop_size: usize,
+        k_rand_ind: &mut [usize],
+    ) {
+        let between = Uniform::from(0.0..1.0);
+        let mut rng = rand::thread_rng();
+        let mut k_rand_ind_f64: Vec<f64> = vec![0.0; pop_size];
+        //let mut k_rand_ind: Vec<usize> = vec![0; pop_size];
+        let kw_ind = vec![0.85, 0.05, 0.05, 0.05];
+
+        for i in 0..pop_size {
+            k_rand_ind_f64[i] = between.sample(&mut rng);
+        }
+        //let kw_ind = [0.85, 0.05, 0.05, 0.05];
+        // Compute cumulative probabilities
+        let sum_kw_ind_1_2 = kw_ind[0] + kw_ind[1];
+        let sum_kw_ind_1_3 = kw_ind[0] + kw_ind[1] + kw_ind[2];
+        let sum_kw_ind_1_4 = kw_ind.iter().sum::<f64>();
+
+        // Apply conditions to map random values to integer categories
+
+        let mut i: usize = 0;
+        for val in k_rand_ind_f64.iter() {
+            if *val > sum_kw_ind_1_3 && *val <= sum_kw_ind_1_4 {
+                k_rand_ind[i] = 3; //4;
+            } else if *val > sum_kw_ind_1_2 && *val <= sum_kw_ind_1_3 {
+                k_rand_ind[i] = 2; // 3;
+            } else if *val > kw_ind[0] && *val <= sum_kw_ind_1_2 {
+                k_rand_ind[i] = 1; // 2;
+            } else if *val > 0.0 && *val <= kw_ind[0] {
+                k_rand_ind[i] = 0; //1;
+            }
+            i += 1;
+        }
+
+        let result_kf: Vec<f64> = k_rand_ind.iter().map(|&i| kf_pool[i]).collect();
+        let result_kr: Vec<f64> = k_rand_ind.iter().map(|&i| kr_pool[i]).collect();
+        for i in 0..pop_size {
+            kf[i] = result_kf[i];
+            kr[i] = result_kr[i];
+        }
+    }
+
+    fn update_kf_and_kr_90percent(
+        &self,
+        kf: &mut Vec<f64>,
+        kr: &mut Vec<f64>,
+        kf_pool: &Vec<f64>,
+        kr_pool: &Vec<f64>,
+        pop_size: usize,
+        k_rand_ind: &mut [usize],
+    ) {
+        let mut kw_ind = vec![0.85, 0.05, 0.05, 0.05]; // Initial `KW_ind` values
+        let all_imp = vec![0.0; 4]; // All_Imp equivalent as a vector of zeros
+                                    //let kf_pool = vec![0.1, 1.0, 0.5, 1.0]; // KF_pool values
+                                    //let kr_pool = vec![0.2, 0.1, 0.9, 0.9]; // KR_pool values
+        let interval01 = Uniform::from(0.0..1.0);
+
+        // Update KW_ind: 0.95 * KW_ind + 0.05 * All_Imp
+        for i in 0..kw_ind.len() {
+            kw_ind[i] = 0.95 * kw_ind[i] + 0.05 * all_imp[i];
+        }
+
+        // Normalize KW_ind by dividing each element by the sum of KW_ind
+        let sum_kw_ind: f64 = kw_ind.iter().sum();
+        for i in 0..kw_ind.len() {
+            kw_ind[i] /= sum_kw_ind;
+        }
+
+        // Generate random values in the range [0, 1) for K_rand_ind
+        let mut rng = rand::thread_rng();
+        let mut k_rand_indf64: Vec<f64> =
+            (0..pop_size).map(|_| interval01.sample(&mut rng)).collect();
+
+        // Apply conditions to categorize K_rand_ind into 1, 2, 3, or 4
+        let sum_kw_ind_1_2 = kw_ind[0] + kw_ind[1];
+        let sum_kw_ind_1_3 = sum_kw_ind_1_2 + kw_ind[2];
+        let sum_kw_ind_1_4 = sum_kw_ind_1_3 + kw_ind[3];
+
+        for val in k_rand_indf64.iter_mut() {
+            *val = if *val > sum_kw_ind_1_3 && *val <= sum_kw_ind_1_4 {
+                3.0 //4.0
+            } else if *val > sum_kw_ind_1_2 && *val <= sum_kw_ind_1_3 {
+                2.0 //3.0
+            } else if *val > kw_ind[0] && *val <= sum_kw_ind_1_2 {
+                1.0 //2.0
+            } else if *val > 0.0 && *val <= kw_ind[0] {
+                0.0 // 1.0
+            } else {
+                *val
+            };
+        }
+
+        for i in 0..pop_size {
+            k_rand_ind[i] = k_rand_indf64[i].round() as usize;
+        }
+
+        // Map K_rand_ind to KF and KR
+        let result_kf: Vec<f64> = k_rand_ind.iter().map(|&i| kf_pool[i as usize]).collect();
+        let result_kr: Vec<f64> = k_rand_ind.iter().map(|&i| kr_pool[i as usize]).collect();
+
+        for i in 0..pop_size {
+            kf[i] = result_kf[i];
+            kr[i] = result_kr[i];
+        }
+        // Print results
+        //println!("KW_ind: {:?}", kw_ind);
+        //println!("K_rand_ind: {:?}", k_rand_ind);
+        //println!("KF: {:?}", kf);
+        //println!("KR: {:?}", kr);
+    }
+
+    fn update_all_imp_step_1(
+        &self,
+        all_imp: &mut [f64],
+        fitness: &[f64],
+        children_fitness: &[f64],
+        k_rand_ind: &[usize],
+    ) {
+        //let fitness = vec![0.7, 0.5, 0.9, 0.6, 0.8]; // Sample fitness values
+        //let children_fitness = vec![0.6, 0.7, 0.8, 0.65, 0.75]; // Sample children fitness values
+        //let k_rand_ind = vec![1, 2, 3, 1, 4]; // Sample K_rand_ind values (1-4)
+
+        // Compute absolute difference between fitness and children_fitness
+        let dif: Vec<f64> = fitness
+            .iter()
+            .zip(children_fitness.iter())
+            .map(|(f, c)| (f - c).abs())
+            .collect();
+
+        // Determine where fitness > children_fitness (true if parent is better)
+        let child_is_better_index: Vec<bool> = fitness
+            .iter()
+            .zip(children_fitness.iter())
+            .map(|(f, c)| f > c)
+            .collect();
+
+        // Filter dif where the parent is better (for reference, though not used directly here)
+
+        /*
+        let dif_val: Vec<f64> = dif
+            .iter()
+            .zip(child_is_better_index.iter())
+            .filter_map(|(&d, &is_better)| if is_better { Some(d) } else { None })
+            .collect();
+         */
+
+        // Initialize All_Imp as a vector of four zeros
+        //let mut all_imp = vec![0.0; 4];
+
+        // Calculate All_Imp based on the conditions
+        for i in 0..4 {
+            let mut sum_dif = 0.0;
+            for j in 0..fitness.len() {
+                if child_is_better_index[j] && k_rand_ind[j] == i {
+                    sum_dif += dif[j];
+                }
+            }
+            all_imp[i] = sum_dif; // Assign the result to the corresponding All_Imp index
+        }
+
+        // Print results
+        //println!("Dif: {:?}", dif);
+        //println!("Child_is_better_index: {:?}", child_is_better_index);
+        //println!("Dif_val (parent is better): {:?}", dif_val);
+        //println!("All_Imp: {:?}", all_imp);
+    }
+
+    fn update_all_imp_step_2(&self, all_imp: &mut [f64]) {
+        //let mut all_imp = vec![0.1, 0.2, 0.3, 0.4]; // Example initial values
+
+        let sum_all_imp: f64 = all_imp.iter().sum();
+
+        if sum_all_imp != 0.0 {
+            // Normalize All_Imp by dividing each element by the sum
+            for i in 0..all_imp.len() {
+                all_imp[i] /= sum_all_imp;
+            }
+
+            // Sort All_Imp and get the sorted indices
+            let mut imp_ind: Vec<usize> = (0..all_imp.len()).collect();
+            imp_ind.sort_by(|&a, &b| all_imp[a].partial_cmp(&all_imp[b]).unwrap());
+
+            // Enforce minimum value of 0.05 for each element except the last one
+            for &idx in imp_ind.iter().take(all_imp.len() - 1) {
+                all_imp[idx] = all_imp[idx].max(0.05);
+            }
+
+            // Adjust the last element to ensure sum of All_Imp is 1
+            let sum_except_last: f64 = imp_ind
+                .iter()
+                .take(all_imp.len() - 1)
+                .map(|&idx| all_imp[idx])
+                .sum();
+            let last_index = *imp_ind.last().unwrap();
+            all_imp[last_index] = 1.0 - sum_except_last;
+        } else {
+            // Case when sum of All_Imp is zero
+            //let imp_ind: Vec<usize> = (0..all_imp.len()).collect();
+            let equal_value = 1.0 / all_imp.len() as f64;
+            all_imp.fill(equal_value);
+        }
+
+        // Print results
+        //println!("All_Imp: {:?}", all_imp);
+    }
+
+    fn resize_population(&self, max_pop_size: usize, nfes: usize, max_nfes: usize) -> usize {
+        let min_pop_size: f64 = 12.0;
+        let max_pop_siz: f64 = max_pop_size as f64;
+
+        let ratio: f64 = nfes as f64 / max_nfes as f64;
+        //plan_pop_size = round((min_pop_size - max_pop_size)* ((nfes / max_nfes).^((1-nfes / max_nfes)))  + max_pop_size);
+        let plan_pop_size: f64 =
+            (min_pop_size - max_pop_siz) * ratio.powf(1.0 - ratio) + max_pop_siz;
+
+        plan_pop_size.round() as usize
     }
 }
 
@@ -342,7 +570,7 @@ impl<'a, T: Problem> EOA for APGSK<'a, T> {
         let chronos = Instant::now();
 
         //-------------------------------------------------
-        let pop_size: usize = self.params.get_population_size();
+        let mut pop_size: usize = self.params.get_population_size();
         let max_iter: usize = self.params.max_iterations;
         let problem_size: usize = self.params.dimensions;
         //let max_nfes: usize = pop_size * (max_iter + 1);
@@ -383,9 +611,9 @@ impl<'a, T: Problem> EOA for APGSK<'a, T> {
 
         //--------------------------------------------------
         let p: f64 = self.params.get_partition_size_p();
-        let kf = self.params.kf; //Knowledge Factor.
-        let kr = self.params.kr; //Knowledge Ratio.
-        let k = self.params.k; //Knowledge rate.
+        let mut kf = vec![0.0; pop_size]; // self.params.kf; //Knowledge Factor.
+        let mut kr = vec![0.0; pop_size]; //self.params.kr; //Knowledge Ratio.
+                                          //let k = self.params.k; //Knowledge rate.
 
         let mut g: usize = 0;
 
@@ -399,21 +627,49 @@ impl<'a, T: Problem> EOA for APGSK<'a, T> {
         let kf_pool: Vec<f64> = vec![0.1, 1.0, 0.5, 1.0];
         let kr_pool: Vec<f64> = vec![0.2, 0.1, 0.9, 0.9];
 
-        let (kind_vec, k_vec) = self.init_kind_and_k();
-        println!("kind_vec : {:?},\n k_vec : {:?}", kind_vec, k_vec);
+        let mut k = self.init_kind_and_k();
+        // println!("kind_vec : {:?},\n k_vec : {:?}", kind_vec, k_vec);
+
+        let mut all_imp = vec![0.0; 4];
+        let mut k_rand_ind: Vec<usize> = vec![0; pop_size];
+        let min_pop_size: usize = 12;
+
         //--------------------------------------------------
+        let iters_1stpart: usize = (g_max_f64 as f64 * 0.1).round() as usize;
 
         //THE MAIN LOOP
         while g < max_iter {
             g += 1;
-            // D_Gained_Shared_Junior=ceil((problem_size)*(1-g/G_Max).^K);
-            //   D_Gained_Shared_Senior=problem_size-D_Gained_Shared_Junior;
 
-            let d_gained_shared_value =
-                problem_size_f64 * ((g_max_f64 - g as f64) / g_max_f64).powf(k);
+            // Do when iter < 10%* max_iter
+            if g < iters_1stpart {
+                //let kw_ind = vec![0.85, 0.05, 0.05, 0.05];
+                self.update_kf_and_kr_10percent(
+                    &mut kf,
+                    &mut kr,
+                    &kf_pool,
+                    &kr_pool,
+                    pop_size,
+                    &mut k_rand_ind,
+                );
+            } else {
+                self.update_kf_and_kr_90percent(
+                    &mut kf,
+                    &mut kr,
+                    &kf_pool,
+                    &kr_pool,
+                    pop_size,
+                    &mut k_rand_ind,
+                );
+            }
+
             for j in 0..pop_size {
-                d_gained_shared_junior[j] = d_gained_shared_value;
+                // D_Gained_Shared_Junior=ceil((problem_size)*(1-nfes / max_nfes).^K);
+                d_gained_shared_junior[j] =
+                    problem_size_f64 * ((g_max_f64 - g as f64) / g_max_f64).powf(k[j]);
                 //println!("d_gained_shared_junior[{}] = {}",j, d_gained_shared_junior[j]);
+
+                // D_Gained_Shared_Senior=problem_size-D_Gained_Shared_Junior;
                 d_gained_shared_senior[j] = problem_size_f64 - d_gained_shared_junior[j];
             }
 
@@ -442,6 +698,7 @@ impl<'a, T: Problem> EOA for APGSK<'a, T> {
             // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE:
             // Gained_Shared_Junior=zeros(pop_size, problem_size);
             let mut gained_shared_junior = vec![vec![0.0f64; problem_size]; pop_size];
+
             self.update_gained_shared_junior(
                 &mut gained_shared_junior,
                 &pop,
@@ -449,7 +706,7 @@ impl<'a, T: Problem> EOA for APGSK<'a, T> {
                 &rg1,
                 &rg2,
                 &rg3,
-                kf,
+                &kf,
             );
 
             // PSEUDO-CODE FOR SENIOR GAINING SHARING KNOWLEDGE PHASE:
@@ -461,7 +718,7 @@ impl<'a, T: Problem> EOA for APGSK<'a, T> {
                 &r1,
                 &r2,
                 &r3,
-                kf,
+                &kf,
             );
 
             // check the lower and the upper bound.
@@ -493,7 +750,7 @@ impl<'a, T: Problem> EOA for APGSK<'a, T> {
                 d_gained_shared_senior_mask
             );*/
 
-            let d_gained_shared_junior_rand_mask = self.generate_d_gained_shared_rand_mask(kr);
+            let d_gained_shared_junior_rand_mask = self.generate_d_gained_shared_rand_mask(kr[0]);
             /* println!(
                 "d_gained_shared_junior_rand_mask : {:?}",
                 d_gained_shared_junior_rand_mask
@@ -503,7 +760,7 @@ impl<'a, T: Problem> EOA for APGSK<'a, T> {
                 &d_gained_shared_junior_mask,
                 &d_gained_shared_junior_rand_mask,
             );
-            let d_gained_shared_senior_rand_mask = self.generate_d_gained_shared_rand_mask(kr);
+            let d_gained_shared_senior_rand_mask = self.generate_d_gained_shared_rand_mask(kr[0]);
 
             // D_Gained_Shared_Senior_mask=and(D_Gained_Shared_Senior_mask,D_Gained_Shared_Senior_rand_mask);
             let d_gained_shared_senior_mask = self.and_masks(
@@ -554,6 +811,12 @@ impl<'a, T: Problem> EOA for APGSK<'a, T> {
                     copy_solution(&ui[i], &mut bsf_solution, problem_size);
                 }
             }
+
+            //--------------Calculate the improvemnt of each settings -------------------------------------
+            self.update_all_imp_step_1(&mut all_imp, &fitness, &children_fitness, &k_rand_ind);
+            self.update_all_imp_step_2(&mut all_imp);
+            //------------------------------------------------------------
+
             // SAVE THE BEST- FITNESS (convergence trend):
             //run_funcvals = [run_funcvals;bsf_fit_var];
             run_funcvals[g] = bsf_fit_var;
@@ -578,6 +841,48 @@ impl<'a, T: Problem> EOA for APGSK<'a, T> {
                       copy_solution(&pop[i], &mut popold[i], problem_size);
                   }*/
             }
+
+            //-------resizing the population size -----
+            // plan_pop_size = round((min_pop_size - max_pop_size)* ((nfes / max_nfes).^((1-nfes / max_nfes)))  + max_pop_size);
+            let plan_pop_size = self.resize_population(pop_size, g, max_iter);
+            if pop_size > plan_pop_size {
+                let mut reduction_ind_num = pop_size - plan_pop_size;
+                if pop_size - reduction_ind_num < min_pop_size {
+                    reduction_ind_num = pop_size - min_pop_size;
+                    for _i in 0..reduction_ind_num {
+                        //Sorte and sorting indexes:
+                        let mut ind_best: Vec<usize> = (0..fitness.len()).collect();
+                        ind_best.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
+                        let worst_ind = ind_best.last();
+                        match worst_ind {
+                            Some(index) => {
+                                pop.remove(*index);
+                                fitness.remove(*index);
+                                k.remove(*index);
+                                pop_size -= 1;
+                            }
+                            None => {}
+                        };
+                    }
+                }
+            }
+            /*
+            if pop_size > plan_pop_size
+                               reduction_ind_num = pop_size - plan_pop_size;
+                               if pop_size - reduction_ind_num <  min_pop_size; reduction_ind_num = pop_size - min_pop_size;end
+
+                               pop_size = pop_size - reduction_ind_num;
+                               for r = 1 : reduction_ind_num
+                                   [valBest indBest] = sort(fitness, 'ascend');
+                                   worst_ind = indBest(end);
+                                   popold(worst_ind,:) = [];
+                                   pop(worst_ind,:) = [];
+                                   fitness(worst_ind,:) = [];
+                                   K(worst_ind,:)=[];
+                               end
+
+                           end
+            */
         } // THE MAIN LOOP
 
         let duration = chronos.elapsed();
@@ -927,7 +1232,7 @@ mod apgsk_test {
 
         let mut gained_shared_junior =
             vec![vec![0.0f64; settings.dimensions]; settings.population_size];
-        let kf: f64 = 0.5;
+        let kf = vec![0.5; settings.population_size];
 
         gsk.update_gained_shared_junior(
             &mut gained_shared_junior,
@@ -936,7 +1241,7 @@ mod apgsk_test {
             &rg1,
             &rg2,
             &rg3,
-            kf,
+            &kf,
         );
 
         let ans0: Vec<f64> = vec![-5.205550000000001, 2.3628, -9.6837];
@@ -1044,7 +1349,7 @@ mod apgsk_test {
 
         let mut gained_shared_senior =
             vec![vec![0.0f64; settings.dimensions]; settings.population_size];
-        let kf: f64 = 0.5;
+        let kf = vec![0.5; settings.population_size];
 
         gsk.update_gained_shared_senior(
             &mut gained_shared_senior,
@@ -1053,7 +1358,7 @@ mod apgsk_test {
             &r1,
             &r2,
             &r3,
-            kf,
+            &kf,
         );
 
         let ans: Vec<&[f64]> = vec![
