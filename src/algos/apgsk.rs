@@ -309,6 +309,31 @@ impl<'a, T: Problem> APGSK<'a, T> {
             }
         }
     }
+
+    fn init_kind_and_k(&self) -> (Vec<f64>, Vec<f64>) {
+        let between01 = Uniform::from(0.0f64..1.0f64);
+        let between020 = Uniform::from(0usize..20usize);
+        let mut rng = rand::thread_rng();
+        let pop_size: usize = self.params.get_population_size();
+        let mut kind: Vec<f64> = vec![0.0; pop_size];
+        let mut k: Vec<f64> = vec![0.0; pop_size];
+
+        for i in 0..pop_size {
+            kind[i] = between01.sample(&mut rng);
+        }
+
+        // Fill K based on Kind
+        for i in 0..pop_size {
+            if kind[i] < 0.5f64 {
+                // Generate a random float in [0, 1)
+                k[i] = between01.sample(&mut rng);
+            } else {
+                // Generate a random integer in [1, 20]
+                k[i] = between020.sample(&mut rng) as f64;
+            }
+        }
+        (kind, k)
+    }
 }
 
 impl<'a, T: Problem> EOA for APGSK<'a, T> {
@@ -368,6 +393,15 @@ impl<'a, T: Problem> EOA for APGSK<'a, T> {
         let mut d_gained_shared_senior = vec![0.0f64; pop_size];
 
         let problem_size_f64: f64 = problem_size as f64;
+        //---------------------------------------------------
+        // KF_pool = [0.1 1.0 0.5 1.0];
+        // KR_pool = [0.2 0.1 0.9 0.9];
+        let kf_pool: Vec<f64> = vec![0.1, 1.0, 0.5, 1.0];
+        let kr_pool: Vec<f64> = vec![0.2, 0.1, 0.9, 0.9];
+
+        let (kind_vec, k_vec) = self.init_kind_and_k();
+        println!("kind_vec : {:?},\n k_vec : {:?}", kind_vec, k_vec);
+        //--------------------------------------------------
 
         //THE MAIN LOOP
         while g < max_iter {

@@ -6,18 +6,21 @@ use sefar::core::optimization_result::OptimizationResult;
 
 use sefar::algos::meo::MEO;
 // use sefar::algos::qago::{QAGOparams, QAGO};
+use sefar::algos::apgsk::{APGSKparams, APGSK};
 use sefar::algos::go::{GOparams, GO};
 use sefar::algos::gsk::{GSKparams, GSK};
 
 const DIM: usize = 5;
-const POP_SIZE: usize = 25;
+const POP_SIZE: usize = 12;
 const KMAX: usize = 2;
 
 fn main() {
     println!("Hello, sefar !");
 
     //-----------------------------------------------------------------------
-    gsk_f1_test1();
+    apgsk_f1_test1();
+
+    //gsk_f1_test1();
 
     //--------------------------------------------------------------------
     //println!("Evaluation with Max_Iter = {}", KMAX);
@@ -53,6 +56,46 @@ fn main() {
 }
 
 #[allow(dead_code)]
+fn apgsk_f1_test1() {
+    let mut settings: APGSKparams = APGSKparams::default();
+
+    settings.population_size = POP_SIZE;
+    settings.dimensions = DIM;
+    settings.max_iterations = KMAX;
+
+    let lb = vec![-100.0f64; DIM];
+    let ub = vec![100.0f64; DIM];
+
+    settings.lower_bounds = lb.as_slice();
+    settings.upper_bounds = ub.as_slice();
+
+    settings.partition_size_p = 0.10;
+
+    let mut fo = SumAbsFunction {}; // Sphere{};
+
+    let mut algo: APGSK<SumAbsFunction> = APGSK::new(&settings, &mut fo);
+
+    let result: OptimizationResult = algo.run();
+
+    /*match result.convergence_trend{
+        None => println!("QAGO: no convergence trend !!!"),
+        Some(cv) => println!("QAGO: Convergence trend :\n {:?}", cv),
+    };
+    */
+
+    /*match result.best_genome {
+        None => println!("QAGO: no best solution !"),
+        Some(bg)=> println!("QAGO: best-genome {:?}", bg),
+    };
+    */
+
+    println!(
+        "Gaining-Sharing Knowledge optimizer with Adaptive Parameters (APGSK) : F0 (SumAbsFunction) test; Result: {:?}",
+        result.to_string()
+    );
+}
+
+#[allow(dead_code)]
 fn gsk_f1_test1() {
     let mut settings: GSKparams = GSKparams::default();
 
@@ -68,9 +111,9 @@ fn gsk_f1_test1() {
 
     settings.partition_size_p = 0.2;
 
-    let mut fo = SumAbsFunction {}; // Sphere{};
+    let mut fo = Sphere {};
 
-    let mut algo: GSK<SumAbsFunction> = GSK::new(&settings, &mut fo);
+    let mut algo: GSK<Sphere> = GSK::new(&settings, &mut fo);
 
     let result: OptimizationResult = algo.run();
 
