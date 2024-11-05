@@ -36,7 +36,7 @@ impl<'a, T: Problem> GSK<'a, T> {
     /// problem: The problem to optimize.
     ///
     pub fn new(settings: &'a GSKparams, problem: &'a mut T) -> Self {
-        GSK {
+        Self {
             problem,
             params: settings,
         }
