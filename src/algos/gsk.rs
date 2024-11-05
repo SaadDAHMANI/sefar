@@ -1095,4 +1095,14 @@ mod gsk_test {
             }
         }
     }
+
+    #[test]
+    fn gsk_get_partition_size_p() {
+        let mut params: GSKparams = GSKparams::default();
+        params.p = 1.2;
+        assert_eq!(params.get_partition_size_p(), 0.1);
+
+        params.p = -0.5;
+        assert_eq!(params.get_partition_size_p(), 0.1);
+    }
 }
