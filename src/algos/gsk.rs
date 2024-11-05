@@ -124,10 +124,10 @@ impl<'a, T: Problem> GSK<'a, T> {
         ind_best: &Vec<usize>,
     ) -> (Vec<usize>, Vec<usize>, Vec<usize>) {
         let pop_size = ind_best.len();
-
+        let p_ratio = self.params.get_partition_size_p();
         // Calculate the ranges for R1, R2, and R3
-        let r1_size = (pop_size as f64 * 0.1).round() as usize;
-        let r2_size = (pop_size as f64 * 0.8).round() as usize;
+        let r1_size = (pop_size as f64 * p_ratio).round() as usize;
+        let r2_size = (pop_size as f64 * (1.0 - 2.0 * p_ratio)).round() as usize;
 
         let mut rng = rand::thread_rng();
 
@@ -359,8 +359,9 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 
         //--------------------------------------------------
         let kf = self.params.kf; //Knowledge Factor.
-        let kr = 0.9; //Knowledge Ratio.
-        let k = 10.0;
+        let kr = self.params.kr; //Knowledge Ratio.
+        let k = self.params.k; //Knowledge rate.
+
         let mut g: usize = 0;
 
         let mut d_gained_shared_junior = vec![0.0f64; pop_size];
@@ -623,6 +624,14 @@ impl<'a> GSKparams<'a> {
             kf,
             kr,
             k,
+        }
+    }
+
+    pub fn get_partition_size_p(&self) -> f64 {
+        if self.p > 1.0 || self.p < 0.0 {
+            0.1f64
+        } else {
+            self.p
         }
     }
 }
