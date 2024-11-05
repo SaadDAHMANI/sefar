@@ -20,7 +20,6 @@ use std::time::Instant;
 ///
 /// Written in Rust by Saad Dahmani <sd.dahmani2000@gmail.com>
 ///
-
 #[derive(Debug)]
 pub struct GSK<'a, T: Problem> {
     /// The problem to optimize. It must define the Problem trait.
@@ -319,7 +318,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
         let chronos = Instant::now();
 
         //-------------------------------------------------
-        let pop_size: usize = self.params.population_size;
+        let pop_size: usize = self.params.get_population_size();
         let max_iter: usize = self.params.max_iterations;
         let problem_size: usize = self.params.dimensions;
         //let max_nfes: usize = pop_size * (max_iter + 1);
@@ -629,12 +628,11 @@ impl<'a> GSKparams<'a> {
         }
     }
 
+    /// Check the partition size rate 'p'.
     pub fn get_partition_size_p(&self) -> f64 {
         let group1_size: f64 = (self.population_size as f64 * self.partition_size_p).round();
         let group3_size: f64 = (self.population_size as f64 - 2.0 * group1_size).round();
-
-        println!("group1 : {}, group3: {}", group1_size, group3_size);
-
+        //println!("group1 : {}, group3: {}", group1_size, group3_size);
         if group1_size < 1.0 || group3_size < 1.0 {
             0.1f64
         } else {
@@ -653,7 +651,7 @@ impl<'a> Parameters for GSKparams<'a> {
     }
 
     fn get_population_size(&self) -> usize {
-        usize::max(self.population_size, 6)
+        usize::max(self.population_size, 12)
     }
 
     fn get_lower_bounds(&self) -> Vec<f64> {
