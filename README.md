@@ -11,9 +11,11 @@
 - [X] Particle Swarm Optimization ([PSO](https://doi.org/10.1109/ICNN.1995.488968));
 - [X] Equilibrium optimizer ([EO](https://doi.org/10.1016/j.knosys.2019.105190));
 - [-] Modified Equilibrium optimizer ([MEO](https://doi.org/10.1016/j.asoc.2020.106542));
-- [X] Growth Optimizer ([GO](https://doi.org/10.1016/j.knosys.2022.110206)).
-- [X] Gaining-Sharing Knowledge ([GSK](https://doi.org/10.1007/s13042-019-01053-x))
-- [-] Gaining-Sharing Knowledge Based Algorithm With Adaptive Parameters ([APGSK](https://doi:10.1109/ACCESS.2021.3076091)).
+- [X] Growth Optimizer ([GO](https://doi.org/10.1016/j.knosys.2022.110206));
+- [X] Gaining-Sharing Knowledge ([GSK](https://doi.org/10.1007/s13042-019-01053-x));
+- [-] Gaining-Sharing Knowledge Based Algorithm With Adaptive Parameters ([APGSK](https://doi:10.1109/ACCESS.2021.3076091));
+- [-] LSHADE_SPACMA([LSHADE_SPACMA](https://ieeexplore.ieee.org/document/7969307))
+
 
 # Important
 
