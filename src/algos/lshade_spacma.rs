@@ -26,6 +26,22 @@ pub struct LshadeSpacma<'a, T: Problem> {
     pub params: &'a LshadeSpacmaParams<'a>,
 }
 
+impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
+    fn run(&mut self) -> OptimizationResult {
+        let result: OptimizationResult = OptimizationResult::get_none(String::from("n/a"));
+        let l_rate: f64 = 0.80;
+        let record_fes_factor: Vec<f64> = vec![
+            0.01, 0.02, 0.03, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
+        ];
+
+        let progress: usize = record_fes_factor.len();
+        //----------------------------------------------
+        let problem_size: usize = self.params.get_problem_dimension();
+
+        result
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct LshadeSpacmaParams<'a> {
     /// The number of search agents.
@@ -45,7 +61,7 @@ pub struct LshadeSpacmaParams<'a> {
 }
 
 impl<'a> Parameters for LshadeSpacmaParams<'a> {
-    fn get_dimensions(&self) -> usize {
+    fn get_problem_dimension(&self) -> usize {
         self.dimensions
     }
 

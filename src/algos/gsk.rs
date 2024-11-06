@@ -642,7 +642,7 @@ impl<'a> GSKparams<'a> {
 }
 
 impl<'a> Parameters for GSKparams<'a> {
-    fn get_dimensions(&self) -> usize {
+    fn get_problem_dimension(&self) -> usize {
         self.dimensions
     }
 

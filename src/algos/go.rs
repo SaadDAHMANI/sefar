@@ -50,7 +50,7 @@ impl<'a, T: Problem> GO<'a, T> {
     fn get_empty_solutions(&self, n: usize) -> Vec<Genome> {
         let mut result: Vec<Genome> = Vec::with_capacity(n);
         for i in 0..n {
-            result.push(Genome::new(i, self.params.get_dimensions()));
+            result.push(Genome::new(i, self.params.get_problem_dimension()));
         }
         result
     }
@@ -459,7 +459,7 @@ impl<'a> GOparams<'a> {
 }
 
 impl<'a> Parameters for GOparams<'a> {
-    fn get_dimensions(&self) -> usize {
+    fn get_problem_dimension(&self) -> usize {
         self.dimensions
     }
 

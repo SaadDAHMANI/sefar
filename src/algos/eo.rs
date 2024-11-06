@@ -48,7 +48,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
         match self.params.check() {
             Err(error) => OptimizationResult::get_none(error),
             Ok(()) => {
-                let dim = self.params.get_dimensions();
+                let dim = self.params.get_problem_dimension();
                 let particles_no = self.params.get_population_size();
                 let max_iter = self.params.get_max_iterations();
 
@@ -365,7 +365,7 @@ impl<'a> Parameters for EOparams<'a> {
         self.population_size
     }
 
-    fn get_dimensions(&self) -> usize {
+    fn get_problem_dimension(&self) -> usize {
         self.dimensions
     }
 

@@ -210,7 +210,7 @@ impl<'a> Parameters for PSOparams<'a> {
         self.population_size
     }
 
-    fn get_dimensions(&self) -> usize {
+    fn get_problem_dimension(&self) -> usize {
         self.dimensions
     }
 
