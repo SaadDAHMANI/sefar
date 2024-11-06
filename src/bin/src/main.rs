@@ -60,6 +60,17 @@ fn main() {
 #[allow(dead_code)]
 fn lshade_spacma_test1() {
     let settings: LshadeSpacmaParams = LshadeSpacmaParams::default();
+    let mut fo: SumAbsFunction = SumAbsFunction {};
+    let mut algo: LshadeSpacma<SumAbsFunction> = LshadeSpacma {
+        problem: &mut fo,
+        params: &settings,
+    };
+
+    let result = algo.run();
+    println!(
+        "LSHADE_SPACMA : F0 (SumAbsFunction) test; Result: {:?}",
+        result.to_string()
+    );
 }
 
 #[allow(dead_code)]
