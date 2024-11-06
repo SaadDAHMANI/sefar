@@ -58,12 +58,32 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
         // Initialize the main population
         let mut pop: Vec<Genome> = self.initialize(self.params, InitializationMode::RealUniform);
         let mut popold: Vec<Genome> = pop.clone();
-        pop[0].genes[0] = 2122.6;
+        //-----------------------------------------------------------------
+        let mut fitness: Vec<f64> = vec![0.0; pop_size];
+        let mut bsf_fit_var: f64 = f64::MAX;
+        let mut bsf_solution: Genome = Genome::new(0, problem_size);
+        let mut bsf_index: usize = 0;
 
-        println!(
-            "pop[0][0] = {}, popold[0][0] = {}",
-            pop[0].genes[0], popold[0].genes[0]
-        );
+        // Fitness function evaluation ------------------------------------
+        let mut i: usize = 0;
+        for genom in pop.iter_mut() {
+            fitness[i] = self.problem.objectivefunction(&genom.genes);
+            genom.fitness = Some(fitness[i]);
+            i += 1;
+            nfes += 1;
+        }
+
+        // save the best fitness and the best solution
+        for i in 0..pop_size {
+            if fitness[i] < bsf_fit_var {
+                bsf_fit_var = fitness[i];
+                copy_solution(&pop[i], &mut bsf_solution, problem_size);
+                bsf_index = i;
+            }
+        }
+
+        //save the best fitness for convergence trend.
+        run_funcvals[0] = bsf_fit_var;
 
         result
     }
