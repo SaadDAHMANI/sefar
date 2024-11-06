@@ -35,9 +35,23 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
         ];
 
         let progress: usize = record_fes_factor.len();
-        //----------------------------------------------
+        //-----------------------------------------------------------------
         let problem_size: usize = self.params.get_problem_dimension();
+        let pop_size: usize = self.params.get_population_size();
+        let max_iter: usize = self.params.get_max_iterations();
+        let max_nfes: usize = (max_iter + 1) * pop_size;
+        let mut nfes: usize = 0;
+        let mut run_funcvals: Vec<f64> = vec![-1.0; max_iter + 1];
 
+        //
+        // Parameter settings for L-SHADE----------------------------------
+        let p_best_rate: f64 = 0.11;
+        let arc_rate: f64 = 1.4;
+        let memory_size: usize = 5;
+        // pop_size = 18 * problem_size;
+        let max_pop_size: usize = usize::max(pop_size, 18 * problem_size);
+        let min_pop_size: usize = 4;
+        //------------------------------------------------------------------
         result
     }
 }
