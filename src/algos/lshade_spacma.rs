@@ -52,6 +52,18 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
         let max_pop_size: usize = usize::max(pop_size, 18 * problem_size);
         let min_pop_size: usize = 4;
         //------------------------------------------------------------------
+        // Parameter settings for Hybridization----------------------------
+        let first_calss_percentage: f64 = 0.5;
+        //-----------------------------------------------------------------
+        // Initialize the main population
+        let mut pop: Vec<Genome> = self.initialize(self.params, InitializationMode::RealUniform);
+        let mut popold: Vec<Genome> = self.initialize(self.params, InitializationMode::RealUniform);
+        let mut i: usize = 0;
+        for genom in pop.iter() {
+            copy_solution(genom, &mut popold[i], problem_size);
+            i += 1;
+        }
+
         result
     }
 }
