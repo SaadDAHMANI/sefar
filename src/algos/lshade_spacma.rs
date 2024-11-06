@@ -85,8 +85,35 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
         //save the best fitness for convergence trend.
         run_funcvals[0] = bsf_fit_var;
 
+        //----------------------------------------------------------
+        //  memory_sf = 0.5 .* ones(memory_size, 1);
+        //  memory_cr = 0.5 .* ones(memory_size, 1);
+        //  memory_pos = 1;
+        let memory_sf = vec![0.5; memory_size];
+        let memory_cr = vec![0.5; memory_size];
+        let memory_pos = 1; // 0;
+
+        let archive: Archive = Archive {
+            np: arc_rate * pop_size as f64,
+            pop: vec![0.0; problem_size],
+            funvalues: vec![0.0; problem_size],
+        };
+
+        let memory_1st_class_percentage: Vec<f64> = vec![first_calss_percentage; memory_size];
+
+        // Initialize CMAES parameters --------------------------------------
+
         result
     }
+}
+#[derive(Debug, Clone)]
+struct Archive {
+    /// The maximum size of the archive.
+    pub np: f64,
+    /// The solutions stored in te archive.
+    pub pop: Vec<f64>,
+    /// The function value of the archived solutions.
+    pub funvalues: Vec<f64>,
 }
 
 #[derive(Debug, Clone)]
