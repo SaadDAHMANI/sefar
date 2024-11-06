@@ -9,6 +9,7 @@ use sefar::algos::meo::MEO;
 // use sefar::algos::apgsk::{APGSKparams, APGSK};
 use sefar::algos::go::{GOparams, GO};
 use sefar::algos::gsk::{GSKparams, GSK};
+use sefar::algos::lshade_spacma::{LshadeSpacma, LshadeSpacmaParams};
 
 const DIM: usize = 5;
 const POP_SIZE: usize = 12;
@@ -54,6 +55,11 @@ fn main() {
         println!("_________________________________________________________________");
         go_f1_binary_test();
     }*/
+}
+
+#[allow(dead_code)]
+fn lshade_spacma_test1() {
+    let settings: LshadeSpacmaParams = LshadeSpacmaParams::default();
 }
 
 #[allow(dead_code)]

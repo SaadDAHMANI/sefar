@@ -57,12 +57,13 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
         //-----------------------------------------------------------------
         // Initialize the main population
         let mut pop: Vec<Genome> = self.initialize(self.params, InitializationMode::RealUniform);
-        let mut popold: Vec<Genome> = self.initialize(self.params, InitializationMode::RealUniform);
-        let mut i: usize = 0;
-        for genom in pop.iter() {
-            copy_solution(genom, &mut popold[i], problem_size);
-            i += 1;
-        }
+        let mut popold: Vec<Genome> = pop.clone();
+        pop[0].genes[0] = 2122.6;
+
+        println!(
+            "pop[0][0] = {}, popold[0][0] = {}",
+            pop[0].genes[0], popold[0].genes[0]
+        );
 
         result
     }
@@ -74,7 +75,7 @@ pub struct LshadeSpacmaParams<'a> {
     pub population_size: usize,
 
     /// The dimension of the optimization problem (i.e., the length of the solution).
-    pub dimensions: usize,
+    pub problem_dimension: usize,
 
     /// The maximum number of iterations serves as the stopping criterion for the optimization process.
     pub max_iterations: usize,
@@ -88,7 +89,7 @@ pub struct LshadeSpacmaParams<'a> {
 
 impl<'a> Parameters for LshadeSpacmaParams<'a> {
     fn get_problem_dimension(&self) -> usize {
-        self.dimensions
+        self.problem_dimension
     }
 
     fn get_max_iterations(&self) -> usize {
@@ -105,5 +106,17 @@ impl<'a> Parameters for LshadeSpacmaParams<'a> {
 
     fn get_upper_bounds(&self) -> Vec<f64> {
         self.upper_bounds.to_vec()
+    }
+}
+
+impl<'a> Default for LshadeSpacmaParams<'a> {
+    fn default() -> Self {
+        Self {
+            population_size: 10,
+            problem_dimension: 3,
+            max_iterations: 2,
+            lower_bounds: &[-100.0, -100.0, -100.0],
+            upper_bounds: &[100.0, 100.0, 100.0],
+        }
     }
 }
