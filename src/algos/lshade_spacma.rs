@@ -141,6 +141,76 @@ impl<'a, T: Problem> LshadeSpacma<'a, T> {
             copy_solution(&source[i], &mut target[i], problem_size);
         }
     }
+
+    fn update_memory_params(
+        &self,
+        pop_size: usize,
+        memory_size: usize,
+        memory_sf: &[f64],
+        memory_cr: &[f64],
+    ) -> (Vec<usize>, Vec<f64>, Vec<f64>, Vec<f64>) {
+        //mem_rand_index = ceil(memory_size * rand(pop_size, 1));
+        let mut rand_vec: Vec<f64> = vec![0.0; pop_size];
+        self.randomize_0to1(&mut rand_vec);
+
+        let mut mem_rand_index: Vec<usize> = vec![0; pop_size];
+        for i in 0..pop_size {
+            mem_rand_index[i] = (rand_vec[i] * memory_size as f64).ceil() as usize;
+        }
+
+        //mu_sf = memory_sf(mem_rand_index);
+        let mu_sf: Vec<f64> = mem_rand_index
+            .iter()
+            .map(|&index| memory_sf[index])
+            .collect();
+
+        //mu_cr = memory_cr(mem_rand_index);
+        let mu_cr: Vec<f64> = mem_rand_index
+            .iter()
+            .map(|&index| memory_cr[index])
+            .collect();
+
+        //mem_rand_ratio = rand(pop_size, 1);
+        let mut mem_rand_ratio: Vec<f64> = vec![0.0; pop_size];
+        self.randomize_0to1(&mut mem_rand_ratio);
+        (mem_rand_index, mu_sf, mu_cr, mem_rand_ratio)
+    }
+
+    fn generate_crosover_rate(&self, mu_cr: &[f64]) {
+        // %% for generating crossover rate
+        //cr = normrnd(mu_cr, 0.1);
+        //term_pos = find(mu_cr == -1);
+        //cr(term_pos) = 0;
+        //cr = min(cr, 1);
+        //cr = max(cr, 0);
+        let mut cr: Vec<f64> = mu_cr.iter().map(|x| normal_rand1(*x, 0.1)).collect();
+        for i in 0..cr.len() {
+            if cr[i] == -1.0 {
+                cr[i] = 0.0;
+            }
+        }
+
+        let cr: Vec<f64> = cr.iter_mut().map(|x| x.clamp(0.0, 1.0)).collect();
+    }
+
+    fn generat_scaling_factor(&self, pop_size: usize, max_nfes: usize) {
+        //if(nfes <= max_nfes/2)
+        //sf=0.45+.1*rand(pop_size, 1);
+        //pos = find(sf <= 0);
+        //while ~ isempty(pos)
+        //sf(pos)=0.45+0.1*rand(length(pos), 1);
+        //pos = find(sf <= 0);
+        //end
+        //else
+        //sf = mu_sf + 0.1 * tan(pi * (rand(pop_size, 1) - 0.5));
+        //pos = find(sf <= 0);
+        //while ~ isempty(pos)
+        //sf(pos) = mu_sf(pos) + 0.1 * tan(pi * (rand(length(pos), 1) - 0.5));
+        //pos = find(sf <= 0);
+        //end
+        //end
+        //sf = min(sf, 1);
+    }
 }
 
 impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
@@ -248,11 +318,21 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
             let mut sorted_index: Vec<usize> = (0..fitness.len()).collect();
             sorted_index.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
 
-            println!(
+            /* println!(
                 "fitness: {:?}, \n sorted_index: {:?}",
                 fitness, sorted_index
-            );
-        }
+            );*/
+            //mem_rand_index = ceil(memory_size * rand(pop_size, 1));
+            //mu_sf = memory_sf(mem_rand_index);
+            //mu_cr = memory_cr(mem_rand_index);
+            //mem_rand_ratio = rand(pop_size, 1);
+            let (mem_rand_index, mu_sf, mu_cr, mem_rand_ratio) =
+                self.update_memory_params(pop_size, memory_size, &memory_sf, &memory_cr);
+            // Generate crossover rate
+            let cr = self.generate_crosover_rate(&mu_cr);
+
+            // Generate scaling factor
+        } //END MAIN LOOP.
 
         result
     }
@@ -376,5 +456,31 @@ mod lshade_spacma_test {
         assert_eq!(pc, ans_pc);
         assert_eq!(ps, ans_ps);
         assert_eq!(chi_n, ans_chi_n);
+    }
+
+    #[test]
+    fn lshade_spacma_update_memory_params_test1() {
+        //mu_sf = memory_sf(mem_rand_index);
+        let mem_rand_index = vec![3, 1, 2];
+        let memory_sf = vec![10.0, 20.0, 30.0, 40.0];
+        let mu_sf: Vec<f64> = mem_rand_index
+            .iter()
+            .map(|&index| memory_sf[index])
+            .collect();
+
+        assert_eq!(mu_sf, vec![40.0, 20.0, 30.0]);
+    }
+
+    #[test]
+    fn crosover_rate_test() {
+        let mut cr: Vec<f64> = vec![1.0, -1.0, 0.5, 1.7];
+        for i in 0..cr.len() {
+            if cr[i] == -1.0 {
+                cr[i] = 0.0;
+            }
+        }
+
+        let cr: Vec<f64> = cr.iter_mut().map(|x| x.clamp(0.0, 1.0)).collect();
+        assert_eq!(cr, vec![1.0, 0.0, 0.5, 1.0]);
     }
 }
