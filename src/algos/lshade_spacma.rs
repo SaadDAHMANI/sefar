@@ -63,6 +63,34 @@ impl<'a, T: Problem> LshadeSpacma<'a, T> {
         let sum_weightsp2: f64 = weights.iter().fold(0.0, |acc, w| acc + w.powi(2));
         sum_weights / sum_weightsp2
     }
+
+    fn strategy_setting_adaptation(
+        &self,
+        problem_size: usize,
+        mueff: f64,
+    ) -> (f64, f64, f64, f64, f64) {
+        let problem_size_f64 = problem_size as f64;
+        //% Strategy parameter setting: Adaptation
+        //cc = (4 + mueff/problem_size) / (problem_size + 4 + 2*mueff/problem_size); % time constant for cumulation for C
+        let cc = (4.0 + mueff / problem_size_f64)
+            / (problem_size_f64 + 4.0 + 2.0 * mueff / problem_size_f64);
+
+        //cs = (mueff+2) / (problem_size+mueff+5);  % t-const for cumulation for sigma control
+        let cs = (mueff + 2.0) / (problem_size_f64 + mueff + 5.0);
+
+        //c1 = 2 / ((problem_size+1.3)^2+mueff);    % learning rate for rank-one update of C
+        let c1 = 2.0 / ((problem_size_f64 + 1.3).powi(2) + mueff);
+
+        //cmu = min(1-c1, 2 * (mueff-2+1/mueff) / ((problem_size+2)^2+mueff));  % and for rank-mu update
+        let cmu: f64 = f64::min(
+            1.0 - c1,
+            2.0 * (mueff - 2.0 + 1.0 / mueff) / ((problem_size_f64 + 2.0).powi(2) + mueff),
+        );
+        //damps = 1 + 2*max(0, sqrt((mueff-1)/(problem_size+1))-1) + cs; % damping for sigma usually close to 1
+        let tmp = f64::sqrt((mueff - 1.0) / (problem_size_f64 + 1.0)) - 1.0;
+        let damps = 1.0 + cs + 2.0 * f64::max(0.0, tmp);
+        (cc, cs, c1, cmu, damps)
+    }
 }
 
 impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
@@ -146,6 +174,9 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
         self.randomize_0to1(&mut xmean);
         let mu: usize = pop_size / 2; //number of parents/points for recombination
         let weights = self.get_weights(mu); //weights = log(mu+1/2)-log(1:mu)'; % muXone array for weighted recombination
+        let mueff: f64 = self.get_mueff(&weights);
+        //% Strategy parameter setting: Adaptation---------------------------
+        let (cc, cs, c1, cmu, damps) = self.strategy_setting_adaptation(problem_size, mueff);
 
         result
     }
@@ -236,5 +267,21 @@ mod lshade_spacma_test {
 
         assert_eq!(weights, ans);
         assert_eq!(mueff, 5.938888539979187);
+    }
+
+    #[test]
+    fn lshade_spama_strategy_setting_adaptation_test1() {
+        let settings: LshadeSpacmaParams = LshadeSpacmaParams::default();
+        let mut fo: Sphere = Sphere {};
+        let algo: LshadeSpacma<Sphere> = LshadeSpacma::new(&settings, &mut fo);
+        let problem_size: usize = 12;
+        let mueff: f64 = 5.938804235601242;
+
+        let (cc, cs, c1, cmu, damps) = algo.strategy_setting_adaptation(problem_size, mueff);
+        assert_eq!(cc, 0.264564630908058);
+        assert_eq!(cs, 0.3460862281251846);
+        assert_eq!(c1, 1.093919532188545e-02);
+        assert_eq!(cmu, 4.067755393929940e-02);
+        assert_eq!(damps, 1.3460862281251846);
     }
 }
