@@ -91,6 +91,45 @@ impl<'a, T: Problem> LshadeSpacma<'a, T> {
         let damps = 1.0 + cs + 2.0 * f64::max(0.0, tmp);
         (cc, cs, c1, cmu, damps)
     }
+
+    fn dynamic_strategy_parameters(
+        &self,
+        problem_size: usize,
+    ) -> (
+        Vec<f64>,
+        Vec<f64>,
+        Vec<Vec<usize>>,
+        Vec<usize>,
+        Vec<Vec<usize>>,
+        Vec<Vec<usize>>,
+        f64,
+    ) {
+        // % Initialize dynamic (internal) strategy parameters and constants
+        //pc = zeros(problem_size,1);
+        //ps = zeros(problem_size,1);   % evolution paths for C and sigma
+        //B = eye(problem_size,problem_size);                       % B defines the coordinate system
+        //D = ones(problem_size,1);                      % diagonal D defines the scaling
+        //C = B * diag(D.^2) * B';            % covariance matrix C
+        //invsqrtC = B * diag(D.^-1) * B';    % C^-1/2
+        //eigeneval = 0;                      % track update of B and D
+        //chiN=problem_size^0.5*(1-1/(4*problem_size)+1/(21*problem_size^2));  % expectation of
+        let pc: Vec<f64> = vec![0.0; problem_size];
+        let ps: Vec<f64> = vec![0.0; problem_size];
+        let mut b: Vec<Vec<usize>> = vec![vec![0; problem_size]; problem_size];
+        //let mut c: Vec<Vec<usize>> = vec![vec![0; problem_size]; problem_size];
+        for i in 0..problem_size {
+            b[i][i] = 1;
+            //c[i][i] = 1;
+        }
+
+        let d: Vec<usize> = vec![1; problem_size];
+        let c = b.clone();
+        let invsqrt_c = c.clone();
+        let problem_sizef64 = problem_size as f64;
+        let chi_n = problem_sizef64.powf(0.5)
+            * (1.0 - 1.0 / (4.0 * problem_sizef64) + 1.0 / (21.0 * problem_sizef64.powi(2)));
+        (pc, ps, b, d, c, invsqrt_c, chi_n)
+    }
 }
 
 impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
@@ -175,8 +214,11 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
         let mu: usize = pop_size / 2; //number of parents/points for recombination
         let weights = self.get_weights(mu); //weights = log(mu+1/2)-log(1:mu)'; % muXone array for weighted recombination
         let mueff: f64 = self.get_mueff(&weights);
-        //% Strategy parameter setting: Adaptation---------------------------
+        //% Strategy parameter setting: Adaptation----------------------------------------------------------------------
         let (cc, cs, c1, cmu, damps) = self.strategy_setting_adaptation(problem_size, mueff);
+        //  % Initialize dynamic (internal) strategy parameters and constants-------------------------------------------
+        let (pc, ps, b, d, c, invsqrt_c, chi_n) = self.dynamic_strategy_parameters(problem_size);
+        let eigeneval = 0; // track update of B and D
 
         result
     }
