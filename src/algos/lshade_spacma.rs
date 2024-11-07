@@ -130,6 +130,17 @@ impl<'a, T: Problem> LshadeSpacma<'a, T> {
             * (1.0 - 1.0 / (4.0 * problem_sizef64) + 1.0 / (21.0 * problem_sizef64.powi(2)));
         (pc, ps, b, d, c, invsqrt_c, chi_n)
     }
+
+    fn clone_population(
+        &self,
+        source: &Vec<Genome>,
+        target: &mut Vec<Genome>,
+        problem_size: usize,
+    ) {
+        for i in 0..source.len() {
+            copy_solution(&source[i], &mut target[i], problem_size);
+        }
+    }
 }
 
 impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
@@ -219,6 +230,29 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
         //  % Initialize dynamic (internal) strategy parameters and constants-------------------------------------------
         let (pc, ps, b, d, c, invsqrt_c, chi_n) = self.dynamic_strategy_parameters(problem_size);
         let eigeneval = 0; // track update of B and D
+                           //--------------------------------------------------------------------------------------------------------------
+
+        // MAIN LOOP
+        let hybridization_flag: usize = 1;
+        while nfes < max_nfes {
+            //  pop = popold; the old population becomes the current population
+            self.clone_population(&popold, &mut pop, problem_size);
+            for i in 0..pop.len() {
+                fitness[i] = self.problem.objectivefunction(&pop[i].genes);
+                pop[i].fitness = Some(fitness[i]);
+                nfes += 1;
+            }
+
+            // Sort fitness :
+            //Sorte and sorting indexes:
+            let mut sorted_index: Vec<usize> = (0..fitness.len()).collect();
+            sorted_index.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
+
+            println!(
+                "fitness: {:?}, \n sorted_index: {:?}",
+                fitness, sorted_index
+            );
+        }
 
         result
     }
@@ -277,10 +311,10 @@ impl<'a> Default for LshadeSpacmaParams<'a> {
     fn default() -> Self {
         Self {
             population_size: 10,
-            problem_dimension: 3,
+            problem_dimension: 4,
             max_iterations: 2,
-            lower_bounds: &[-100.0, -100.0, -100.0],
-            upper_bounds: &[100.0, 100.0, 100.0],
+            lower_bounds: &[-100.0, -100.0, -100.0, -100.0],
+            upper_bounds: &[100.0, 100.0, 100.0, 100.0],
         }
     }
 }
