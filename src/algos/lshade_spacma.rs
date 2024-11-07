@@ -326,4 +326,21 @@ mod lshade_spacma_test {
         assert_eq!(cmu, 4.067755393929940e-02);
         assert_eq!(damps, 1.3460862281251846);
     }
+
+    #[test]
+    fn lshade_spacma_dynamic_strategy_parameters_test1() {
+        let settings: LshadeSpacmaParams = LshadeSpacmaParams::default();
+        let mut fo: Sphere = Sphere {};
+        let algo: LshadeSpacma<Sphere> = LshadeSpacma::new(&settings, &mut fo);
+        let problem_size: usize = 4;
+
+        let (pc, ps, _b, _d, _c, _invsqrt_c, chi_n) =
+            algo.dynamic_strategy_parameters(problem_size);
+        let ans_pc = vec![0.0f64; 4];
+        let ans_ps = vec![0.0f64; 4];
+        let ans_chi_n: f64 = 1.880952380952381;
+        assert_eq!(pc, ans_pc);
+        assert_eq!(ps, ans_ps);
+        assert_eq!(chi_n, ans_chi_n);
+    }
 }
