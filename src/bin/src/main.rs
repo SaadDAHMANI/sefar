@@ -17,6 +17,9 @@ const KMAX: usize = 200;
 
 fn main() {
     println!("Hello, sefar !");
+    let pop_size: usize = 11;
+    let mu: usize = pop_size / 2;
+    println!("mu = {}", mu);
 
     //-----------------------------------------------------------------------
 

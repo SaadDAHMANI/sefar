@@ -26,6 +26,45 @@ pub struct LshadeSpacma<'a, T: Problem> {
     pub params: &'a LshadeSpacmaParams<'a>,
 }
 
+impl<'a, T: Problem> LshadeSpacma<'a, T> {
+    pub fn new(settings: &'a LshadeSpacmaParams, problem: &'a mut T) -> Self {
+        Self {
+            problem,
+            params: settings,
+        }
+    }
+    fn randomize_0to1(&self, randvect: &mut Vec<f64>) {
+        let between = Uniform::from(0.0..1.0);
+        let mut rng = rand::thread_rng();
+
+        for i in 0..randvect.len() {
+            randvect[i] = between.sample(&mut rng);
+        }
+    }
+
+    fn get_weights(&self, mu: usize) -> Vec<f64> {
+        //weights = log(mu+1/2)-log(1:mu)'; % muXone array for weighted recombination
+        let mut weights: Vec<f64> = vec![0.0; mu];
+        for i in 1..mu + 1 {
+            weights[i - 1] = (mu as f64 + 0.5).ln() - f64::ln(i as f64);
+        }
+
+        // weights = weights/sum(weights);
+        let sum_weights: f64 = weights.iter().sum();
+        for i in 0..mu {
+            weights[i] = weights[i] / sum_weights;
+        }
+        weights
+    }
+
+    fn get_mueff(&self, weights: &[f64]) -> f64 {
+        //mueff=sum(weights)^2/sum(weights.^2); % variance-effectiveness of sum w_i x_i}
+        let sum_weights: f64 = weights.iter().sum();
+        let sum_weightsp2: f64 = weights.iter().fold(0.0, |acc, w| acc + w.powi(2));
+        sum_weights / sum_weightsp2
+    }
+}
+
 impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
     fn run(&mut self) -> OptimizationResult {
         let result: OptimizationResult = OptimizationResult::get_none(String::from("n/a"));
@@ -102,6 +141,11 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
         let memory_1st_class_percentage: Vec<f64> = vec![first_calss_percentage; memory_size];
 
         // Initialize CMAES parameters --------------------------------------
+        let sigma: f64 = 0.5; // coordinate wise standard deviation (step size)
+        let mut xmean: Vec<f64> = vec![0.0; problem_size]; // rand(problem_size, 1); // objective variables initial point
+        self.randomize_0to1(&mut xmean);
+        let mu: usize = pop_size / 2; //number of parents/points for recombination
+        let weights = self.get_weights(mu); //weights = log(mu+1/2)-log(1:mu)'; % muXone array for weighted recombination
 
         result
     }
@@ -165,5 +209,32 @@ impl<'a> Default for LshadeSpacmaParams<'a> {
             lower_bounds: &[-100.0, -100.0, -100.0],
             upper_bounds: &[100.0, 100.0, 100.0],
         }
+    }
+}
+
+#[cfg(test)]
+mod lshade_spacma_test {
+    use crate::benchmarks::functions::Sphere;
+
+    use super::*;
+
+    #[test]
+    fn lshade_spacma_get_weights_test1() {
+        let settings: LshadeSpacmaParams = LshadeSpacmaParams::default();
+        let mut fo: Sphere = Sphere {};
+        let algo: LshadeSpacma<Sphere> = LshadeSpacma::new(&settings, &mut fo);
+        let mut weights = algo.get_weights(10);
+        let ans = vec![
+            0.27961, 0.19719, 0.14897, 0.11476, 0.08823, 0.06655, 0.04822, 0.03234, 0.01833, 0.0058,
+        ];
+
+        for i in 0..10 {
+            weights[i] = (weights[i] * 100000.0).round() / 100000.0;
+        }
+
+        let mueff = algo.get_mueff(&weights);
+
+        assert_eq!(weights, ans);
+        assert_eq!(mueff, 5.938888539979187);
     }
 }

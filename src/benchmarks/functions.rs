@@ -43,8 +43,10 @@ impl Problem for Sphere {
 }
 
 ///
-/// F2 = Sum(x_i) + Prod(x_i) = Sum(X) + Prod(X)
-///
+/// F2 = Sum(x_i) + Prod(x_i) = Sum(X) + Prod(X).
+/// Search space : [-100.0, 100.0];
+/// Problem dimension : 30;
+/// Optimal value = vec![0.0; 30];
 #[derive(Debug, Clone)]
 pub struct F2 {}
 impl Problem for F2 {
