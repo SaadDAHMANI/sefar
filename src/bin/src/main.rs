@@ -23,7 +23,7 @@ fn main() {
 
     //apgsk_f1_test1();
 
-    //gsk_f1_test1();
+    gsk_f1_test1();
 
     //--------------------------------------------------------------------
     //println!("Evaluation with Max_Iter = {}", KMAX);
@@ -135,18 +135,6 @@ fn gsk_f1_test1() {
     let mut algo: GSK<Sphere> = GSK::new(&settings, &mut fo);
 
     let result: OptimizationResult = algo.run();
-
-    /*match result.convergence_trend{
-        None => println!("QAGO: no convergence trend !!!"),
-        Some(cv) => println!("QAGO: Convergence trend :\n {:?}", cv),
-    };
-    */
-
-    /*match result.best_genome {
-        None => println!("QAGO: no best solution !"),
-        Some(bg)=> println!("QAGO: best-genome {:?}", bg),
-    };
-    */
 
     println!(
         "Gaining-Sharing Knowledge optimizer (GSK) : F1 (Sphere) test; Result: {:?}",

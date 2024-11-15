@@ -20,6 +20,17 @@ use std::time::Instant;
 ///
 /// Written in Rust by Saad Dahmani <sd.dahmani2000@gmail.com>
 ///
+/// To use GSK algorithm:
+/// use sefar::algos::gsk::{GSKparams, GSK};
+/// use crate::benchmarks::functions::Sphere;
+/// let settings: GSKparams = GSKparams::default();
+/// let mut fo = Sphere {};
+/// let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
+/// let result: OptimizationResult = algo.run();
+/// println!(
+///    "Gaining-Sharing Knowledge optimizer (GSK) : F1 (Sphere) test; Result: {:?}",
+///    result.to_string());
+///
 #[derive(Debug)]
 pub struct GSK<'a, T: Problem> {
     /// The problem to optimize. It must define the Problem trait.
@@ -34,7 +45,13 @@ impl<'a, T: Problem> GSK<'a, T> {
     /// Return a new instance of the Gaining-Sharing Knowledge Optimizer (GSK).
     /// settings: The optimization parameters,
     /// problem: The problem to optimize.
+    /// Example :
     ///
+    /// use sefar::algos::gsk::{GSKparams, GSK};
+    /// use crate::benchmarks::functions::Sphere;
+    /// let settings: GSKparams = GSKparams::default();
+    /// let mut fo = Sphere {};
+    /// let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
     pub fn new(settings: &'a GSKparams, problem: &'a mut T) -> Self {
         Self {
             problem,
