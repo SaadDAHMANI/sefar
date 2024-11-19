@@ -116,10 +116,10 @@ To run *report* feature:
 cargo run --features report;
 ```
 
-|Algorithm       | *_report_* feature | *_binary_* feature                  | *_parallel_* feature |
-|----------------|--------------------|-------------------------------------|----------------------|
-|*PSO*           | :heavy_check_mark: |                                     |                      |
-|*EO*            | :heavy_check_mark: | :heavy_check_mark: S-Shape function | :heavy_check_mark:   |
-|*GO*            | :heavy_check_mark: | :heavy_check_mark: S-Shape functio  | :heavy_check_mark:   |
-|*GSK*           | :heavy_check_mark: |                                     |                      |
-|*LSHADE_SPACMA* |                    |                                     |                      |
+|Algorithm       | *_report_* feature | *_binary_* feature         | *_parallel_* feature |
+|----------------|--------------------|----------------------------|----------------------|
+|*PSO*           | :heavy_check_mark: | &#x2610;                   |                      |
+|*EO*            | :heavy_check_mark: | :heavy_check_mark: S-Shape | :heavy_check_mark:   |
+|*GO*            | :heavy_check_mark: | :heavy_check_mark: S-Shape | :heavy_check_mark:   |
+|*GSK*           | :heavy_check_mark: |                            |                      |
+|*LSHADE_SPACMA* |                    |                            |                      |
