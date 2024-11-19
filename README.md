@@ -109,11 +109,19 @@ impl Problem for F1 {
 ```
 
 ## Supported features
+[Sefar](https://github.com/SaadDAHMANI/sefar) supports *_report_*, *_binary_* and *_parallel_* features.
 
-To run *report* feature:
+1. Run *_report_* feature:
 
 ```bash
+# run report feature:
 cargo run --features report;
+
+# run binary feature:
+cargo run --features binary;
+
+# run parallel feature:
+cargo run --features parallel;
 ```
 
 |Algorithm       | *_report_* feature | *_binary_* feature         | *_parallel_* feature |
