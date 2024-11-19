@@ -19,7 +19,7 @@ fn main() {
     println!("Hello, sefar !");
     //-----------------------------------------------------------------------
 
-    lshade_spacma_test1();
+    //lshade_spacma_test1();
 
     //apgsk_f1_test1();
 
@@ -129,6 +129,7 @@ fn gsk_f1_test1() {
     settings.upper_bounds = ub.as_slice();
 
     settings.partition_size_p = 0.2;
+    settings.kr = 10.0;
 
     let mut fo = Sphere {};
 

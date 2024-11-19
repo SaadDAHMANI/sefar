@@ -749,24 +749,24 @@ impl<'a> Parameters for GSKparams<'a> {
 
         if self.k <= 0.0 {
             msg = format!(
-                "{} The knowledge rate 'k' should be greater than 0!; \n",
-                msg
+                "{} The knowledge rate 'k' should be greater than 0! [actual value k={:?}]; \n",
+                msg, self.k
             );
             errors += 1;
         };
 
         if self.kf <= 0.0 {
             msg = format!(
-                "{} The knowledge factor 'kf' should be greater than 0!; \n",
-                msg
+                "{} The knowledge factor 'kf' should be greater than 0! [actual value kf={:?}]; \n",
+                msg, self.kf
             );
             errors += 1;
         };
 
         if self.kr < 0.0 || self.kr > 1.0 {
             msg = format!(
-                "{} The knowledge ratio 'kr' should be in the range [0, 1]!; \n",
-                msg
+                "{} The knowledge ratio 'kr' should be in the range [0, 1]! [actual value kr={:?}]; \n",
+                msg, self.kr
             );
             errors += 1;
         };
