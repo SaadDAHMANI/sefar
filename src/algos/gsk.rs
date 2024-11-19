@@ -555,10 +555,13 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                     //run_funcvals = [run_funcvals;bsf_fit_var];
                     run_funcvals[g] = bsf_fit_var;
 
-                    println!(
+                    /* println!(
                         "iter : {} -- best_fit : {} -- best_sol:{:?}",
                         g, bsf_fit_var, bsf_solution
-                    );
+                    );*/
+
+                    #[cfg(feature = "report")]
+                    println!("Iter : {}, best-fitness : {}", g, bsf_fit_var);
 
                     // UPDATE THE SEARCH POPULATION:
                     for i in 0..pop_size {

@@ -110,8 +110,13 @@ impl Problem for F1 {
 
 ## Supported features
 
-Features        | Designation                                                           |
-| ------------- | --------------------------------------------------------------------------- |
-| *_binary_*    | Run binary optimization using **S-Shape** function (**only with EO & GO**)  |
-| *_parallel_*  | Run optimization in parallel mode using Rayon crate (**only with EO & GO**) |
-| *_report_*    | Show the evolution of the optimization process at each iteration            |
+To run *report* feature:
+```bash
+cargo run --features report;
+```
+Algorithm       | *_report_* feature | *_binary_* feature   |  *_parallel_* feature |
+*PSO*           | [x]                | [ ]                  | [ ]                   |
+*EO*            | [x]                | [x] S-Shape function | [x]                   |
+*GO*            | [x]                | [x] S-Shape functio  | [x]                   |
+*GSK*           | [x]                | [ ]                  | [ ]                   |
+*LSHADE_SPACMA* | [x]                | [ ]                  | [ ]                   |
