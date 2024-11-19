@@ -40,7 +40,7 @@ pub trait Parameters {
 
         if self.get_problem_dimension() == 0 {
             msg = format!(
-                "{} Search space dimensions must be greater than 0!; \n",
+                "{} Search space dimension (i.e., problem dimension or decision variables) must be greater than 0!; \n",
                 msg
             );
             errors += 1;
