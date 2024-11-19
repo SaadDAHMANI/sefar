@@ -747,6 +747,30 @@ impl<'a> Parameters for GSKparams<'a> {
             errors += 1;
         }
 
+        if self.k <= 0.0 {
+            msg = format!(
+                "{} The knowledge rate 'k' should be greater than 0!; \n",
+                msg
+            );
+            errors += 1;
+        };
+
+        if self.kf <= 0.0 {
+            msg = format!(
+                "{} The knowledge factor 'kf' should be greater than 0!; \n",
+                msg
+            );
+            errors += 1;
+        };
+
+        if self.kr < 0.0 || self.kr > 1.0 {
+            msg = format!(
+                "{} The knowledge ratio 'kr' should be in the range [0, 1]!; \n",
+                msg
+            );
+            errors += 1;
+        };
+
         if errors > 0 {
             msg = format!("There are [{}] errors : \n {}", errors, msg.trim());
             Err(msg)
