@@ -39,7 +39,7 @@ impl<'a, T: Problem> EOA for PSO<'a, T> {
         match self.params.check() {
             Err(error) => OptimizationResult::get_none(error),
             Ok(()) => {
-                let dim = self.params.dimensions;
+                let dim = self.params.problem_dimension;
                 let ub = self.params.upper_bounds;
                 let lb = self.params.lower_bounds;
                 let max_iter = self.params.max_iterations;
@@ -169,7 +169,7 @@ impl<'a, T: Problem> EOA for PSO<'a, T> {
 #[derive(Debug, Clone)]
 pub struct PSOparams<'a> {
     pub population_size: usize,
-    pub dimensions: usize,
+    pub problem_dimension: usize,
     pub max_iterations: usize,
     pub lower_bounds: &'a [f64],
     pub upper_bounds: &'a [f64],
@@ -190,7 +190,7 @@ impl<'a> PSOparams<'a> {
     ) -> Result<PSOparams<'a>, String> {
         let params = PSOparams {
             population_size: p_size,
-            dimensions: dim,
+            problem_dimension: dim,
             max_iterations: max_iter,
             lower_bounds: lb,
             upper_bounds: ub,
@@ -211,7 +211,7 @@ impl<'a> Parameters for PSOparams<'a> {
     }
 
     fn get_problem_dimension(&self) -> usize {
-        self.dimensions
+        self.problem_dimension
     }
 
     fn get_max_iterations(&self) -> usize {
@@ -249,7 +249,7 @@ impl<'a> Default for PSOparams<'a> {
     fn default() -> Self {
         PSOparams {
             population_size: 10,
-            dimensions: 3,
+            problem_dimension: 3,
             max_iterations: 100,
             lower_bounds: &[-100.0f64, -100.0, -100.0],
             upper_bounds: &[100.0f64, 100.0, 100.0],

@@ -79,7 +79,7 @@ fn apgsk_f1_test1() {
     let mut settings: GSKparams = GSKparams::default(); // APGSKparams = APGSKparams::default();
 
     settings.population_size = POP_SIZE;
-    settings.dimensions = DIM;
+    settings.problem_dimension = DIM;
     settings.max_iterations = KMAX;
 
     let lb = vec![-100.0f64; DIM];
@@ -119,7 +119,7 @@ fn gsk_f1_test1() {
     let mut settings: GSKparams = GSKparams::default();
 
     settings.population_size = POP_SIZE;
-    settings.dimensions = DIM;
+    settings.problem_dimension = DIM;
     settings.max_iterations = KMAX;
 
     let lb = vec![-100.0f64; DIM];
@@ -179,7 +179,7 @@ fn go_f1_test1() {
     let mut settings: GOparams = GOparams::default();
 
     settings.population_size = POP_SIZE;
-    settings.dimensions = DIM;
+    settings.problem_dimension = DIM;
     settings.max_iterations = KMAX;
 
     let lb = vec![-100.0f64; DIM];
@@ -217,7 +217,7 @@ fn go_f2_test1() {
     let mut settings: GOparams = GOparams::default();
 
     settings.population_size = POP_SIZE;
-    settings.dimensions = DIM;
+    settings.problem_dimension = DIM;
     settings.max_iterations = KMAX;
 
     let lb = vec![-100.0f64; DIM];
@@ -382,7 +382,7 @@ fn peo_f1_test1() {
     let mut settings: PSOparams = PSOparams::default();
 
     settings.population_size = POP_SIZE;
-    settings.dimensions = DIM;
+    settings.problem_dimension = DIM;
     settings.max_iterations = KMAX;
 
     let lb = vec![-100.0f64; DIM];

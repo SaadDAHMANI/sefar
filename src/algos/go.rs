@@ -122,7 +122,7 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
         let chronos = Instant::now();
 
         let n: usize = self.params.population_size;
-        let d: usize = self.params.dimensions;
+        let d: usize = self.params.problem_dimension;
         let max_iter: usize = self.params.max_iterations;
 
         #[cfg(not(feature = "binary"))]
@@ -425,7 +425,7 @@ pub struct GOparams<'a> {
     pub population_size: usize,
 
     /// The dimension of the optimization problem (i.e., the length of the solution).
-    pub dimensions: usize,
+    pub problem_dimension: usize,
 
     /// The maximum number of iterations serves as the stopping criterion for the optimization process.
     pub max_iterations: usize,
@@ -450,7 +450,7 @@ impl<'a> GOparams<'a> {
     pub fn new(pop_size: usize, dim: usize, max_iter: usize, lb: &'a [f64], ub: &'a [f64]) -> Self {
         GOparams {
             population_size: pop_size,
-            dimensions: dim,
+            problem_dimension: dim,
             max_iterations: max_iter,
             lower_bounds: lb,
             upper_bounds: ub,
@@ -460,7 +460,7 @@ impl<'a> GOparams<'a> {
 
 impl<'a> Parameters for GOparams<'a> {
     fn get_problem_dimension(&self) -> usize {
-        self.dimensions
+        self.problem_dimension
     }
 
     fn get_max_iterations(&self) -> usize {
@@ -500,7 +500,7 @@ impl<'a> Default for GOparams<'a> {
     fn default() -> Self {
         GOparams {
             population_size: 20,
-            dimensions: 3,
+            problem_dimension: 3,
             max_iterations: 100,
             lower_bounds: &[-100.0f64, -100.0, -100.0],
             upper_bounds: &[100.0f64, 100.0, 100.0],

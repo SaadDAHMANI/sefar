@@ -45,8 +45,8 @@ impl<'a, T: Problem> GSK<'a, T> {
     /// Return a new instance of the Gaining-Sharing Knowledge Optimizer (GSK).
     /// settings: The optimization parameters,
     /// problem: The problem to optimize.
-    /// Example :
     ///
+    /// Example :
     /// use sefar::algos::gsk::{GSKparams, GSK};
     /// use crate::benchmarks::functions::Sphere;
     /// let settings: GSKparams = GSKparams::default();
@@ -181,7 +181,7 @@ impl<'a, T: Problem> GSK<'a, T> {
 
     fn bound_constraint(&self, vi: &mut Vec<Vec<f64>>, pop: &Vec<Genome>) {
         let np = self.params.population_size; // Population size
-        let d = self.params.dimensions; //pop[0].len(); // Dimension
+        let d = self.params.problem_dimension; //pop[0].len(); // Dimension
         let lb = self.params.get_lower_bounds();
         let ub = self.params.get_upper_bounds();
 
@@ -208,7 +208,7 @@ impl<'a, T: Problem> GSK<'a, T> {
         d_gained_shared_junior: &Vec<f64>,
     ) -> Vec<Vec<bool>> {
         let pop_size: usize = self.params.population_size;
-        let problem_size: usize = self.params.dimensions;
+        let problem_size: usize = self.params.problem_dimension;
 
         // Initialize the mask matrix
         let mut mask = vec![vec![false; problem_size]; pop_size];
@@ -227,7 +227,7 @@ impl<'a, T: Problem> GSK<'a, T> {
 
     fn generate_d_gained_shared_rand_mask(&self, kr: f64) -> Vec<Vec<bool>> {
         let pop_size: usize = self.params.population_size;
-        let problem_size: usize = self.params.dimensions;
+        let problem_size: usize = self.params.problem_dimension;
         let interval01 = Uniform::from(0.0f64..1.0f64);
         let mut rng = rand::thread_rng();
 
@@ -244,7 +244,7 @@ impl<'a, T: Problem> GSK<'a, T> {
 
     fn and_masks(&self, mask1: &Vec<Vec<bool>>, mask2: &Vec<Vec<bool>>) -> Vec<Vec<bool>> {
         let pop_size: usize = self.params.population_size;
-        let problem_size: usize = self.params.dimensions;
+        let problem_size: usize = self.params.problem_dimension;
 
         let mut result_mask = vec![vec![false; problem_size]; pop_size];
 
@@ -267,7 +267,7 @@ impl<'a, T: Problem> GSK<'a, T> {
         kf: f64,
     ) {
         let pop_size = self.params.population_size;
-        let problem_size = self.params.dimensions;
+        let problem_size = self.params.problem_dimension;
 
         for i in 0..pop_size {
             if fitness[i] > fitness[rg3[i]] {
@@ -303,7 +303,7 @@ impl<'a, T: Problem> GSK<'a, T> {
         kf: f64,
     ) {
         let pop_size = self.params.population_size;
-        let problem_size = self.params.dimensions;
+        let problem_size = self.params.problem_dimension;
 
         for i in 0..pop_size {
             if fitness[i] > fitness[r2[i]] {
@@ -330,6 +330,15 @@ impl<'a, T: Problem> GSK<'a, T> {
 }
 
 impl<'a, T: Problem> EOA for GSK<'a, T> {
+    /// Run GSK optimizer:
+    /// Example :
+    /// use sefar::algos::gsk::{GSKparams, GSK};
+    /// use crate::benchmarks::functions::Sphere;
+    /// let settings: GSKparams = GSKparams::default();
+    /// let mut fo = Sphere {};
+    /// let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
+    /// let result = gsk.run();
+    ///
     fn run(&mut self) -> OptimizationResult {
         match self.params.check() {
             Err(eror) => OptimizationResult::get_none(eror),
@@ -339,7 +348,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                 //-------------------------------------------------
                 let pop_size: usize = self.params.get_population_size();
                 let max_iter: usize = self.params.max_iterations;
-                let problem_size: usize = self.params.dimensions;
+                let problem_size: usize = self.params.problem_dimension;
                 //let max_nfes: usize = pop_size * (max_iter + 1);
                 //--------------------------------------------------
                 //let mut nfes: usize = 0; // function evaluation counter.
@@ -588,11 +597,11 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 ///
 #[derive(Debug, Clone)]
 pub struct GSKparams<'a> {
-    /// The number of search agents.
+    /// Number of search agents.
     pub population_size: usize,
 
-    /// The dimension of the optimization problem (i.e., the length of the solution).
-    pub dimensions: usize,
+    /// Dimension of the optimization problem (i.e., the length of the solution).
+    pub problem_dimension: usize,
 
     /// The maximum number of iterations serves as the stopping criterion for the optimization process.
     pub max_iterations: usize,
@@ -643,7 +652,7 @@ impl<'a> GSKparams<'a> {
     ) -> Self {
         Self {
             population_size: pop_size,
-            dimensions: problem_size,
+            problem_dimension: problem_size,
             max_iterations: max_iter,
             lower_bounds: lb,
             upper_bounds: ub,
@@ -669,7 +678,7 @@ impl<'a> GSKparams<'a> {
 
 impl<'a> Parameters for GSKparams<'a> {
     fn get_problem_dimension(&self) -> usize {
-        self.dimensions
+        self.problem_dimension
     }
 
     fn get_max_iterations(&self) -> usize {
@@ -713,7 +722,7 @@ impl<'a> Default for GSKparams<'a> {
     fn default() -> Self {
         GSKparams {
             population_size: 12,
-            dimensions: 3,
+            problem_dimension: 3,
             max_iterations: 1,
             lower_bounds: &[-100.0f64, -100.0, -100.0],
             upper_bounds: &[100.0f64, 100.0, 100.0],
@@ -919,7 +928,7 @@ mod gsk_test {
         assert_eq!(fitness[11], 10.8023);
 
         let mut gained_shared_junior =
-            vec![vec![0.0f64; settings.dimensions]; settings.population_size];
+            vec![vec![0.0f64; settings.problem_dimension]; settings.population_size];
         let kf: f64 = 0.5;
 
         gsk.update_gained_shared_junior(
@@ -1036,7 +1045,7 @@ mod gsk_test {
         assert_eq!(fitness[11], 18.3375);
 
         let mut gained_shared_senior =
-            vec![vec![0.0f64; settings.dimensions]; settings.population_size];
+            vec![vec![0.0f64; settings.problem_dimension]; settings.population_size];
         let kf: f64 = 0.5;
 
         gsk.update_gained_shared_senior(
@@ -1085,8 +1094,8 @@ mod gsk_test {
         ];
 
         let mut settings: GSKparams = GSKparams::default();
-        let lb = vec![-10.0f64; settings.dimensions];
-        let ub = vec![10.0f64; settings.dimensions];
+        let lb = vec![-10.0f64; settings.problem_dimension];
+        let ub = vec![10.0f64; settings.problem_dimension];
         settings.population_size = 4;
         settings.lower_bounds = &lb;
         settings.upper_bounds = &ub;
@@ -1120,7 +1129,7 @@ mod gsk_test {
         gsk.bound_constraint(&mut junior_set, &pop);
 
         for i in 0..settings.population_size {
-            for j in 0..settings.dimensions {
+            for j in 0..settings.problem_dimension {
                 assert_eq!(
                     (junior_set[i][j] * 100.0).round(),
                     (ans_bounded_set[i][j] * 100.0).round()
