@@ -59,6 +59,32 @@ impl<'a, T: Problem> GSK<'a, T> {
         }
     }
 
+    fn evaluate_solutions(&mut self, pop: &mut Vec<Genome>, fitness: &mut [f64]) {
+        // Sequential mode
+        #[cfg(not(feature = "parallel"))]
+        {
+            for i in 0..self.params.get_population_size() {
+                fitness[i] = self.problem.objectivefunction(&pop[i].genes);
+                pop[i].fitness = Some(fitness[i]);
+                //nfes += 1;
+                //println!("fitness[{}] = {}", i, fitness[i]);
+            }
+        }
+
+        //___________Parallel mode________________
+        #[cfg(feature = "parallel")]
+        {
+            pop.par_iter_mut()
+                .for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));
+            for i in 0..n {
+                match x[i].fitness {
+                    None => fitness[i] = f64::MAX,
+                    Some(fit) => fitness[i] = fit,
+                };
+            }
+        }
+    }
+
     fn find_indices(&self, x: &Vec<usize>, target: usize) -> usize {
         let y: Vec<usize> = x
             .iter()
@@ -369,12 +395,8 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                 let mut pop = self.initialize(self.params, InitializationMode::RealUniform); //popold.clone();
 
                 // Objective function evaluation:
-                for i in 0..pop_size {
-                    fitness[i] = self.problem.objectivefunction(&pop[i].genes);
-                    pop[i].fitness = Some(fitness[i]);
-                    //nfes += 1;
-                    //println!("fitness[{}] = {}", i, fitness[i]);
-                }
+                self.evaluate_solutions(&mut pop, &mut fitness);
+
                 // Save the best fitness value for convergence trend:
                 for i in 0..pop_size {
                     if fitness[i] < bsf_fit_var {
@@ -534,11 +556,14 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                     }
 
                     //  children_fitness = feval(ui); %
-                    for i in 0..pop_size {
+                    /* for i in 0..pop_size {
                         children_fitness[i] = self.problem.objectivefunction(&ui[i].genes);
                         ui[i].fitness = Some(children_fitness[i]);
                         //nfes += 1;
-                    }
+                    }*/
+
+                    // Objective function evaluation for childrens
+                    self.evaluate_solutions(&mut ui, &mut children_fitness);
 
                     // SAVE THE BEST SOLUTION:
                     // if children_fitness(i) < bsf_fit_var
