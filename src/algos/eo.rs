@@ -18,7 +18,7 @@ use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
 
 ///
-/// Sequential Equilibrium Optimizer (EO)
+/// Equilibrium Optimizer (EO)
 /// Reference:
 /// "Faramarzi, A., Heidarinejad, M., Stephens, B., & Mirjalili, S. (2020).
 /// Equilibrium optimizer: A novel optimization algorithm. Knowledge-Based Systems, 191, 105190."
@@ -317,16 +317,29 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
         }
     }
 }
-
+/// Define parameters for Equilibrium Optimizer
 #[derive(Debug, Clone)]
 pub struct EOparams<'a> {
+    /// number of search agents (population size)
     pub population_size: usize,
+
+    /// problem dimension (i.e., number of decision variables)
     pub dimensions: usize,
+
+    /// maximum number of iterations
     pub max_iterations: usize,
+
+    /// search space lower bounds
     pub lower_bounds: &'a [f64],
+
+    /// search space upper bounds,
     pub upper_bounds: &'a [f64],
+
+    /// EO parameter
     pub a1: f64,
+    /// EO parameter
     pub a2: f64,
+    /// EO parameter
     pub gp: f64,
 }
 
