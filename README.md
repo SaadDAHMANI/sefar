@@ -129,5 +129,5 @@ cargo run --features parallel;
 |*PSO*           | :heavy_check_mark: |                            |                      |
 |*EO*            | :heavy_check_mark: | :heavy_check_mark: S-Shape | :heavy_check_mark:   |
 |*GO*            | :heavy_check_mark: | :heavy_check_mark: S-Shape | :heavy_check_mark:   |
-|*GSK*           | :heavy_check_mark: |                            |                      |
+|*GSK*           | :heavy_check_mark: |                            | :heavy_check_mark:   |
 |*LSHADE_SPACMA* |                    |                            |                      |

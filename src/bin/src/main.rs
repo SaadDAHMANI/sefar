@@ -9,7 +9,7 @@ use sefar::algos::meo::MEO;
 // use sefar::algos::apgsk::{APGSKparams, APGSK};
 use sefar::algos::go::{GOparams, GO};
 use sefar::algos::gsk::{GSKparams, GSK};
-use sefar::algos::lshade_spacma::{LshadeSpacma, LshadeSpacmaParams};
+//use sefar::algos::lshade_spacma::{LshadeSpacma, LshadeSpacmaParams};
 
 const DIM: usize = 5;
 const POP_SIZE: usize = 12;
@@ -23,7 +23,10 @@ fn main() {
 
     //apgsk_f1_test1();
 
+    #[cfg(not(feature = "parallel"))]
     gsk_f1_test1();
+    #[cfg(feature = "parallel")]
+    para_gsk_f1_test1();
 
     //--------------------------------------------------------------------
     //println!("Evaluation with Max_Iter = {}", KMAX);
@@ -58,6 +61,7 @@ fn main() {
     }*/
 }
 
+/*
 #[allow(dead_code)]
 fn lshade_spacma_test1() {
     let settings: LshadeSpacmaParams = LshadeSpacmaParams::default();
@@ -73,6 +77,7 @@ fn lshade_spacma_test1() {
         result.to_string()
     );
 }
+*/
 
 #[allow(dead_code)]
 fn apgsk_f1_test1() {
@@ -139,6 +144,36 @@ fn gsk_f1_test1() {
 
     println!(
         "Gaining-Sharing Knowledge optimizer (GSK) : F1 (Sphere) test; Result: {:?}",
+        result.to_string()
+    );
+}
+
+#[cfg(feature = "parallel")]
+#[allow(dead_code)]
+fn para_gsk_f1_test1() {
+    let mut settings: GSKparams = GSKparams::default();
+
+    settings.population_size = POP_SIZE;
+    settings.problem_dimension = DIM;
+    settings.max_iterations = KMAX;
+
+    let lb = vec![-100.0f64; DIM];
+    let ub = vec![100.0f64; DIM];
+
+    settings.lower_bounds = lb.as_slice();
+    settings.upper_bounds = ub.as_slice();
+
+    //settings.partition_size_p = 0.2;
+    settings.kr = 0.8;
+
+    let mut fo = Sphere {};
+
+    let mut algo: GSK<Sphere> = GSK::new(&settings, &mut fo);
+
+    let result: OptimizationResult = algo.run();
+
+    println!(
+        "Parallel Gaining-Sharing Knowledge optimizer (Para-GSK) : F1 (Sphere) test; Result: {:?}",
         result.to_string()
     );
 }

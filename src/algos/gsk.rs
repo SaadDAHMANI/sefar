@@ -4,10 +4,13 @@ use crate::core::genome::Genome;
 use crate::core::optimization_result::OptimizationResult;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
+
 //use rand::rngs::ThreadRng;
 use rand_distr::{Distribution, Uniform};
-//#[cfg(feature = "parallel")]
-//use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
+
+#[cfg(feature = "parallel")]
+use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
+
 use std::time::Instant;
 
 /// GSK : Gaining-Sharing Knowedge algorithm.
@@ -60,10 +63,11 @@ impl<'a, T: Problem> GSK<'a, T> {
     }
 
     fn evaluate_solutions(&mut self, pop: &mut Vec<Genome>, fitness: &mut [f64]) {
+        let n = self.params.get_population_size();
         // Sequential mode
         #[cfg(not(feature = "parallel"))]
         {
-            for i in 0..self.params.get_population_size() {
+            for i in 0..n {
                 fitness[i] = self.problem.objectivefunction(&pop[i].genes);
                 pop[i].fitness = Some(fitness[i]);
                 //nfes += 1;
@@ -77,7 +81,7 @@ impl<'a, T: Problem> GSK<'a, T> {
             pop.par_iter_mut()
                 .for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));
             for i in 0..n {
-                match x[i].fitness {
+                match pop[i].fitness {
                     None => fitness[i] = f64::MAX,
                     Some(fit) => fitness[i] = fit,
                 };
