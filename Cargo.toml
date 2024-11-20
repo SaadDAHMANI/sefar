@@ -1,10 +1,10 @@
 [package]
 name = "sefar"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
-authors = ["Saad Dahmani <sd.dahmani2000@gmail.com>"] 
+authors = ["Saad Dahmani <sd.dahmani2000@gmail.com>"]
 description ="sefar is library for evolutionary optimization algorithms."
-keywords = ["optimization", "metaheuristic", "evolutionary", "algorithm"] 
+keywords = ["optimization", "metaheuristic", "evolutionary", "algorithm"]
 license = "MIT"
 
 
