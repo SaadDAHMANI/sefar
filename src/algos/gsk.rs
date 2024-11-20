@@ -24,6 +24,7 @@ use std::time::Instant;
 /// Written in Rust by Saad Dahmani <sd.dahmani2000@gmail.com>
 ///
 /// To use GSK algorithm:
+/// ```rust
 /// use sefar::algos::gsk::{GSKparams, GSK};
 /// use sefar::benchmarks::functions::Sphere;
 /// let settings: GSKparams = GSKparams::default();
@@ -33,7 +34,7 @@ use std::time::Instant;
 /// println!(
 ///    "Gaining-Sharing Knowledge optimizer (GSK) : F1 (Sphere) test; Result: {:?}",
 ///    result.to_string());
-///
+///```
 #[derive(Debug)]
 pub struct GSK<'a, T: Problem> {
     /// The problem to optimize. It must define the Problem trait.
@@ -50,11 +51,13 @@ impl<'a, T: Problem> GSK<'a, T> {
     /// problem: The problem to optimize.
     ///
     /// Example :
+    /// ```rust
     /// use sefar::algos::gsk::{GSKparams, GSK};
     /// use sefar::benchmarks::functions::Sphere;
     /// let settings: GSKparams = GSKparams::default();
     /// let mut fo = Sphere {};
     /// let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
+    /// ```
     pub fn new(settings: &'a GSKparams, problem: &'a mut T) -> Self {
         Self {
             problem,
@@ -362,13 +365,14 @@ impl<'a, T: Problem> GSK<'a, T> {
 impl<'a, T: Problem> EOA for GSK<'a, T> {
     /// Run GSK optimizer:
     /// Example :
+    /// ```rust
     /// use sefar::algos::gsk::{GSKparams, GSK};
     /// use sefar::benchmarks::functions::Sphere;
     /// let settings: GSKparams = GSKparams::default();
     /// let mut fo = Sphere {};
     /// let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
     /// let result = gsk.run();
-    ///
+    /// ```
     fn run(&mut self) -> OptimizationResult {
         match self.params.check() {
             Err(eror) => OptimizationResult::get_none(eror),
