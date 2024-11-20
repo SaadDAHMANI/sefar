@@ -25,7 +25,7 @@ use std::time::Instant;
 ///
 /// To use GSK algorithm:
 /// use sefar::algos::gsk::{GSKparams, GSK};
-/// use crate::benchmarks::functions::Sphere;
+/// use sefar::benchmarks::functions::Sphere;
 /// let settings: GSKparams = GSKparams::default();
 /// let mut fo = Sphere {};
 /// let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
@@ -51,7 +51,7 @@ impl<'a, T: Problem> GSK<'a, T> {
     ///
     /// Example :
     /// use sefar::algos::gsk::{GSKparams, GSK};
-    /// use crate::benchmarks::functions::Sphere;
+    /// use sefar::benchmarks::functions::Sphere;
     /// let settings: GSKparams = GSKparams::default();
     /// let mut fo = Sphere {};
     /// let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
@@ -363,7 +363,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
     /// Run GSK optimizer:
     /// Example :
     /// use sefar::algos::gsk::{GSKparams, GSK};
-    /// use crate::benchmarks::functions::Sphere;
+    /// use sefar::benchmarks::functions::Sphere;
     /// let settings: GSKparams = GSKparams::default();
     /// let mut fo = Sphere {};
     /// let gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);

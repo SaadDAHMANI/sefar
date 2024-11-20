@@ -13,7 +13,7 @@ use sefar::algos::gsk::{GSKparams, GSK};
 
 const DIM: usize = 5;
 const POP_SIZE: usize = 12;
-const KMAX: usize = 10;
+const KMAX: usize = 200;
 
 fn main() {
     println!("Hello, sefar !");
