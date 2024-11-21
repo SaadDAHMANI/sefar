@@ -361,7 +361,7 @@ fn eo_f1_test1() {
     let mut settings: EOparams = EOparams::default();
 
     settings.population_size = POP_SIZE;
-    settings.dimensions = DIM;
+    settings.problem_dimension = DIM;
     settings.max_iterations = KMAX;
 
     let lb = vec![-100.0f64; DIM];
@@ -390,7 +390,7 @@ fn eo_f1_binary_test() {
     let mut settings: EOparams = EOparams::default();
 
     settings.population_size = POP_SIZE;
-    settings.dimensions = DIM;
+    settings.problem_dimension = DIM;
     settings.max_iterations = KMAX;
 
     let lb = vec![0.0f64; DIM];
@@ -446,7 +446,7 @@ fn meo_test1() {
     let mut settings: EOparams = EOparams::default();
 
     settings.population_size = 7;
-    settings.dimensions = 3;
+    settings.problem_dimension = 3;
     settings.max_iterations = 2;
 
     let lb = vec![-100.0f64; 3];
@@ -474,7 +474,7 @@ fn para_meo_test1() {
     let mut settings: EOparams = EOparams::default();
 
     settings.population_size = 7;
-    settings.dimensions = 3;
+    settings.problem_dimension = 3;
     settings.max_iterations = 2;
 
     let lb = vec![-100.0f64; 3];

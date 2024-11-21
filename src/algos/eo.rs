@@ -324,7 +324,7 @@ pub struct EOparams<'a> {
     pub population_size: usize,
 
     /// problem dimension (i.e., number of decision variables)
-    pub dimensions: usize,
+    pub problem_dimension: usize,
 
     /// maximum number of iterations
     pub max_iterations: usize,
@@ -357,7 +357,7 @@ impl<'a> EOparams<'a> {
     ) -> Result<EOparams<'a>, String> {
         let params = EOparams {
             population_size: p_size,
-            dimensions: dim,
+            problem_dimension: dim,
             max_iterations: max_iter,
             lower_bounds: lb,
             upper_bounds: ub,
@@ -379,7 +379,7 @@ impl<'a> Parameters for EOparams<'a> {
     }
 
     fn get_problem_dimension(&self) -> usize {
-        self.dimensions
+        self.problem_dimension
     }
 
     fn get_max_iterations(&self) -> usize {
@@ -418,7 +418,7 @@ impl<'a> Default for EOparams<'a> {
     fn default() -> Self {
         EOparams {
             population_size: 10,
-            dimensions: 3,
+            problem_dimension: 3,
             max_iterations: 100,
             lower_bounds: &[-100.0f64, -100.0, -100.0],
             upper_bounds: &[100.0f64, 100.0, 100.0],
@@ -445,7 +445,7 @@ mod eo_params_tests {
         let params = EOparams {
             population_size: n,
             max_iterations: k,
-            dimensions: d,
+            problem_dimension: d,
             lower_bounds: lb.as_slice(),
             upper_bounds: ub.as_slice(),
             a1: 2.0f64,
