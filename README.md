@@ -16,11 +16,6 @@
 - [-] Gaining-Sharing Knowledge Based Algorithm With Adaptive Parameters ([APGSK](https://doi:10.1109/ACCESS.2021.3076091));
 - [-] LSHADE_SPACMA([LSHADE_SPACMA](https://ieeexplore.ieee.org/document/7969307))
 
-
-# Important
-
-**In the current version, binary and parallel optimization are implemented exclusively for the Equilibrium Optimizer (EO) and the Growth Optimizer (GO). Soon, these features will be available for the other algorithms as well.**
-
 ## Binary optimization
 
 In the current version, binarization is performed using the S-Shape function provided below:
