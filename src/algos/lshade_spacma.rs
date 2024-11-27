@@ -288,6 +288,35 @@ impl<'a, T: Problem> LshadeSpacma<'a, T> {
         }
         (r1, r2)
     }
+
+    fn choose_from_top_solutions(
+        &self,
+        pop: &Vec<Genome>,
+        pop_size: usize,
+        p_best_rate: f64,
+        sorted_index: &[usize],
+    ) -> Vec<Genome> {
+        // pNP = max(round(p_best_rate * pop_size), 2); %% choose at least two best solutions
+        // randindex = ceil(rand(1, pop_size) .* pNP); %% select from [1, 2, 3, ..., pNP]
+        // randindex = max(1, randindex); %% to avoid the problem that rand = 0 and thus ceil(rand) = 0
+        // pbest = pop(sorted_index(randindex), :); %% randomly choose one of the top 100p% solutions
+        //
+        let pnpv: f64 = f64::max(p_best_rate * pop_size as f64, 2.0); // choose at least two best solutions
+        let pnp: usize = pnpv.round() as usize;
+
+        let mut randindex: Vec<usize> = vec![0; pop_size];
+        let interval = Uniform::from(0..pnp);
+        let mut rng = rand::thread_rng();
+        for i in 0..pop_size {
+            randindex[i] = interval.sample(&mut rng);
+        }
+
+        let mut pbest: Vec<Genome> = Vec::with_capacity(pop_size);
+        for k in 0..pop_size {
+            pbest.push(pop[sorted_index[randindex[k]]].clone());
+        }
+        pbest
+    }
 }
 
 impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
@@ -436,6 +465,8 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
             pop_all.push(Genome::from(0, &archive.pop, f64::MAX)); // Extend with archive.pop
                                                                    //[r1, r2] = gnR1R2(pop_size, size(popAll, 1), r0);
             let (r1, r2) = self.gnr1r2(pop_size, pop_all.len());
+            // println!("r1 = {:?} \n r2 = {:?}", r1, r2);
+            let pbest = self.choose_from_top_solutions(&pop, pop_size, p_best_rate, &sorted_index);
         } //END MAIN LOOP.
 
         result
