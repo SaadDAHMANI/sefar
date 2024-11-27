@@ -317,6 +317,55 @@ impl<'a, T: Problem> LshadeSpacma<'a, T> {
         }
         pbest
     }
+
+    fn get_vi(
+        &self,
+        pop: &[Genome],
+        pop_all: &[Genome],
+        pbest: &[Genome],
+        class_select_index: &[usize],
+        sf: &[f64],
+        r1: &[usize],
+        r2: &[usize],
+    ) {
+        /*
+        vi=[];
+        temp=[];
+        if(sum(Class_Select_Index)~=0)
+            vi(Class_Select_Index,:) = pop(Class_Select_Index,:) + sf(Class_Select_Index, ones(1, problem_size)) .* (pbest(Class_Select_Index,:) - pop(Class_Select_Index,:) +
+            pop(r1(Class_Select_Index), :) - popAll(r2(Class_Select_Index), :));
+        end
+
+        if(sum(~Class_Select_Index)~=0)
+            for k=1:sum(~Class_Select_Index)
+                temp(:,k) = xmean + sigma * B * (D .* randn(problem_size,1)); % m + sig * Normal(0,C)
+            end
+            vi(~Class_Select_Index,:) = temp';
+        end
+        */
+        let pop_size = class_select_index.len();
+        let dim = self.params.get_problem_dimension();
+
+        let mut vi: Vec<Vec<f64>> = vec![vec![0.0; dim]; pop_size];
+
+        let sum_class: usize = class_select_index.iter().sum();
+
+        if sum_class != 0 {
+            for i in 0..pop_size {
+                if class_select_index[i] == 1 {
+                    for j in 0..self.params.get_problem_dimension() {
+                        // vi(Class_Select_Index,:) = pop(Class_Select_Index,:) +
+                        // sf(Class_Select_Index, ones(1, problem_size)) .* (pbest(Class_Select_Index,:) - pop(Class_Select_Index,:)
+                        // + pop(r1(Class_Select_Index), :) - popAll(r2(Class_Select_Index), :));
+                        vi[i][j] = pop[i].genes[j]
+                            + (sf[i] * (pbest[i].genes[j] - pop[i].genes[j] - pop[r1[i]].genes[j])
+                                - pop_all[r2[i]].genes[j]);
+                        0000
+                    }
+                }
+            }
+        }
+    }
 }
 
 impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
@@ -446,7 +495,7 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
 
             // For generating Hybridization Class probability
             // Select Class_Select_Index
-            let mut class_select_index: Vec<bool> = mem_rand_index
+            let mut class_select_index_bool: Vec<bool> = mem_rand_index
                 .iter()
                 .map(|&index| {
                     // Adjust MATLAB 1-based index to Rust 0-based index
@@ -458,7 +507,14 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
             // Apply Hybridization_flag logic
             if hybridization_flag == 0 {
                 // All values will be true (equivalent to MATLAB `or(Class_Select_Index, ~Class_Select_Index)`)
-                class_select_index = vec![true; pop_size];
+                class_select_index_bool = vec![true; pop_size];
+            }
+
+            let mut class_select_index: Vec<usize> = vec![0; class_select_index_bool.len()];
+            for k in 0..class_select_index_bool.len() {
+                if class_select_index_bool[k] == true {
+                    class_select_index[k] = 1;
+                }
             }
 
             let mut pop_all = pop.clone(); // Start with pop.
