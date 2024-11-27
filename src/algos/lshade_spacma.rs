@@ -197,6 +197,7 @@ impl<'a, T: Problem> LshadeSpacma<'a, T> {
         let cr: Vec<f64> = cr.iter_mut().map(|x| x.clamp(0.0, 1.0)).collect();
     }
 
+    /// Update the scaling_factor (sf).
     fn update_scaling_factor(
         &self,
         sf: &mut [f64],
@@ -248,6 +249,44 @@ impl<'a, T: Problem> LshadeSpacma<'a, T> {
                 };
             }
         }
+    }
+
+    fn gnr1r2(&self, np1: usize, np2: usize) -> (Vec<usize>, Vec<usize>) {
+        // r0 = [1 : pop_size];
+        let mut r0: Vec<usize> = vec![0; np1];
+        for i in 0..np1 {
+            r0[i] = i;
+        }
+        //
+        //NP0 = length(r0);
+        //let np0 = r0.len();
+        //r1 = floor(rand(1, NP0) * NP1) + 1;
+        let mut r1: Vec<usize> = r0.clone();
+        let interval = Uniform::from(0..np1);
+        let mut rng = rand::thread_rng();
+        let mut k: usize = 0;
+        for i in 0..np1 {
+            while r1[i] == r0[i] && k < 999 {
+                r1[i] = interval.sample(&mut rng);
+                k += 1;
+            }
+            k = 0;
+        }
+        //r2 = floor(rand(1, NP0) * NP2) + 1;
+        let mut r2: Vec<usize> = r0.clone();
+        let interval2 = Uniform::from(0..np2);
+        k = 0;
+        for i in 0..np1 {
+            while r2[i] == r0[i] || r2[i] == r1[i] {
+                r2[i] = interval2.sample(&mut rng);
+                k += 1;
+                if k > 999 {
+                    break;
+                }
+            }
+            k = 0;
+        }
+        (r1, r2)
     }
 }
 
@@ -374,8 +413,29 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
 
             // Generate scaling factor
             self.update_scaling_factor(&mut sf, pop_size, nfes, max_nfes, &mu_sf);
+            //println!("sf = {:?}", sf);
 
-            println!("sf = {:?}", sf);
+            // For generating Hybridization Class probability
+            // Select Class_Select_Index
+            let mut class_select_index: Vec<bool> = mem_rand_index
+                .iter()
+                .map(|&index| {
+                    // Adjust MATLAB 1-based index to Rust 0-based index
+                    let memory_value = memory_1st_class_percentage[index];
+                    memory_value >= mem_rand_ratio[index]
+                })
+                .collect();
+
+            // Apply Hybridization_flag logic
+            if hybridization_flag == 0 {
+                // All values will be true (equivalent to MATLAB `or(Class_Select_Index, ~Class_Select_Index)`)
+                class_select_index = vec![true; pop_size];
+            }
+
+            let mut pop_all = pop.clone(); // Start with pop.
+            pop_all.push(Genome::from(0, &archive.pop, f64::MAX)); // Extend with archive.pop
+                                                                   //[r1, r2] = gnR1R2(pop_size, size(popAll, 1), r0);
+            let (r1, r2) = self.gnr1r2(pop_size, pop_all.len());
         } //END MAIN LOOP.
 
         result
@@ -525,7 +585,7 @@ mod lshade_spacma_test {
     }
 
     #[test]
-    fn crosover_rate_test() {
+    fn lshade_spacma_crosover_rate_test() {
         let mut cr: Vec<f64> = vec![1.0, -1.0, 0.5, 1.7];
         for i in 0..cr.len() {
             if cr[i] == -1.0 {
@@ -535,5 +595,21 @@ mod lshade_spacma_test {
 
         let cr: Vec<f64> = cr.iter_mut().map(|x| x.clamp(0.0, 1.0)).collect();
         assert_eq!(cr, vec![1.0, 0.0, 0.5, 1.0]);
+    }
+
+    #[test]
+    fn lshade_spacma_gnr1r2_test() {
+        let settings: LshadeSpacmaParams = LshadeSpacmaParams::default();
+        let mut fo: Sphere = Sphere {};
+        let algo: LshadeSpacma<Sphere> = LshadeSpacma::new(&settings, &mut fo);
+        let pop_size = settings.get_population_size();
+        let pop_all_size = pop_size + 1;
+        let (r1, r2) = algo.gnr1r2(pop_size, pop_all_size);
+
+        for i in 0..pop_size {
+            assert_ne!(r1[i], i);
+            assert_ne!(r2[i], i);
+            assert_ne!(r1[i], r2[i]);
+        }
     }
 }
