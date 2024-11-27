@@ -18,7 +18,9 @@ const KMAX: usize = 2;
 fn main() {
     println!("Hello, sefar !");
     //-----------------------------------------------------------------------
-
+    let v = [0, 1, 0, 2, 0];
+    let sum_not = v.iter().filter(|&&x| x == 0).count();
+    println!("there is  : {} of 0", sum_not);
     lshade_spacma_test1();
 
     //apgsk_f1_test1();

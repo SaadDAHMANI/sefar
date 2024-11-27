@@ -5,7 +5,7 @@ use crate::core::optimization_result::OptimizationResult;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
 //use rand::rngs::ThreadRng;
-use rand_distr::{Distribution, Uniform};
+use rand_distr::{Distribution, Normal, Uniform};
 //#[cfg(feature = "parallel")]
 //use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
 use std::time::Instant;
@@ -327,7 +327,11 @@ impl<'a, T: Problem> LshadeSpacma<'a, T> {
         sf: &[f64],
         r1: &[usize],
         r2: &[usize],
-    ) {
+        xmean: &Vec<f64>,
+        b: &Vec<Vec<usize>>,
+        d: &Vec<usize>,
+        sigma: f64,
+    ) -> Vec<Vec<f64>> {
         /*
         vi=[];
         temp=[];
@@ -336,12 +340,7 @@ impl<'a, T: Problem> LshadeSpacma<'a, T> {
             pop(r1(Class_Select_Index), :) - popAll(r2(Class_Select_Index), :));
         end
 
-        if(sum(~Class_Select_Index)~=0)
-            for k=1:sum(~Class_Select_Index)
-                temp(:,k) = xmean + sigma * B * (D .* randn(problem_size,1)); % m + sig * Normal(0,C)
-            end
-            vi(~Class_Select_Index,:) = temp';
-        end
+
         */
         let pop_size = class_select_index.len();
         let dim = self.params.get_problem_dimension();
@@ -360,10 +359,49 @@ impl<'a, T: Problem> LshadeSpacma<'a, T> {
                         vi[i][j] = pop[i].genes[j]
                             + (sf[i] * (pbest[i].genes[j] - pop[i].genes[j] - pop[r1[i]].genes[j])
                                 - pop_all[r2[i]].genes[j]);
-                        0000
                     }
                 }
             }
+        }
+
+        /*if(sum(~Class_Select_Index)~=0)
+            for k=1:sum(~Class_Select_Index)
+                temp(:,k) = xmean + sigma * B * (D .* randn(problem_size,1)); % m + sig * Normal(0,C)
+            end
+            vi(~Class_Select_Index,:) = temp';
+        end */
+        let mut rng = rand::thread_rng();
+
+        let normal = Normal::new(0.0, 1.0).unwrap();
+        //let v = normal.sample(&mut rng);
+        let sum_not = class_select_index.iter().filter(|&&x| x == 0).count();
+        if sum_not > 0 {
+            let mut temp: Vec<Vec<f64>> = vec![vec![0.0; dim]; sum_not];
+            for k in 0..sum_not {
+                for j in 0..dim {
+                    temp[k][j] =
+                        xmean[j] + sigma * normal.sample(&mut rng) * (b[j][j] * d[j]) as f64;
+                }
+            }
+            //vi(~Class_Select_Index,:) = temp';
+            let mut k: usize = 0;
+            for i in 0..pop_size {
+                if class_select_index[i] == 0 {
+                    for j in 0..dim {
+                        vi[i][j] = temp[k][j];
+                    }
+                    k += 1;
+                }
+            }
+        }
+        vi
+    }
+
+    fn display(&self, x: &Vec<Vec<f64>>, msg: &str) {
+        println!("{:?}", msg);
+
+        for i in 0..x.len() {
+            println!("{:?}", x[i]);
         }
     }
 }
@@ -523,6 +561,21 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
             let (r1, r2) = self.gnr1r2(pop_size, pop_all.len());
             // println!("r1 = {:?} \n r2 = {:?}", r1, r2);
             let pbest = self.choose_from_top_solutions(&pop, pop_size, p_best_rate, &sorted_index);
+            let vi = self.get_vi(
+                &pop,
+                &pop_all,
+                &pbest,
+                &class_select_index,
+                &sf,
+                &r1,
+                &r2,
+                &xmean,
+                &b,
+                &d,
+                sigma,
+            );
+
+            self.display(&vi, &"vi");
         } //END MAIN LOOP.
 
         result
