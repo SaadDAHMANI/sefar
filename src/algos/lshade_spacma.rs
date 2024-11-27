@@ -10,6 +10,8 @@ use rand_distr::{Distribution, Uniform};
 //use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
 use std::time::Instant;
 
+const PI: f64 = std::f64::consts::PI;
+
 /// LshadeSpacma(LSHADE_SPACMA)
 /// Reference:
 /// Ali W. Mohamed, Anas A. Hadi, Anas M. Fattouh, and Kamal M. Jambi:
@@ -33,7 +35,7 @@ impl<'a, T: Problem> LshadeSpacma<'a, T> {
             params: settings,
         }
     }
-    fn randomize_0to1(&self, randvect: &mut Vec<f64>) {
+    fn randomize_0to1(&self, randvect: &mut [f64]) {
         let between = Uniform::from(0.0..1.0);
         let mut rng = rand::thread_rng();
 
@@ -155,8 +157,10 @@ impl<'a, T: Problem> LshadeSpacma<'a, T> {
 
         let mut mem_rand_index: Vec<usize> = vec![0; pop_size];
         for i in 0..pop_size {
-            mem_rand_index[i] = (rand_vec[i] * memory_size as f64).ceil() as usize;
+            mem_rand_index[i] = (rand_vec[i] * memory_size as f64).ceil() as usize - 1;
         }
+
+        println!("mem_rand_index : {:?}", mem_rand_index);
 
         //mu_sf = memory_sf(mem_rand_index);
         let mu_sf: Vec<f64> = mem_rand_index
@@ -193,7 +197,14 @@ impl<'a, T: Problem> LshadeSpacma<'a, T> {
         let cr: Vec<f64> = cr.iter_mut().map(|x| x.clamp(0.0, 1.0)).collect();
     }
 
-    fn generat_scaling_factor(&self, pop_size: usize, max_nfes: usize) {
+    fn update_scaling_factor(
+        &self,
+        sf: &mut [f64],
+        pop_size: usize,
+        nfes: usize,
+        max_nfes: usize,
+        mu_sf: &[f64],
+    ) {
         //if(nfes <= max_nfes/2)
         //sf=0.45+.1*rand(pop_size, 1);
         //pos = find(sf <= 0);
@@ -210,6 +221,33 @@ impl<'a, T: Problem> LshadeSpacma<'a, T> {
         //end
         //end
         //sf = min(sf, 1);
+
+        if nfes < (max_nfes / 2) {
+            // sf=0.45+.1*rand(pop_size, 1);
+            self.randomize_0to1(sf);
+            for sfv in sf.iter_mut() {
+                *sfv = (*sfv * 0.1) + 0.45;
+            }
+        } else {
+            //sf = mu_sf + 0.1 * tan(pi * (rand(pop_size, 1) - 0.5));
+            let interval = Uniform::from(0.0..1.0);
+            let mut rng = rand::thread_rng();
+
+            let mut tmp_value: f64 = -1.0;
+            for i in 0..pop_size {
+                while tmp_value <= 0.0 {
+                    tmp_value = mu_sf[i] + 0.1 * (PI * (interval.sample(&mut rng) - 0.5)).tan();
+                }
+                sf[i] = tmp_value;
+            }
+
+            //sf = min(sf, 1);
+            for i in 0..pop_size {
+                if sf[i] > 1.0 {
+                    sf[i] = 1.0
+                };
+            }
+        }
     }
 }
 
@@ -304,6 +342,9 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
 
         // MAIN LOOP
         let hybridization_flag: usize = 1;
+
+        let mut sf: Vec<f64> = vec![0.0; pop_size];
+
         while nfes < max_nfes {
             //  pop = popold; the old population becomes the current population
             self.clone_population(&popold, &mut pop, problem_size);
@@ -332,6 +373,9 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
             let cr = self.generate_crosover_rate(&mu_cr);
 
             // Generate scaling factor
+            self.update_scaling_factor(&mut sf, pop_size, nfes, max_nfes, &mu_sf);
+
+            println!("sf = {:?}", sf);
         } //END MAIN LOOP.
 
         result
@@ -388,6 +432,15 @@ impl<'a> Parameters for LshadeSpacmaParams<'a> {
 }
 
 impl<'a> Default for LshadeSpacmaParams<'a> {
+    /// Return the default values for LshadeSpacmaParams
+    /// ```rust
+    /// population_size: 10,
+    /// problem_dimension: 4,
+    /// max_iterations: 2,
+    /// lower_bounds: &[-100.0, -100.0, -100.0, -100.0],
+    /// upper_bounds: &[100.0, 100.0, 100.0, 100.0],
+    /// ```
+
     fn default() -> Self {
         Self {
             population_size: 10,

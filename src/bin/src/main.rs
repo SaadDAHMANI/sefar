@@ -9,22 +9,23 @@ use sefar::algos::meo::MEO;
 // use sefar::algos::apgsk::{APGSKparams, APGSK};
 use sefar::algos::go::{GOparams, GO};
 use sefar::algos::gsk::{GSKparams, GSK};
-//use sefar::algos::lshade_spacma::{LshadeSpacma, LshadeSpacmaParams};
+use sefar::algos::lshade_spacma::{LshadeSpacma, LshadeSpacmaParams};
 
 const DIM: usize = 5;
 const POP_SIZE: usize = 12;
-const KMAX: usize = 200;
+const KMAX: usize = 2;
 
 fn main() {
     println!("Hello, sefar !");
     //-----------------------------------------------------------------------
 
-    //lshade_spacma_test1();
+    lshade_spacma_test1();
 
     //apgsk_f1_test1();
 
-    #[cfg(not(feature = "parallel"))]
-    gsk_f1_test1();
+    // #[cfg(not(feature = "parallel"))]
+    // gsk_f1_test1();
+
     #[cfg(feature = "parallel")]
     para_gsk_f1_test1();
 
@@ -61,10 +62,18 @@ fn main() {
     }*/
 }
 
-/*
 #[allow(dead_code)]
 fn lshade_spacma_test1() {
-    let settings: LshadeSpacmaParams = LshadeSpacmaParams::default();
+    let mut settings: LshadeSpacmaParams = LshadeSpacmaParams::default();
+    settings.population_size = POP_SIZE;
+    settings.problem_dimension = DIM;
+    settings.max_iterations = KMAX;
+    let lb = vec![-10.0f64; DIM];
+    let ub = vec![10.0f64; DIM];
+
+    settings.lower_bounds = lb.as_slice();
+    settings.upper_bounds = ub.as_slice();
+
     let mut fo: SumAbsFunction = SumAbsFunction {};
     let mut algo: LshadeSpacma<SumAbsFunction> = LshadeSpacma {
         problem: &mut fo,
@@ -77,7 +86,6 @@ fn lshade_spacma_test1() {
         result.to_string()
     );
 }
-*/
 
 #[allow(dead_code)]
 fn apgsk_f1_test1() {
