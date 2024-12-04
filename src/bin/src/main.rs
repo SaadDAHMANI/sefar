@@ -11,17 +11,12 @@ use sefar::algos::go::{GOparams, GO};
 use sefar::algos::gsk::{GSKparams, GSK};
 use sefar::algos::lshade_spacma::{LshadeSpacma, LshadeSpacmaParams};
 
-const DIM: usize = 5;
-const POP_SIZE: usize = 12;
-const KMAX: usize = 2;
+const DIM: usize = 50;
+const POP_SIZE: usize = 100;
+const KMAX: usize = 10000;
 
 fn main() {
-    println!("Hello, sefar !");
-    //-----------------------------------------------------------------------
-    let v = [0, 1, 0, 2, 0];
-    let sum_not = v.iter().filter(|&&x| x == 0).count();
-    println!("there is  : {} of 0", sum_not);
-    lshade_spacma_test1();
+    // lshade_spacma_test1();
 
     //apgsk_f1_test1();
 
@@ -54,14 +49,13 @@ fn main() {
 
     //meo_test1();
 
-    /*
     #[cfg(feature = "binary")]
     {
         println!("Run Binary tests");
         eo_f1_binary_test();
         println!("_________________________________________________________________");
         go_f1_binary_test();
-    }*/
+    }
 }
 
 #[allow(dead_code)]
