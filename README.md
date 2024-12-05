@@ -1,6 +1,6 @@
 # Sefar
 
-[Sefar](https://github.com/SaadDAHMANI/sefar) is a simple and comprehensive [Rust](https://github.com/rust-lang/rust) library for evolutionary optimization algorithms, exclusively written using Rust safe code. It supports **continuous** and **binary** optimization in both **sequential** and **parallel** modes through its features. In the current version, the *_parallel mode executes objective function_* evaluations in parallel (multi-threading) using the [rayon](https://github.com/rayon-rs/rayon) crate.
+[Sefar](https://github.com/SaadDAHMANI/sefar) is a simple and comprehensive [Rust](https://github.com/rust-lang/rust) library for evolutionary optimization algorithms, exclusively written using Rust safe code. It supports **continuous** and **binary** optimization in both **sequential** and **parallel** modes. In the current version, the *_parallel mode executes objective function_* evaluations in parallel (multi-threading) using [rayon](https://github.com/rayon-rs/rayon) crate.
 
 ## Current state (Under development)
 
@@ -10,6 +10,7 @@
 
 - [X] Particle Swarm Optimization ([PSO](https://doi.org/10.1109/ICNN.1995.488968));
 - [X] Equilibrium optimizer ([EO](https://doi.org/10.1016/j.knosys.2019.105190));
+- [X] Binary Equilibrium Optimizer ([BiEO](https://doi.org/10.1016/j.enbuild.2022.112503));
 - [-] Modified Equilibrium optimizer ([MEO](https://doi.org/10.1016/j.asoc.2020.106542));
 - [X] Growth Optimizer ([GO](https://doi.org/10.1016/j.knosys.2022.110206));
 - [X] Gaining-Sharing Knowledge ([GSK](https://doi.org/10.1007/s13042-019-01053-x));
@@ -17,22 +18,18 @@
 - [-] LSHADE_SPACMA([LSHADE_SPACMA](https://ieeexplore.ieee.org/document/7969307))
 
 ## Binary optimization
+The binary optimizatin in the older versions of [Sefar](https://github.com/SaadDAHMANI/sefar) will be replaced by more efficent binary optimization algorithms.
 
-In the current version, binarization is performed using the S-Shape function provided below:
-
-$S(x) = 1/(1 + e^{(-x)})$
-
-In this context, *x* represents a "gene" and signifies each element in the candidate solution *X* ("genome") within a search space of length *d*, where $X= \{x_1, x_2, ..., x_d\}$.
-
-The Binary optimization can be executed using the **binary** feature.
+## Parallel optimization
+In the current version of [Sefar](https://github.com/SaadDAHMANI/sefar), only the objective function evaluation is run in parallel mode using [rayon](https://github.com/rayon-rs/rayon) crate.
 
 ### Example
-1. Import [Sefar](https://github.com/SaadDAHMANI/sefar) with **binary** feature in the *Cargo.Toml* file of your project.
+1. Import [Sefar](https://github.com/SaadDAHMANI/sefar) in the *Cargo.Toml* file of your project.
 
 ```toml
 
 [dependencies]
-sefar = {version = "0.1.6", features = ["binary"]}
+sefar = "0.1.7"
 ```
 
 2. In the *main.rs* file :
@@ -46,22 +43,22 @@ use sefar::core::problem::Problem;
 
 fn main() {
 
-    println!("Binary optimization using Growth optimizer in Sefar crate:");
+    println!("Optimization using Growth optimizer in Sefar crate:");
 
     go_f1_binary_test();
 }
 
 ///
-/// run the binary version of Growth Optimizer (Binary-GO).
+/// run the Growth Optimizer (GO).
 ///
 fn go_f1_binary_test(){
 
     // Define the parameters of GO:
-    let search_agents : usize = 20;
-    let dim : usize = 10;
-    let max_iterations : usize = 100;
-    let lb = vec![0.0; dim];
-    let ub = vec![1.0; dim];
+    let search_agents : usize = 20; // number of search agents.
+    let dim : usize = 10; // problem dimension.
+    let max_iterations : usize = 200; // maximum number of iterations.
+    let lb = vec![-100.0; dim]; // lower bound of search space.
+    let ub = vec![100.0; dim]; // upper bound of the search space.
 
     // Build the parameter struct:
     let settings : GOparams = GOparams::new(search_agents, dim, max_iterations, &lb, &ub);
@@ -76,14 +73,8 @@ fn go_f1_binary_test(){
     let result : OptimizationResult = algo.run();
 
     // Print the results:
-    println!("The optimization results of Binary-GO : {}", result.to_string());
+    println!("The optimization results GO : {}", result.to_string());
 
-    // The results show something like :
-    // Binary optimization using Growth optimizer in Sefar crate:
-    // The optimization results of Binary-GO : Best-fitness : Some(0.0)
-    // ; Best-solution : Some(Genome { id: 22, genes: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], fitness: Some(0.0) })
-    // ; Time : Some(3.326498ms)
-    // ; Err-report: None
 }
 
 // Define the objective function to minimize. Here, the Sphere function is implemented.
@@ -98,13 +89,13 @@ pub struct F1{}
 
 impl Problem for F1 {
     fn objectivefunction(&mut self, genome : &[f64])->f64 {
-       genome.iter().fold(0.0f64, |sum, x| sum +x)
+       genome.iter().fold(0.0f64, |sum, x| sum + x.powi(2))
     }
 }
 ```
 
 ## Supported features
-[Sefar](https://github.com/SaadDAHMANI/sefar) supports *_report_*, *_binary_* and *_parallel_* features.
+[Sefar](https://github.com/SaadDAHMANI/sefar) supports *_report_* and *_parallel_* features.
 
 1. Run *_report_* feature:
 
@@ -112,17 +103,15 @@ impl Problem for F1 {
 # run report feature:
 cargo run --features report;
 
-# run binary feature:
-cargo run --features binary;
-
 # run parallel feature:
 cargo run --features parallel;
 ```
 
-|Algorithm       | *_report_* feature | *_binary_* feature         | *_parallel_* feature |
-|----------------|--------------------|----------------------------|----------------------|
-|*PSO*           | :heavy_check_mark: |                            |                      |
-|*EO*            | :heavy_check_mark: | :heavy_check_mark: S-Shape | :heavy_check_mark:   |
-|*GO*            | :heavy_check_mark: | :heavy_check_mark: S-Shape | :heavy_check_mark:   |
-|*GSK*           | :heavy_check_mark: |                            | :heavy_check_mark:   |
-|*LSHADE_SPACMA* |                    |                            |                      |
+|Algorithm       | *_report_* feature | *_parallel_* feature |
+|----------------|--------------------| ---------------------|
+|*PSO*           | :heavy_check_mark: |                      |
+|*EO*            | :heavy_check_mark: | :heavy_check_mark:   |
+|*GO*            | :heavy_check_mark: | :heavy_check_mark:   |
+|*GSK*           | :heavy_check_mark: | :heavy_check_mark:   |
+|*LSHADE_SPACMA* |                    |                      |
+|*BiEO*          | :heavy_check_mark: |                      |

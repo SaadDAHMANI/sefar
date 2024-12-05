@@ -17,7 +17,7 @@ use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
 
 ///
-/// Binary Equilibrium Optimizer (EO)
+/// Binary Equilibrium Optimizer (BiEO)
 /// Reference:
 /// Faramarzi, A., Mirjalili, S., & Heidarinejad, M. (2022).
 /// Binary equilibrium optimizer: Theory and application in building optimal control problems.

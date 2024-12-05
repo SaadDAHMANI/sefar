@@ -52,17 +52,9 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 let particles_no = self.params.get_population_size();
                 let max_iter = self.params.get_max_iterations();
 
-                #[cfg(not(feature = "binary"))]
-                let ub = self.params.upper_bounds;
+                let ub = self.params.get_upper_bounds();
 
-                #[cfg(not(feature = "binary"))]
-                let lb = self.params.lower_bounds;
-
-                #[cfg(feature = "binary")]
-                let ub: Vec<f64> = vec![1.0; dim];
-
-                #[cfg(feature = "binary")]
-                let lb: Vec<f64> = vec![0.0; dim];
+                let lb = self.params.get_lower_bounds();
 
                 // a1=2;
                 // a2=1;
@@ -108,15 +100,6 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 let mut fitness = vec![0.0f64; particles_no];
                 let mut fit_old = vec![0.0f64; particles_no];
                 let mut c_old = vec![vec![0.0f64; dim]; particles_no];
-
-                #[cfg(feature = "binary")]
-                {
-                    //DeltaC=zeros(Particles_no,dim);
-                    let delta_c = vec![vec![0.0f64; dim]; particles_no];
-                    // V=zeros(Particles_no,dim);
-                    let delta_c = vec![vec![0.0f64; dim]; particles_no];
-                }
-
                 let mut c_pool = vec![vec![0.0f64; dim]; 5];
 
                 let mut lambda = vec![0.0f64; dim];
@@ -138,24 +121,12 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 let mut _g: f64 = 0.0;
 
                 //C=initialization(Particles_no,dim,ub,lb);
-                #[cfg(not(feature = "binary"))]
+
                 let mut c: Vec<Genome> =
                     self.initialize(self.params, InitializationMode::RealUniform);
 
-                #[cfg(feature = "binary")]
-                let mut c: Vec<Genome> =
-                    self.initialize(self.params, InitializationMode::BinaryUnifrom);
-
                 // the main loop of EO
                 while iter < max_iter {
-                    //__________________________Binary ________________________________________
-
-                    #[cfg(feature = "binary")]
-                    for i in 0..particles_no {
-                        s_shape_v2(&mut c[i], &mut rng);
-                    }
-                    //_________________________________________________________________________
-
                     // compute fitness for search agents
                     // Sequential mode
                     #[cfg(not(feature = "parallel"))]

@@ -19,6 +19,5 @@ rayon = "1.10.0"
 
 [features]
 report = []
-binary = []
 parallel = []
 #deep_report = [report]
