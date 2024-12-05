@@ -7,13 +7,15 @@ use sefar::core::optimization_result::OptimizationResult;
 use sefar::algos::meo::MEO;
 // use sefar::algos::qago::{QAGOparams, QAGO};
 // use sefar::algos::apgsk::{APGSKparams, APGSK};
+use sefar::algos::bieo::{BiEO, BiEOparams};
 use sefar::algos::go::{GOparams, GO};
 use sefar::algos::gsk::{GSKparams, GSK};
-use sefar::algos::lshade_spacma::{LshadeSpacma, LshadeSpacmaParams};
 
-const DIM: usize = 50;
-const POP_SIZE: usize = 100;
-const KMAX: usize = 10000;
+//use sefar::algos::lshade_spacma::{LshadeSpacma, LshadeSpacmaParams};
+
+const DIM: usize = 80;
+const POP_SIZE: usize = 30;
+const KMAX: usize = 500;
 
 fn main() {
     // lshade_spacma_test1();
@@ -22,9 +24,6 @@ fn main() {
 
     // #[cfg(not(feature = "parallel"))]
     // gsk_f1_test1();
-
-    #[cfg(feature = "parallel")]
-    para_gsk_f1_test1();
 
     //--------------------------------------------------------------------
     //println!("Evaluation with Max_Iter = {}", KMAX);
@@ -48,16 +47,9 @@ fn main() {
     //peo_f1_test1();
 
     //meo_test1();
-
-    #[cfg(feature = "binary")]
-    {
-        println!("Run Binary tests");
-        eo_f1_binary_test();
-        println!("_________________________________________________________________");
-        go_f1_binary_test();
-    }
+    bieo_f1_binary_test();
 }
-
+/*
 #[allow(dead_code)]
 fn lshade_spacma_test1() {
     let mut settings: LshadeSpacmaParams = LshadeSpacmaParams::default();
@@ -82,6 +74,7 @@ fn lshade_spacma_test1() {
         result.to_string()
     );
 }
+*/
 
 #[allow(dead_code)]
 fn apgsk_f1_test1() {
@@ -388,26 +381,19 @@ fn eo_f1_test1() {
     println!("Err : {:?}", result.err_report);
 }
 
-#[cfg(feature = "binary")]
 #[allow(dead_code)]
-fn eo_f1_binary_test() {
-    let mut settings: EOparams = EOparams::default();
+fn bieo_f1_binary_test() {
+    let mut settings: BiEOparams = BiEOparams::default();
 
     settings.population_size = POP_SIZE;
     settings.problem_dimension = DIM;
     settings.max_iterations = KMAX;
 
-    let lb = vec![0.0f64; DIM];
-    let ub = vec![1.0f64; DIM];
-
-    settings.lower_bounds = lb.as_slice();
-    settings.upper_bounds = ub.as_slice();
-
     let mut fo = Sphere {};
 
-    let mut eo: EO<Sphere> = EO::new(&settings, &mut fo);
+    let mut bieo: BiEO<Sphere> = BiEO::new(&settings, &mut fo);
 
-    let result = eo.run();
+    let result = bieo.run();
 
     println!(
         "Binary-EO result : \n best fitness : {:?} \n best genome : {:?}",

@@ -8,7 +8,6 @@ use crate::core::problem::Problem;
 use rand_distr::{Distribution, Normal, Uniform};
 //#[cfg(feature = "parallel")]
 //use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
-use std::time::Instant;
 
 const PI: f64 = std::f64::consts::PI;
 
@@ -437,7 +436,7 @@ impl<'a, T: Problem> EOA for LshadeSpacma<'a, T> {
         //-----------------------------------------------------------------
         // Initialize the main population
         let mut pop: Vec<Genome> = self.initialize(self.params, InitializationMode::RealUniform);
-        let mut popold: Vec<Genome> = pop.clone();
+        let popold: Vec<Genome> = pop.clone();
         //-----------------------------------------------------------------
         let mut fitness: Vec<f64> = vec![0.0; pop_size];
         let mut bsf_fit_var: f64 = f64::MAX;

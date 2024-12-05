@@ -1,14 +1,13 @@
 //
-// Implementation of Equilibrium Optimizer (EO)
+// Implementation of Binary Equilibrium Optimizer (EO)
 //
 
 extern crate rand;
 use rand::distributions::{Distribution, Uniform};
-//use rand::prelude::ThreadRng;
 use std::time::Instant;
 
-#[cfg(feature = "parallel")]
-use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
+//#[cfg(feature = "parallel")]
+//use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
 
 use crate::common::*;
 use crate::core::eoa::{InitializationMode, EOA};
@@ -18,27 +17,33 @@ use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
 
 ///
-/// Equilibrium Optimizer (EO)
+/// Binary Equilibrium Optimizer (EO)
 /// Reference:
-/// "Faramarzi, A., Heidarinejad, M., Stephens, B., & Mirjalili, S. (2020).
-/// Equilibrium optimizer: A novel optimization algorithm. Knowledge-Based Systems, 191, 105190."
+/// Faramarzi, A., Mirjalili, S., & Heidarinejad, M. (2022).
+/// Binary equilibrium optimizer: Theory and application in building optimal control problems.
+/// Energy and Buildings, 277, 112503.
+/// https://doi.org/10.1016/j.enbuild.2022.112503
 ///
+
+const A: f64 = 2.0 / std::f64::consts::PI;
+const B: f64 = std::f64::consts::PI / 2.0;
+
 #[derive(Debug)]
-pub struct EO<'a, T: Problem> {
+pub struct BiEO<'a, T: Problem> {
     pub problem: &'a mut T,
-    pub params: &'a EOparams<'a>,
+    pub params: &'a BiEOparams,
 }
 
-impl<'a, T: Problem> EO<'a, T> {
-    pub fn new(settings: &'a EOparams, problem: &'a mut T) -> Self {
-        EO {
+impl<'a, T: Problem> BiEO<'a, T> {
+    pub fn new(settings: &'a BiEOparams, problem: &'a mut T) -> Self {
+        BiEO {
             problem,
             params: settings,
         }
     }
 }
 
-impl<'a, T: Problem> EOA for EO<'a, T> {
+impl<'a, T: Problem> EOA for BiEO<'a, T> {
     fn run(&mut self) -> OptimizationResult {
         let chronos = Instant::now();
 
@@ -52,16 +57,10 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 let particles_no = self.params.get_population_size();
                 let max_iter = self.params.get_max_iterations();
 
-                #[cfg(not(feature = "binary"))]
-                let ub = self.params.upper_bounds;
-
-                #[cfg(not(feature = "binary"))]
-                let lb = self.params.lower_bounds;
-
-                #[cfg(feature = "binary")]
+                //#[cfg(feature = "binary")]
                 let ub: Vec<f64> = vec![1.0; dim];
 
-                #[cfg(feature = "binary")]
+                //#[cfg(feature = "binary")]
                 let lb: Vec<f64> = vec![0.0; dim];
 
                 // a1=2;
@@ -102,20 +101,16 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
 
                 // Iter=0; V=1;
                 let mut iter = 0;
-                let v: f64 = 1.0;
 
                 // to store agents fitness values
                 let mut fitness = vec![0.0f64; particles_no];
                 let mut fit_old = vec![0.0f64; particles_no];
                 let mut c_old = vec![vec![0.0f64; dim]; particles_no];
 
-                #[cfg(feature = "binary")]
-                {
-                    //DeltaC=zeros(Particles_no,dim);
-                    let delta_c = vec![vec![0.0f64; dim]; particles_no];
-                    // V=zeros(Particles_no,dim);
-                    let delta_c = vec![vec![0.0f64; dim]; particles_no];
-                }
+                //DeltaC=zeros(Particles_no,dim);
+                let mut delta_c = vec![vec![0.0f64; dim]; particles_no];
+                // V=zeros(Particles_no,dim);
+                let mut v = vec![vec![0.0f64; dim]; particles_no];
 
                 let mut c_pool = vec![vec![0.0f64; dim]; 5];
 
@@ -128,7 +123,8 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 let mut _gcp: f64 = 0.0;
                 //------------------------------------------
                 let interval = Uniform::from(0..c_pool.len());
-                //let between01 = Uniform::from(0.0..=1.0);
+                let interval01 = Uniform::from(0.0..1.0);
+
                 let mut rng = rand::thread_rng();
                 //------------------------------------------
 
@@ -137,49 +133,19 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 let mut _g0: f64 = 0.0;
                 let mut _g: f64 = 0.0;
 
-                //C=initialization(Particles_no,dim,ub,lb);
-                #[cfg(not(feature = "binary"))]
-                let mut c: Vec<Genome> =
-                    self.initialize(self.params, InitializationMode::RealUniform);
-
-                #[cfg(feature = "binary")]
+                //#[cfg(feature = "binary")]
                 let mut c: Vec<Genome> =
                     self.initialize(self.params, InitializationMode::BinaryUnifrom);
 
                 // the main loop of EO
                 while iter < max_iter {
-                    //__________________________Binary ________________________________________
-
-                    #[cfg(feature = "binary")]
-                    for i in 0..particles_no {
-                        s_shape_v2(&mut c[i], &mut rng);
-                    }
-                    //_________________________________________________________________________
-
                     // compute fitness for search agents
                     // Sequential mode
-                    #[cfg(not(feature = "parallel"))]
+                    //#[cfg(not(feature = "parallel"))]
                     for i in 0..particles_no {
                         fitness[i] = self.problem.objectivefunction(&c[i].genes);
                         //fobj(&c[i]);
                     }
-
-                    // Parallel mode
-                    //___________Parallel mode________________
-                    #[cfg(feature = "parallel")]
-                    {
-                        c.par_iter_mut().for_each(|g| {
-                            g.fitness = Some(self.problem.objectivefunction(&g.genes))
-                        });
-                        for i in 0..particles_no {
-                            match c[i].fitness {
-                                None => fitness[i] = f64::MAX,
-                                Some(fit) => fitness[i] = fit,
-                            };
-                        }
-                        //println!("EO: Parallel objective function evaluation was done.");
-                    }
-                    //________________________________________
 
                     for i in 0..c.len() {
                         // space bound
@@ -192,8 +158,6 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                                 c[i].genes[j] = ub[j];
                             }
                         }
-
-                        // fitness[i] = self.problem.objectivefunction(&c[i].genes);
 
                         // check fitness with best
                         if fitness[i] < ceq1_fit {
@@ -222,8 +186,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                         }
                     }
 
-                    //-- Memory saving---
-
+                    //-- Memory saving--------------------------------
                     if iter == 0 {
                         copy_vector(&fitness, &mut fit_old);
                         copy_matrix(&c, &mut c_old);
@@ -236,32 +199,34 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                         }
                     }
 
+                    //C_old=C;  fit_old=fitness;
                     copy_matrix(&c, &mut c_old);
                     copy_vector(&fitness, &mut fit_old);
+                    // ----------------------------------------------
 
                     // compute averaged candidate Ceq_ave
                     for i in 0..dim {
-                        ceq_ave[i] = (ceq1[i] + ceq2[i] + ceq3[i] + ceq4[i]) / 4.0;
+                        ceq_ave[i] = ((ceq1[i] + ceq2[i] + ceq3[i] + ceq4[i]) / 4.0).round();
                     }
 
                     //Equilibrium pool
                     for i in 0..dim {
-                        c_pool[0][i] = ceq1[i];
-                        c_pool[1][i] = ceq2[i];
-                        c_pool[2][i] = ceq3[i];
-                        c_pool[3][i] = ceq4[i];
+                        c_pool[0][i] = ceq1[i].round();
+                        c_pool[1][i] = ceq2[i].round();
+                        c_pool[2][i] = ceq3[i].round();
+                        c_pool[3][i] = ceq4[i].round();
                         c_pool[4][i] = ceq_ave[i];
                     }
-
                     // comput t using Eq 09
+                    // t=(1-Iter/Max_iter)^(a2*Iter/Max_iter); % Eq(4)
                     let tmpt = (iter / max_iter) as f64;
                     let t: f64 = (1.0 - tmpt).powf(a2 * tmpt);
-
                     // let chronos = Instant::now();
+                    let mut _alpha: f64 = 0.0;
 
                     for i in 0..particles_no {
-                        randomize(&mut lambda); //  lambda=rand(1,dim);  lambda in Eq(11)
-                        randomize(&mut r); //  r=rand(1,dim);  r in Eq(11
+                        randomize(&mut lambda); //  lambda=rand(1,dim);  lambda in Eq(3)
+                        randomize(&mut r); //  r=rand(1,dim);
 
                         //-------------------------------------------------------
                         // Ceq=C_pool(randi(size(C_pool,1)),:);
@@ -269,7 +234,8 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                         _index = interval.sample(&mut rng);
                         copy_vector(&c_pool[_index], &mut ceq);
                         //--------------------------------------------------------
-                        // compute F using Eq(11)
+                        // compute F using Eq(3)
+                        // F=a1*sign(r-0.5).*(exp(-lambda.*t)-1);  %Eq(3)
                         for j in 0..dim {
                             f[j] = a1
                                 * f64::signum(r[j] - 0.5)
@@ -280,6 +246,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                         randomize(&mut r1);
                         randomize(&mut r2);
 
+                        //GCP=0.5*rand()*ones(1,dim)*(rand>=GP);  % Eq(7)
                         for j in 0..dim {
                             // Eq. 15
                             if r2[j] > gp {
@@ -288,21 +255,47 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                                 _gcp = 0.0f64;
                             }
 
-                            // Eq. 14
+                            // G0=GCP.*(Ceq-lambda.*C(i,:));   % Eq(6)
                             _g0 = _gcp * (ceq[j] - lambda[j] * c[i].genes[j]);
 
-                            // Eq 13
+                            // G=G0.*F;   % Eq(5)
                             _g = _g0 * f[j];
 
-                            // Eq. 16
-                            c[i].genes[j] = ceq[j]
-                                + (c[i].genes[j] - ceq[j]) * f[j]
-                                + (_g / (lambda[j] * v)) * (1.0 - f[j]);
+                            // Alpha=GP*(rand>GP);   % Eq(13)
+                            _alpha = 0.0;
+                            if interval01.sample(&mut rng) > gp {
+                                _alpha = gp;
+                            }
+                            // DeltaC(i,:)=((Alpha+C(i,:)-Ceq).*F+(G./lambda).*(1-F)); % Eq(12)
+                            delta_c[i][j] = ((_alpha + c[i].genes[j] - ceq[j]) * f[j])
+                                + ((_g / lambda[j]) * (1.0 - f[j]));
+
+                            //  V(i,:)=abs((2/pi)*atan((pi/2)*DeltaC(i,:))); % Eq(11)
+                            // const A: f64 = 2.0/ std::f64::consts::PI;
+                            // const B: f64 = std::f64::consts::PI/2.0;                            //
+                            v[i][j] = (A * f64::atan(B * delta_c[i][j])).abs();
+                        }
+
+                        //Eq.14
+                        if interval01.sample(&mut rng) < 0.5 {
+                            for j in 0..dim {
+                                if interval01.sample(&mut rng) < v[i][j] {
+                                    if c[i].genes[j] == 0.0 {
+                                        c[i].genes[j] = 1.0;
+                                    } else {
+                                        c[i].genes[j] = 0.0;
+                                    }
+                                }
+                            }
+                        } else {
+                            //Eq.14
+                            for j in 0..dim {
+                                if interval01.sample(&mut rng) < v[i][j] {
+                                    c[i].genes[j] = interval01.sample(&mut rng).round();
+                                }
+                            }
                         }
                     }
-
-                    // let duration = chronos.elapsed();
-                    // println!("seq--> End computation in : {:?}", duration);
 
                     convergence_curve[iter] = ceq1_fit;
                     iter += 1;
@@ -330,7 +323,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
 }
 /// Define parameters for Equilibrium Optimizer
 #[derive(Debug, Clone)]
-pub struct EOparams<'a> {
+pub struct BiEOparams {
     /// number of search agents (population size)
     pub population_size: usize,
 
@@ -340,13 +333,7 @@ pub struct EOparams<'a> {
     /// maximum number of iterations
     pub max_iterations: usize,
 
-    /// search space lower bounds
-    pub lower_bounds: &'a [f64],
-
-    /// search space upper bounds,
-    pub upper_bounds: &'a [f64],
-
-    /// EO parameter
+    /// BiEO parameter
     pub a1: f64,
     /// EO parameter
     pub a2: f64,
@@ -355,23 +342,19 @@ pub struct EOparams<'a> {
 }
 
 #[allow(dead_code)]
-impl<'a> EOparams<'a> {
+impl BiEOparams {
     pub fn new(
         p_size: usize,
         dim: usize,
         max_iter: usize,
-        lb: &'a [f64],
-        ub: &'a [f64],
         a1: f64,
         a2: f64,
         gp: f64,
-    ) -> Result<EOparams<'a>, String> {
-        let params = EOparams {
+    ) -> Result<BiEOparams, String> {
+        let params = BiEOparams {
             population_size: p_size,
             problem_dimension: dim,
             max_iterations: max_iter,
-            lower_bounds: lb,
-            upper_bounds: ub,
             a1,
             a2,
             gp,
@@ -384,7 +367,7 @@ impl<'a> EOparams<'a> {
     }
 }
 
-impl<'a> Parameters for EOparams<'a> {
+impl Parameters for BiEOparams {
     fn get_population_size(&self) -> usize {
         self.population_size
     }
@@ -398,15 +381,17 @@ impl<'a> Parameters for EOparams<'a> {
     }
 
     fn get_lower_bounds(&self) -> Vec<f64> {
-        self.lower_bounds.to_vec()
+        let lb: Vec<f64> = vec![0.0; self.get_problem_dimension()];
+        lb
     }
 
     fn get_upper_bounds(&self) -> Vec<f64> {
-        self.upper_bounds.to_vec()
+        let ub: Vec<f64> = vec![1.0; self.get_problem_dimension()];
+        ub
     }
 }
 
-impl<'a> Default for EOparams<'a> {
+impl Default for BiEOparams {
     ///
     /// Return default values of parameters, as following :
     ///
@@ -418,8 +403,6 @@ impl<'a> Default for EOparams<'a> {
     ///     population_size : 10,
     ///     dimensions : 3,
     ///     max_iterations : 100,
-    ///     lower_bounds : &[100.0f64, 100.0, 100.0],
-    ///     upper_bounds : &[-100.0f64, -100.0, -100.0],
     ///     a1 : 2.0f64,
     ///     a2 : 1.0f64,
     ///     gp : 0.5f64,
@@ -427,12 +410,10 @@ impl<'a> Default for EOparams<'a> {
     /// ~~~
     ///
     fn default() -> Self {
-        EOparams {
+        BiEOparams {
             population_size: 10,
             problem_dimension: 3,
             max_iterations: 100,
-            lower_bounds: &[-100.0f64, -100.0, -100.0],
-            upper_bounds: &[100.0f64, 100.0, 100.0],
             a1: 2.0f64,
             a2: 1.0f64,
             gp: 0.5f64,
@@ -445,60 +426,10 @@ mod eo_params_tests {
     use super::*;
 
     #[test]
-    fn test_ub_slice() {
-        let d: usize = 5;
-        let n: usize = 10;
-        let k: usize = 100;
-
-        let ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
-        let lb = ub.clone();
-
-        let params = EOparams {
-            population_size: n,
-            max_iterations: k,
-            problem_dimension: d,
-            lower_bounds: lb.as_slice(),
-            upper_bounds: ub.as_slice(),
-            a1: 2.0f64,
-            a2: 1.0f64,
-            gp: 0.5f64,
-        };
-
-        let sl_ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
-        let slice_ub = sl_ub.as_slice();
-
-        assert_eq!(params.upper_bounds, slice_ub);
-    }
-
-    #[test]
     fn test_default_fn() {
-        let p = EOparams::default();
+        let p = BiEOparams::default();
         assert_eq!(p.a1, 2.0f64);
         assert_eq!(p.a2, 1.0f64);
-        assert_eq!(p.gp, 0.50f64);
-    }
-
-    #[test]
-    fn eoparams_unwrap_or_default_test_1() {
-        let _ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
-        let _lb = vec![-1.0f64, -2.0, -3.0, -4.0, -5.0];
-
-        let p = EOparams::new(10, 10, 100, _lb.as_slice(), _ub.as_slice(), 0.5, 0.5, 0.5)
-            .unwrap_or_default();
-        assert_eq!(p.a1, 2.0f64);
-        assert_eq!(p.a2, 1.0f64);
-        assert_eq!(p.gp, 0.50f64);
-    }
-
-    #[test]
-    fn eoparams_unwrap_or_default_test_2() {
-        let _ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
-        let _lb = vec![-1.0f64, -2.0, -3.0, -4.0, -5.0];
-
-        let p = EOparams::new(10, 5, 100, _lb.as_slice(), _ub.as_slice(), 0.5, 0.5, 0.5)
-            .unwrap_or_default();
-        assert_eq!(p.a1, 0.50f64);
-        assert_eq!(p.a2, 0.50f64);
         assert_eq!(p.gp, 0.50f64);
     }
 }
