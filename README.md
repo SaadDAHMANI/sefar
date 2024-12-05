@@ -18,7 +18,8 @@
 - [-] LSHADE_SPACMA([LSHADE_SPACMA](https://ieeexplore.ieee.org/document/7969307))
 
 ## Binary optimization
-The binary optimizatin in the older versions of [Sefar](https://github.com/SaadDAHMANI/sefar) will be replaced by more efficent binary optimization algorithms.
+The binary optimizatin in the older versions of [Sefar](https://github.com/SaadDAHMANI/sefar) will be replaced by more efficent binary optimization algorithms.*
+This approach aims to simplify the implementation of algorithms on one hand and to offer parallel mode for binary algorithms as well in simple way.
 
 ## Parallel optimization
 In the current version of [Sefar](https://github.com/SaadDAHMANI/sefar), only the objective function evaluation is run in parallel mode using [rayon](https://github.com/rayon-rs/rayon) crate.
@@ -45,17 +46,9 @@ fn main() {
 
     println!("Optimization using Growth optimizer in Sefar crate:");
 
-    go_f1_binary_test();
-}
-
-///
-/// run the Growth Optimizer (GO).
-///
-fn go_f1_binary_test(){
-
-    // Define the parameters of GO:
+   // Define the parameters of GO:
     let search_agents : usize = 20; // number of search agents.
-    let dim : usize = 10; // problem dimension.
+    let dim : usize = 5; // problem dimension.
     let max_iterations : usize = 200; // maximum number of iterations.
     let lb = vec![-100.0; dim]; // lower bound of search space.
     let ub = vec![100.0; dim]; // upper bound of the search space.
@@ -73,15 +66,20 @@ fn go_f1_binary_test(){
     let result : OptimizationResult = algo.run();
 
     // Print the results:
-    println!("The optimization results GO : {}", result.to_string());
+    println!("The optimization results of GO : {}", result.to_string());
 
+    // The result will be something like :
+    // The optimization results of GO : Best-fitness : Some(1.2106003206412792e-54);
+    // Best-solution : Some(Genome { id: 22, genes: [-7.586125521377413e-28, -7.519595439155215e-28, -2.2218253597758204e-29, -6.135485510888784e-29, -3.7827445210037567e-28], fitness: Some(1.2882857900967827e-54) });
+    // Time : Some(11.606888ms);
+    // Err-report: None
 }
 
 // Define the objective function to minimize. Here, the Sphere function is implemented.
 
 ///
 /// F1 : Sphere benchmark function.
-/// Fi(X) = Sum(|X|)
+/// Fi(X) = Sum(|X^2|)
 /// where X = {x1, x2, ..... xd}, and 'd' is the problem dimension.
 ///
 #[derive(Debug,Clone)]

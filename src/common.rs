@@ -139,6 +139,7 @@ pub fn euclidian_dist(p1: &Genome, p2: &Genome) -> f64 {
     f64::sqrt(sum)
 }
 
+/*
 ///
 /// The S-Shape-V2() function is used to perform a binary optimization.
 /// S-Shape-V2(x) = 1/(1+e^(-x))
@@ -164,3 +165,4 @@ pub fn s_shape_v2(solution: &mut Genome, rng: &mut ThreadRng) {
         }
     }
 }
+*/

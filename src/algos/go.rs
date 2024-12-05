@@ -10,11 +10,6 @@ use rand_distr::{Distribution, Uniform};
 use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
 use std::time::Instant;
 
-#[cfg(feature = "binary")]
-const A: f64 = 2.0 / 3.141592653589793238462;
-#[cfg(feature = "binary")]
-const B: f64 = 3.141592653589793238462 / 2.0;
-
 ///
 /// GO : Growth Optimizer & Binary-GO
 /// Reference:
@@ -79,39 +74,6 @@ impl<'a, T: Problem> GO<'a, T> {
     fn norm(&self, a: &[f64]) -> f64 {
         a.iter().fold(0.0, |sum, x| sum + (x * x)).sqrt()
     }
-
-    #[cfg(feature = "binary")]
-    #[allow(dead_code)]
-    fn transform2binary(&self, solution: &mut Genome, rng: &mut ThreadRng) {
-        //V(i,:)=abs((2/pi)*atan((pi/2)*DeltaC(i,:)));
-        let d: usize = solution.get_dimensions();
-
-        let mut t_vec: Vec<f64> = vec![0.0; d];
-
-        for j in 0..d {
-            t_vec[j] = f64::abs(A * f64::atan(B * solution.genes[j]));
-        }
-
-        let intervall_01: Uniform<f64> = Uniform::from(0.0..=1.0);
-
-        if intervall_01.sample(rng) < 0.5 {
-            for j in 0..d {
-                if intervall_01.sample(rng) < t_vec[j] {
-                    if solution.genes[j].round() == 0.0 {
-                        solution.genes[j] = 1.0;
-                    } else {
-                        solution.genes[j] = 0.0;
-                    }
-                }
-            }
-        } else {
-            for j in 0..d {
-                if intervall_01.sample(rng) < t_vec[j] {
-                    solution.genes[j] = intervall_01.sample(rng).round();
-                }
-            }
-        }
-    }
 }
 
 impl<'a, T: Problem> EOA for GO<'a, T> {
@@ -125,15 +87,8 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
         let d: usize = self.params.problem_dimension;
         let max_iter: usize = self.params.max_iterations;
 
-        #[cfg(not(feature = "binary"))]
         let ub = self.params.upper_bounds;
-        #[cfg(not(feature = "binary"))]
         let lb = self.params.lower_bounds;
-
-        #[cfg(feature = "binary")]
-        let ub: Vec<f64> = vec![1.0; d];
-        #[cfg(feature = "binary")]
-        let lb: Vec<f64> = vec![0.0; d];
 
         let mut iter: usize = 0;
         //Parameter setting
@@ -167,11 +122,7 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
         let mut new_x: Vec<Genome> = self.get_empty_solutions(n);
 
         //Initialization
-        #[cfg(not(feature = "binary"))]
         let mut x = self.initialize(self.params, InitializationMode::RealUniform);
-
-        #[cfg(feature = "binary")]
-        let mut x = self.initialize(self.params, InitializationMode::BinaryUnifrom);
 
         //Evaluation of search agents
         // Sequential mode
@@ -299,12 +250,6 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
                 }
 
                 //newfitness= ObjectiveFunction(newx(i,:));
-                //__________________________Binary ________________________________________
-
-                // #[cfg(feature ="binary")] self.transform2binary(&mut new_x[i], &mut rng);
-                #[cfg(feature = "binary")]
-                s_shape_v2(&mut new_x[i], &mut rng);
-                //_________________________________________________________________________
 
                 let new_fitness = self.problem.objectivefunction(&new_x[i].genes);
                 fes += 1.0;
@@ -360,13 +305,6 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
                     new_x[i].genes[j] = f64::min(new_x[i].genes[j], ub[j]);
                     new_x[i].genes[j] = f64::max(new_x[i].genes[j], lb[j]);
                 }
-                //_______________________ Binary bloc _______________________________________
-
-                //__________________________Binary ________________________________________
-
-                //#[cfg(feature ="binary")] self.transform2binary(&mut new_x[i], &mut rng);
-                #[cfg(feature = "binary")]
-                s_shape_v2(&mut new_x[i], &mut rng);
                 //___________________________________________________________________________
                 //  newfitness= ObjectiveFunction(newx(i,:));
                 let new_fitness = self.problem.objectivefunction(&new_x[i].genes);

@@ -13,8 +13,8 @@ use sefar::algos::gsk::{GSKparams, GSK};
 
 //use sefar::algos::lshade_spacma::{LshadeSpacma, LshadeSpacmaParams};
 
-const DIM: usize = 80;
-const POP_SIZE: usize = 30;
+const DIM: usize = 5;
+const POP_SIZE: usize = 20;
 const KMAX: usize = 500;
 
 fn main() {
@@ -28,9 +28,8 @@ fn main() {
     //--------------------------------------------------------------------
     //println!("Evaluation with Max_Iter = {}", KMAX);
 
-    // println!("______________________GO : F1______________________");
-
-    //go_f1_test1();
+    println!("______________________GO : F1______________________");
+    go_f1_test1();
 
     /*
      println!("______________________GO : F2______________________");
@@ -47,7 +46,7 @@ fn main() {
     //peo_f1_test1();
 
     //meo_test1();
-    bieo_f1_binary_test();
+    //bieo_f1_binary_test();
 }
 /*
 #[allow(dead_code)]
@@ -175,38 +174,6 @@ fn para_gsk_f1_test1() {
     );
 }
 
-///
-/// run the binary version of Growth Optimizer (Binary-GO).
-///
-#[cfg(feature = "binary")]
-#[allow(dead_code)]
-fn go_f1_binary_test() {
-    // Define the parameters of GO:
-    let search_agents: usize = POP_SIZE;
-    let dim: usize = DIM;
-    let max_iterations: usize = KMAX;
-    let lb = vec![0.0; DIM];
-    let ub = vec![1.0; DIM];
-
-    // Build the parameter struct:
-    let settings: GOparams = GOparams::new(search_agents, dim, max_iterations, &lb, &ub);
-
-    // Define the problem to optimize:
-    let mut fo = Sphere {};
-
-    // Build the optimizer:
-    let mut algo: GO<Sphere> = GO::new(&settings, &mut fo);
-
-    // Run the GO algorithm:
-    let result: OptimizationResult = algo.run();
-
-    // Print the results:
-    println!(
-        "The optimization results of Binary-GO : {}",
-        result.to_string()
-    );
-}
-
 #[allow(dead_code)]
 fn go_f1_test1() {
     let mut settings: GOparams = GOparams::default();
@@ -226,23 +193,7 @@ fn go_f1_test1() {
     let mut algo: GO<Sphere> = GO::new(&settings, &mut fo);
 
     let result: OptimizationResult = algo.run();
-
-    /*match result.convergence_trend{
-        None => println!("QAGO: no convergence trend !!!"),
-        Some(cv) => println!("QAGO: Convergence trend :\n {:?}", cv),
-    };
-    */
-
-    /*match result.best_genome {
-        None => println!("QAGO: no best solution !"),
-        Some(bg)=> println!("QAGO: best-genome {:?}", bg),
-    };
-    */
-
-    println!(
-        "Growth optimizer (GO) : F1 (Sphere) test; Result: {:?}",
-        result.to_string()
-    );
+    println!("The optimization results of GO : {}", result.to_string());
 }
 
 #[allow(dead_code)]
@@ -373,12 +324,8 @@ fn eo_f1_test1() {
 
     let result = eo.run();
 
-    println!(
-        "EO result : \n best fitness : {:?} \n best genome : {:?}",
-        result.best_fitness, result.best_genome
-    );
-    println!("Computation time : {:?}", result.computation_time);
-    println!("Err : {:?}", result.err_report);
+    // Print the results:
+    println!("The optimization results of GO : {}", result.to_string());
 }
 
 #[allow(dead_code)]
