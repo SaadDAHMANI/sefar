@@ -10,6 +10,7 @@
 
 - [X] Particle Swarm Optimization ([PSO](https://doi.org/10.1109/ICNN.1995.488968));
 - [X] Equilibrium optimizer ([EO](https://doi.org/10.1016/j.knosys.2019.105190));
+- [X] Improved Equilibrium optimizer ([IEO](https://doi.org/10.3390/sym14061227));
 - [X] Binary Equilibrium Optimizer ([BiEO](https://doi.org/10.1016/j.enbuild.2022.112503));
 - [-] Modified Equilibrium optimizer ([MEO](https://doi.org/10.1016/j.asoc.2020.106542));
 - [X] Growth Optimizer ([GO](https://doi.org/10.1016/j.knosys.2022.110206));
@@ -113,3 +114,4 @@ cargo run --features parallel;
 |*GSK*           | :heavy_check_mark: | :heavy_check_mark:   |
 |*LSHADE_SPACMA* |                    |                      |
 |*BiEO*          | :heavy_check_mark: |                      |
+|*IEO*            | :heavy_check_mark: | :heavy_check_mark:   |

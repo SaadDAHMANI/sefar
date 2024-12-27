@@ -1,13 +1,13 @@
-use sefar::algos::eo::{EOparams, EO};
+use sefar::algos::eo::{BiEO, BiEOparams, EOparams, EO, MEO};
+
 use sefar::algos::pso::{PSOparams, PSO};
 use sefar::benchmarks::functions::{Sphere, SumAbsFunction, F2};
 use sefar::core::eoa::EOA;
 use sefar::core::optimization_result::OptimizationResult;
 
-use sefar::algos::meo::MEO;
 // use sefar::algos::qago::{QAGOparams, QAGO};
 // use sefar::algos::apgsk::{APGSKparams, APGSK};
-use sefar::algos::bieo::{BiEO, BiEOparams};
+
 use sefar::algos::go::{GOparams, GO};
 use sefar::algos::gsk::{GSKparams, GSK};
 

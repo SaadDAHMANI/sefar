@@ -1,7 +1,6 @@
 //
 // Implementation of Equilibrium Optimizer (EO)
 //
-
 extern crate rand;
 use rand::distributions::{Distribution, Uniform};
 //use rand::prelude::ThreadRng;
