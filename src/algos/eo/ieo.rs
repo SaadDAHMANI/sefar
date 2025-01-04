@@ -174,11 +174,13 @@ impl<'a, T: Problem> EOA for IEO<'a, T> {
                     // sort the candidate solutions to choose the equilibrium pool
                     let mut ind: Vec<usize> = (0..particles_no).collect();
                     ind.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
+
                     for i in 0..jpool {
                         for j in 0..dim {
                             c_pool[i][j] = c[ind[i]].genes[j];
                         }
                     }
+
                     // Save the best solution and the best fitness :
                     if ceq1_fit > fitness[ind[0]] {
                         ceq1_fit = fitness[ind[0]];

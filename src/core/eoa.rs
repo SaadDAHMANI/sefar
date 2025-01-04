@@ -62,6 +62,19 @@ pub trait EOA {
         }
     }
 
+    ///
+    /// Run algorithm until reach stopping criterion and return optiization result
+    ///
+    fn run_with_params(&mut self, _settings: &impl Parameters) -> OptimizationResult {
+        OptimizationResult {
+            best_genome: None,
+            best_fitness: None,
+            convergence_trend: None,
+            computation_time: None,
+            err_report: None,
+        }
+    }
+
     fn randomize(randvect: &mut Vec<f64>) {
         let between = Uniform::from(0.0..=1.0);
         let mut rng = rand::thread_rng();

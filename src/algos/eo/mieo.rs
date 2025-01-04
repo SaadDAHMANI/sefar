@@ -1,6 +1,7 @@
 //
-// Implementation of Equilibrium Optimizer (EO)
+// Implementation of Modified Improved Equilibrium Optimizer (MIEO)
 //
+
 extern crate rand;
 use rand::distributions::{Distribution, Uniform};
 //use rand::prelude::ThreadRng;
@@ -23,21 +24,21 @@ use crate::core::problem::Problem;
 /// Equilibrium optimizer: A novel optimization algorithm. Knowledge-Based Systems, 191, 105190."
 ///
 #[derive(Debug)]
-pub struct EO<'a, T: Problem> {
+pub struct MIEO<'a, T: Problem> {
     pub problem: &'a mut T,
-    pub params: &'a EOparams<'a>,
+    pub params: &'a MIEOparams<'a>,
 }
 
-impl<'a, T: Problem> EO<'a, T> {
-    pub fn new(settings: &'a EOparams, problem: &'a mut T) -> Self {
-        EO {
+impl<'a, T: Problem> MIEO<'a, T> {
+    pub fn new(settings: &'a MIEOparams, problem: &'a mut T) -> Self {
+        Self {
             problem,
             params: settings,
         }
     }
 }
 
-impl<'a, T: Problem> EOA for EO<'a, T> {
+impl<'a, T: Problem> EOA for MIEO<'a, T> {
     fn run(&mut self) -> OptimizationResult {
         let chronos = Instant::now();
 
@@ -62,44 +63,21 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 let a2: f64 = self.params.a2;
                 let gp: f64 = self.params.gp;
 
-                // Initialize variables
-                //Ceq1=zeros(1,dim);   Ceq1_fit=inf;
-                //Ceq2=zeros(1,dim);   Ceq2_fit=inf;
-                //Ceq3=zeros(1,dim);   Ceq3_fit=inf;
-                //Ceq4=zeros(1,dim);   Ceq4_fit=inf;
-
-                let mut ceq1 = vec![0.0f64; dim];
-
-                let mut ceq2 = vec![0.0f64; dim];
-
-                let mut ceq3 = vec![0.0f64; dim];
-
-                let mut ceq4 = vec![0.0f64; dim];
-
-                let mut ceq_ave = vec![0.0f64; dim];
-
-                let mut ceq1_fit = f64::MAX;
-
-                let mut ceq2_fit = f64::MAX;
-
-                let mut ceq3_fit = f64::MAX;
-
-                let mut ceq4_fit = f64::MAX;
-
-                let mut ceq1_index: usize = 0;
-                //let mut ceq2_index : usize = 0;
-                //let mut ceq3_index : usize = 0;
-                //let mut ceq4_index : usize = 0;
+                let nu: usize = usize::min(self.params.min_pool_size, particles_no);
 
                 // Iter=0; V=1;
                 let mut iter = 0;
                 let v: f64 = 1.0;
 
                 // to store agents fitness values
+                let mut ceq1_fit: f64 = f64::MAX;
+                //let mut ceq1_index: usize = 0;
+
+                let mut ceq1: Genome = Genome::new(particles_no + 1, dim);
+
                 let mut fitness = vec![0.0f64; particles_no];
                 let mut fit_old = vec![0.0f64; particles_no];
                 let mut c_old = vec![vec![0.0f64; dim]; particles_no];
-                let mut c_pool = vec![vec![0.0f64; dim]; 5];
 
                 let mut lambda = vec![0.0f64; dim];
                 let mut r = vec![0.0f64; dim];
@@ -109,7 +87,6 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                 let mut f = vec![0.0f64; dim];
                 let mut _gcp: f64 = 0.0;
                 //------------------------------------------
-                let interval = Uniform::from(0..c_pool.len());
                 //let between01 = Uniform::from(0.0..=1.0);
                 let mut rng = rand::thread_rng();
                 //------------------------------------------
@@ -126,11 +103,25 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
 
                 // the main loop of EO
                 while iter < max_iter {
+                    // space bound
+                    for i in 0..c.len() {
+                        for j in 0..dim {
+                            if c[i].genes[j] < lb[j] {
+                                c[i].genes[j] = lb[j];
+                            }
+
+                            if c[i].genes[j] > ub[j] {
+                                c[i].genes[j] = ub[j];
+                            }
+                        }
+                    }
+
                     // compute fitness for search agents
                     // Sequential mode
                     #[cfg(not(feature = "parallel"))]
                     for i in 0..particles_no {
                         fitness[i] = self.problem.objectivefunction(&c[i].genes);
+                        c[i].fitness = Some(fitness[i]);
                         //fobj(&c[i]);
                     }
 
@@ -151,47 +142,6 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                     }
                     //________________________________________
 
-                    for i in 0..c.len() {
-                        // space bound
-                        for j in 0..dim {
-                            if c[i].genes[j] < lb[j] {
-                                c[i].genes[j] = lb[j];
-                            }
-
-                            if c[i].genes[j] > ub[j] {
-                                c[i].genes[j] = ub[j];
-                            }
-                        }
-
-                        // fitness[i] = self.problem.objectivefunction(&c[i].genes);
-
-                        // check fitness with best
-                        if fitness[i] < ceq1_fit {
-                            ceq1_index = i;
-                            ceq1_fit = fitness[i];
-                            copy_vector(&c[i].genes, &mut ceq1);
-                        } else if (fitness[i] < ceq2_fit) & (fitness[i] > ceq1_fit) {
-                            //ceq2_index = i;
-                            ceq2_fit = fitness[i];
-                            copy_vector(&c[i].genes, &mut ceq2);
-                        } else if (fitness[i] < ceq3_fit)
-                            & (fitness[i] > ceq2_fit)
-                            & (fitness[i] > ceq1_fit)
-                        {
-                            //ceq3_index = i;
-                            ceq3_fit = fitness[i];
-                            copy_vector(&c[i].genes, &mut ceq3);
-                        } else if (fitness[i] < ceq4_fit)
-                            & (fitness[i] > ceq3_fit)
-                            & (fitness[i] > ceq2_fit)
-                            & (fitness[i] > ceq1_fit)
-                        {
-                            //ceq4_index = i;
-                            ceq4_fit = fitness[i];
-                            copy_vector(&c[i].genes, &mut ceq4);
-                        }
-                    }
-
                     //-- Memory saving---
 
                     if iter == 0 {
@@ -209,28 +159,57 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                     copy_matrix(&c, &mut c_old);
                     copy_vector(&fitness, &mut fit_old);
 
-                    // compute averaged candidate Ceq_ave
-                    for j in 0..dim {
-                        ceq_ave[j] = (ceq1[j] + ceq2[j] + ceq3[j] + ceq4[j]) / 4.0;
+                    //--------------------------- MODIFIED EO -------------------------------
+
+                    // compute the size of the equilibrium pool
+
+                    let mut jpool: usize = (particles_no as f64
+                        * (1.0 - (iter as f64 / max_iter as f64)))
+                        .ceil() as usize;
+
+                    // create a matrix to store the pool elements
+                    jpool = usize::max(jpool, nu);
+
+                    let mut c_pool = vec![vec![0.0f64; dim]; jpool + 1];
+
+                    // interval to choose a random element from the equilibrium pool
+                    let interval = Uniform::from(0..jpool);
+
+                    // sort the candidate solutions to choose the equilibrium pool
+                    let mut ind: Vec<usize> = (0..particles_no).collect();
+                    ind.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
+
+                    for i in 0..jpool {
+                        for j in 0..dim {
+                            c_pool[i][j] = c[ind[i]].genes[j];
+                        }
                     }
 
-                    //Equilibrium pool
-                    for i in 0..dim {
-                        c_pool[0][i] = ceq1[i];
-                        c_pool[1][i] = ceq2[i];
-                        c_pool[2][i] = ceq3[i];
-                        c_pool[3][i] = ceq4[i];
-                        c_pool[4][i] = ceq_ave[i];
+                    // Save the best solution and the best fitness :
+                    if ceq1_fit > fitness[ind[0]] {
+                        ceq1_fit = fitness[ind[0]];
+                        copy_vector2genome(&c[ind[0]].genes, &mut ceq1);
+                        ceq1.fitness = Some(ceq1_fit);
+                    }
+
+                    //println!("fitness = {:?} \n ind = {:?}", fitness, ind);
+                    // compute the average solution
+                    let mut sum_value: f64 = 0.0;
+                    for j in 0..dim {
+                        for i in 0..jpool {
+                            sum_value += c_pool[i][j];
+                        }
+                        c_pool[jpool][j] = sum_value / jpool as f64;
+                        sum_value = 0.0;
                     }
 
                     // comput t using Eq 09
                     let tmpt = (iter / max_iter) as f64;
                     let t: f64 = (1.0 - tmpt).powf(a2 * tmpt);
 
-                    // let chronos = Instant::now();
-
                     for i in 0..particles_no {
-                        randomize(&mut lambda); //  lambda=rand(1,dim);  lambda in Eq(11)
+                        randomize(&mut lambda);
+
                         randomize(&mut r); //  r=rand(1,dim);  r in Eq(11
 
                         //-------------------------------------------------------
@@ -277,20 +256,14 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                     convergence_curve[iter] = ceq1_fit;
                     iter += 1;
 
-                    #[cfg(feature = "report")]
-                    println!(
-                        "Iter : {}, Best-fit : {}, Best-solution : {:?}",
-                        iter, ceq1_fit, ceq1
-                    );
-
-                    println!(
-                        "Iter : {}, Best-fit : {}", iter, ceq1_fit);
+                    //#[cfg(feature = "report")]
+                    println!("Iter : {}, Best-fit : {}", iter, ceq1_fit);
                 }
 
                 //return results
                 let duration = chronos.elapsed();
                 let result = OptimizationResult {
-                    best_genome: Some(Genome::from(ceq1_index, &ceq1, ceq1_fit)),
+                    best_genome: Some(ceq1),
                     best_fitness: Some(ceq1_fit),
                     convergence_trend: Some(convergence_curve),
                     computation_time: Some(duration),
@@ -301,9 +274,9 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
         }
     }
 }
-/// Define parameters for Equilibrium Optimizer
+/// Define parameters for Improved Equilibrium Optimizer
 #[derive(Debug, Clone)]
-pub struct EOparams<'a> {
+pub struct MIEOparams<'a> {
     /// number of search agents (population size)
     pub population_size: usize,
 
@@ -325,10 +298,12 @@ pub struct EOparams<'a> {
     pub a2: f64,
     /// EO parameter
     pub gp: f64,
+    /// The minimum size of the equilibrium pool.
+    pub min_pool_size: usize,
 }
 
 #[allow(dead_code)]
-impl<'a> EOparams<'a> {
+impl<'a> MIEOparams<'a> {
     pub fn new(
         p_size: usize,
         dim: usize,
@@ -338,8 +313,9 @@ impl<'a> EOparams<'a> {
         a1: f64,
         a2: f64,
         gp: f64,
-    ) -> Result<EOparams<'a>, String> {
-        let params = EOparams {
+        min_pool_size: usize,
+    ) -> Result<MIEOparams<'a>, String> {
+        let params = MIEOparams {
             population_size: p_size,
             problem_dimension: dim,
             max_iterations: max_iter,
@@ -348,6 +324,7 @@ impl<'a> EOparams<'a> {
             a1,
             a2,
             gp,
+            min_pool_size,
         };
 
         match params.check() {
@@ -357,7 +334,7 @@ impl<'a> EOparams<'a> {
     }
 }
 
-impl<'a> Parameters for EOparams<'a> {
+impl<'a> Parameters for MIEOparams<'a> {
     fn get_population_size(&self) -> usize {
         self.population_size
     }
@@ -379,15 +356,15 @@ impl<'a> Parameters for EOparams<'a> {
     }
 }
 
-impl<'a> Default for EOparams<'a> {
+impl<'a> Default for MIEOparams<'a> {
     ///
     /// Return default values of parameters, as following :
     ///
     /// ~~~
     ///
-    ///  use sefar::algos::eo::*;
+    ///  use sefar::algos::ieo::*;
     ///
-    ///  EOparams{
+    ///  IEOparams{
     ///     population_size : 10,
     ///     dimensions : 3,
     ///     max_iterations : 100,
@@ -396,11 +373,12 @@ impl<'a> Default for EOparams<'a> {
     ///     a1 : 2.0f64,
     ///     a2 : 1.0f64,
     ///     gp : 0.5f64,
+    ///     min_pool_size: 4,
     /// };
     /// ~~~
     ///
     fn default() -> Self {
-        EOparams {
+        Self {
             population_size: 10,
             problem_dimension: 3,
             max_iterations: 100,
@@ -409,12 +387,13 @@ impl<'a> Default for EOparams<'a> {
             a1: 2.0f64,
             a2: 1.0f64,
             gp: 0.5f64,
+            min_pool_size: 4,
         }
     }
 }
 
 #[cfg(test)]
-mod eo_params_tests {
+mod ieo_params_tests {
     use super::*;
 
     #[test]
@@ -426,7 +405,7 @@ mod eo_params_tests {
         let ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
         let lb = ub.clone();
 
-        let params = EOparams {
+        let params = MIEOparams {
             population_size: n,
             max_iterations: k,
             problem_dimension: d,
@@ -435,6 +414,7 @@ mod eo_params_tests {
             a1: 2.0f64,
             a2: 1.0f64,
             gp: 0.5f64,
+            min_pool_size: 4,
         };
 
         let sl_ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
@@ -445,7 +425,7 @@ mod eo_params_tests {
 
     #[test]
     fn test_default_fn() {
-        let p = EOparams::default();
+        let p = MIEOparams::default();
         assert_eq!(p.a1, 2.0f64);
         assert_eq!(p.a2, 1.0f64);
         assert_eq!(p.gp, 0.50f64);
@@ -456,8 +436,18 @@ mod eo_params_tests {
         let _ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
         let _lb = vec![-1.0f64, -2.0, -3.0, -4.0, -5.0];
 
-        let p = EOparams::new(10, 10, 100, _lb.as_slice(), _ub.as_slice(), 0.5, 0.5, 0.5)
-            .unwrap_or_default();
+        let p = MIEOparams::new(
+            10,
+            10,
+            100,
+            _lb.as_slice(),
+            _ub.as_slice(),
+            0.5,
+            0.5,
+            0.5,
+            2,
+        )
+        .unwrap_or_default();
         assert_eq!(p.a1, 2.0f64);
         assert_eq!(p.a2, 1.0f64);
         assert_eq!(p.gp, 0.50f64);
@@ -468,7 +458,7 @@ mod eo_params_tests {
         let _ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
         let _lb = vec![-1.0f64, -2.0, -3.0, -4.0, -5.0];
 
-        let p = EOparams::new(10, 5, 100, _lb.as_slice(), _ub.as_slice(), 0.5, 0.5, 0.5)
+        let p = MIEOparams::new(10, 5, 100, _lb.as_slice(), _ub.as_slice(), 0.5, 0.5, 0.5, 2)
             .unwrap_or_default();
         assert_eq!(p.a1, 0.50f64);
         assert_eq!(p.a2, 0.50f64);
