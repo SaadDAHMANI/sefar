@@ -130,7 +130,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                     // Sequential mode
                     #[cfg(not(feature = "parallel"))]
                     for i in 0..particles_no {
-                        fitness[i] = self.problem.objectivefunction(&c[i].genes);
+                        fitness[i] = self.problem.objectivefunction(&mut c[i].genes);
                         //fobj(&c[i]);
                     }
 
@@ -283,8 +283,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                         iter, ceq1_fit, ceq1
                     );
 
-                    println!(
-                        "Iter : {}, Best-fit : {}", iter, ceq1_fit);
+                    println!("Iter : {}, Best-fit : {}", iter, ceq1_fit);
                 }
 
                 //return results

@@ -1,5 +1,9 @@
+use std::path::{self, Path};
 //use std::fmt::Display;
 use std::time::Duration;
+use std::io::{Read, Write};
+use std::fs::{exists, File};
+
 use crate::core::genome::Genome;
 
 #[derive(Debug, Clone)]
@@ -24,6 +28,38 @@ pub struct OptimizationResult {
         }   
      }
  }  
+
+ impl OptimizationResult{
+    pub fn save(&self, header :Option<&str>, filename : &str)->std::io::Result<()> {
+      
+        let mut file : File = match std::fs::metadata(filename) {
+            Err(_eror) =>{
+                let file = File::create(&filename)?;
+                file
+            },
+
+            Ok(mdata) =>{
+                if mdata.is_file(){
+                    let  file : File = File::open(&filename)?;
+                    file
+                }
+                else{ let file = File::create(&filename)?;
+                    file
+                 }
+            }
+        };
+
+        match header {
+            None =>{},
+            Some(header)=> {writeln!(file, "{:?}", header)?;},
+        };
+        
+        writeln!(file, "Best_fitness : {:?}", self.best_fitness)?;        
+
+        Ok(())
+
+    }
+ }
 
 /*  impl Display for OptimizationResult{
      fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

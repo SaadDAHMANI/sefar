@@ -5,7 +5,7 @@ use crate::core::problem::Problem;
 pub struct SumAbsFunction {}
 impl Problem for SumAbsFunction {
     #[cfg(not(feature = "parallel"))]
-    fn objectivefunction(&mut self, genome: &[f64]) -> f64 {
+    fn objectivefunction(&mut self, genome: &mut [f64]) -> f64 {
         let fitness = genome.iter().fold(0.0f64, |sum, g| sum + g.abs());
         fitness
     }
@@ -30,7 +30,7 @@ impl Problem for Sphere {
     /// Define the objective function. The later is called in sequential mode.
     ///
     #[cfg(not(feature = "parallel"))]
-    fn objectivefunction(&mut self, genome: &[f64]) -> f64 {
+    fn objectivefunction(&mut self, genome: &mut [f64]) -> f64 {
         let fitness = genome.iter().fold(0.0f64, |sum, g| sum + g.powi(2));
         //let fitness = genome.iter().fold(0.0f64, |sum, g| sum + g);
         fitness
@@ -52,7 +52,7 @@ impl Problem for Sphere {
 pub struct F2 {}
 impl Problem for F2 {
     #[cfg(not(feature = "parallel"))]
-    fn objectivefunction(&mut self, genome: &[f64]) -> f64 {
+    fn objectivefunction(&mut self, genome: &mut [f64]) -> f64 {
         let sum = genome.iter().fold(0.0f64, |sum, g| sum + g.abs());
         let prod = genome.iter().fold(1.0f64, |prod, g| prod * f64::abs(*g));
         sum + prod

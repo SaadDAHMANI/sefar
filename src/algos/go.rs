@@ -128,7 +128,7 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
         // Sequential mode
         #[cfg(not(feature = "parallel"))]
         for i in 0..n {
-            fitness[i] = self.problem.objectivefunction(&x[i].genes);
+            fitness[i] = self.problem.objectivefunction(&mut x[i].genes);
             fes += 1.0;
         }
 
@@ -251,7 +251,7 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
 
                 //newfitness= ObjectiveFunction(newx(i,:));
 
-                let new_fitness = self.problem.objectivefunction(&new_x[i].genes);
+                let new_fitness = self.problem.objectivefunction(&mut new_x[i].genes);
                 fes += 1.0;
 
                 //Update solutions
@@ -307,7 +307,7 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
                 }
                 //___________________________________________________________________________
                 //  newfitness= ObjectiveFunction(newx(i,:));
-                let new_fitness = self.problem.objectivefunction(&new_x[i].genes);
+                let new_fitness = self.problem.objectivefunction(&mut new_x[i].genes);
                 //FEs=FEs+1;
                 fes += 1.0;
 
@@ -330,7 +330,7 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
             }
 
             gbesthistory[iter] = gbestfitness;
-            #[cfg(feature = "report")]
+            //#[cfg(feature = "report")]
             println!("Iter : {}, best-fitness : {}", iter, gbestfitness);
 
             iter += 1;
@@ -340,7 +340,7 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
         //println!("Iter : {}, FES: {}, Max_FES {}", iter, fes, max_fes);
 
         // Compute the best fitness for the best solution
-        best_x.fitness = Some(self.problem.objectivefunction(&best_x.genes));
+        best_x.fitness = Some(self.problem.objectivefunction(&mut best_x.genes));
 
         let result: OptimizationResult = OptimizationResult {
             best_genome: Some(best_x),

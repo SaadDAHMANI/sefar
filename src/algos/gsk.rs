@@ -71,7 +71,7 @@ impl<'a, T: Problem> GSK<'a, T> {
         #[cfg(not(feature = "parallel"))]
         {
             for i in 0..n {
-                fitness[i] = self.problem.objectivefunction(&pop[i].genes);
+                fitness[i] = self.problem.objectivefunction(&mut pop[i].genes);
                 pop[i].fitness = Some(fitness[i]);
                 //nfes += 1;
                 //println!("fitness[{}] = {}", i, fitness[i]);
@@ -593,7 +593,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                         g, bsf_fit_var, bsf_solution
                     );*/
 
-                    #[cfg(feature = "report")]
+                    //#[cfg(feature = "report")]
                     println!("Iter : {}, best-fitness : {}", g, bsf_fit_var);
 
                     // UPDATE THE SEARCH POPULATION:
@@ -1036,10 +1036,10 @@ mod gsk_test {
             fitness: None,
         };
 
-        let pop: Vec<Genome> = vec![g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g11, g12];
+        let mut pop: Vec<Genome> = vec![g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g11, g12];
         let mut fitness: Vec<f64> = vec![0.0; settings.population_size];
         for i in 0..settings.population_size {
-            fitness[i] = gsk.problem.objectivefunction(&pop[i].genes);
+            fitness[i] = gsk.problem.objectivefunction(&mut pop[i].genes);
             //pop[i].fitness = Some(fitness[i]);
         }
 
@@ -1153,10 +1153,10 @@ mod gsk_test {
             fitness: None,
         };
 
-        let pop: Vec<Genome> = vec![g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g11, g12];
+        let mut pop: Vec<Genome> = vec![g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g11, g12];
         let mut fitness: Vec<f64> = vec![0.0; settings.population_size];
         for i in 0..settings.population_size {
-            fitness[i] = gsk.problem.objectivefunction(&pop[i].genes);
+            fitness[i] = gsk.problem.objectivefunction(&mut pop[i].genes);
             //pop[i].fitness = Some(fitness[i]);
         }
 

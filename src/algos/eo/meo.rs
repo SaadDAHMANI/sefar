@@ -131,7 +131,7 @@ impl<'a, T: Problem> EOA for MEO<'a, T> {
 
                 // Step 2 : Evaluate the fitness value of each candidate soluion
                 for genom in c.iter_mut() {
-                    genom.fitness = Some(self.problem.objectivefunction(&genom.genes));
+                    genom.fitness = Some(self.problem.objectivefunction(&mut genom.genes));
                 }
 
                 // Step 3 : Select the 4 best solutions
@@ -165,7 +165,7 @@ impl<'a, T: Problem> EOA for MEO<'a, T> {
 
                         // compute fitness for agents
 
-                        fitness[i] = self.problem.objectivefunction(&c[i].genes); //fobj(&c[i]);
+                        fitness[i] = self.problem.objectivefunction(&mut c[i].genes); //fobj(&c[i]);
 
                         // check fitness with best
                         if fitness[i] < ceq1_fit {

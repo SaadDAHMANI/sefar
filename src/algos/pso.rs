@@ -88,7 +88,7 @@ impl<'a, T: Problem> EOA for PSO<'a, T> {
                         //Objective function computation
                         // Evaluate search agent using objective function
                         particles[k].fitness =
-                            Some(self.problem.objectivefunction(&particles[k].genes));
+                            Some(self.problem.objectivefunction(&mut particles[k].genes));
 
                         //Update the pbest
                         if particles[k].fitness < pbest_x[k].fitness {

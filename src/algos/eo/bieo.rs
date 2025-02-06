@@ -143,7 +143,7 @@ impl<'a, T: Problem> EOA for BiEO<'a, T> {
                     // Sequential mode
                     //#[cfg(not(feature = "parallel"))]
                     for i in 0..particles_no {
-                        fitness[i] = self.problem.objectivefunction(&c[i].genes);
+                        fitness[i] = self.problem.objectivefunction(&mut c[i].genes);
                         //fobj(&c[i]);
                     }
 
@@ -300,11 +300,14 @@ impl<'a, T: Problem> EOA for BiEO<'a, T> {
                     convergence_curve[iter] = ceq1_fit;
                     iter += 1;
 
+                    /*
                     #[cfg(feature = "report")]
                     println!(
                         "Iter : {}, Best-fit : {}, Best-solution : {:?}",
                         iter, ceq1_fit, ceq1
                     );
+                    */
+                    println!("Iter : {}, Best-fit : {}", iter, ceq1_fit);
                 }
 
                 //return results
