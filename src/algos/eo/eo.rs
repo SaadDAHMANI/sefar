@@ -417,13 +417,15 @@ impl<'a> Display for EOparams<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Pop.Size: {}, Problem dim.: {}, Max.Iter: {}, a1: {}, a2: {}, GP: {}",
+            "Pop.Size: {}, Problem dim.: {}, Max.Iter: {}, a1: {}, a2: {}, GP: {}, LB: {:?}, UB: {:?}", 
             self.population_size,
             self.problem_dimension,
             self.max_iterations,
             self.a1,
             self.a2,
-            self.gp
+            self.gp,
+            self.get_lower_bounds(),
+            self.get_upper_bounds()
         )
     }
 }

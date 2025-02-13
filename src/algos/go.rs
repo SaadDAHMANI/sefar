@@ -451,8 +451,12 @@ impl<'a> Display for GOparams<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Popo.Size: {}, Problem dim.: {}, Max.Iter: {}",
-            self.population_size, self.problem_dimension, self.max_iterations
+            "Popo.Size: {}, Problem dim.: {}, Max.Iter: {}, LB: {:?}, UB: {:?}",
+            self.population_size,
+            self.problem_dimension,
+            self.max_iterations,
+            self.get_lower_bounds(),
+            self.get_upper_bounds()
         )
     }
 }

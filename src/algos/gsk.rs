@@ -11,6 +11,7 @@ use rand_distr::{Distribution, Uniform};
 #[cfg(feature = "parallel")]
 use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
 
+use std::fmt::Display;
 use std::time::Instant;
 
 /// GSK : Gaining-Sharing Knowedge algorithm.
@@ -849,6 +850,12 @@ impl<'a> Default for GSKparams<'a> {
             kr: 0.9f64,
             k: 10.0f64,
         }
+    }
+}
+
+impl<'a> Display for GSKparams<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Pop.Size: {}, Problem dim.: {}, Max.Iter: {}, Partition Size: {}, k: {}, kf: {}, kr: {}, LB: {:?}, UB: {:?}", self.population_size, self.problem_dimension, self.max_iterations, self.partition_size_p, self.k, self.kf, self.kr, self.get_lower_bounds(), self.get_upper_bounds())
     }
 }
 

@@ -15,7 +15,7 @@ use sefar::algos::gsk::{GSKparams, GSK};
 
 const DIM: usize = 5;
 const POP_SIZE: usize = 10;
-const KMAX: usize = 5;
+const KMAX: usize = 10;
 
 fn main() {
     // lshade_spacma_test1();
@@ -198,7 +198,7 @@ fn go_f1_test1() {
     // Save the results:
     let file = "/home/sd/Documents/Rust_apps/GO.csv";
 
-    let header = format!("{:?}", settings);
+    let header = format!("{}", settings);
 
     let _result = result.save(Some(&header), &file);
     println!("Saving optimization results on file : {:?}", _result);

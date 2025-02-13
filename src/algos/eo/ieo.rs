@@ -393,14 +393,16 @@ impl<'a> Display for IEOparams<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Pop.Size: {}, Problem dim.: {}, Max.Iter: {}, a1: {}, a2: {}, GP: {}, Pool Size Rate:{}",
+            "Pop.Size: {}, Problem dim.: {}, Max.Iter: {}, a1: {}, a2: {}, GP: {}, Pool Size Rate:{}, LB: {:?}, UB: {:?}",
             self.population_size,
             self.problem_dimension,
             self.max_iterations,
             self.a1,
             self.a2,
             self.gp,
-            self.pool_size_rate
+            self.pool_size_rate,
+            self.get_lower_bounds(),
+            self.get_upper_bounds()
          )
     }
 }

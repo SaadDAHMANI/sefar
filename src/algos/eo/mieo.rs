@@ -396,14 +396,16 @@ impl<'a> Display for MIEOparams<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Pop.Size: {}, Problem dim.: {}, Max.Iter: {}, a1: {}, a2: {}, GP: {}, Min. Pool Size: {}",
+            "Pop.Size: {}, Problem dim.: {}, Max.Iter: {}, a1: {}, a2: {}, GP: {}, Min. Pool Size: {}, LB: {:?}, UB: {:?}",
             self.population_size,
             self.problem_dimension,
             self.max_iterations,
             self.a1,
             self.a2,
             self.gp,
-            self.min_pool_size
+            self.min_pool_size,
+            self.lower_bounds,
+            self.upper_bounds
         )
     }
 }
