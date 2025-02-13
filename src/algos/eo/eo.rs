@@ -3,6 +3,7 @@
 //
 extern crate rand;
 use rand::distributions::{Distribution, Uniform};
+use std::fmt::Display;
 //use rand::prelude::ThreadRng;
 use std::time::Instant;
 
@@ -409,6 +410,21 @@ impl<'a> Default for EOparams<'a> {
             a2: 1.0f64,
             gp: 0.5f64,
         }
+    }
+}
+
+impl<'a> Display for EOparams<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Pop.Size: {}, Problem dim.: {}, Max.Iter: {}, a1: {}, a2: {}, GP: {}",
+            self.population_size,
+            self.problem_dimension,
+            self.max_iterations,
+            self.a1,
+            self.a2,
+            self.gp
+        )
     }
 }
 

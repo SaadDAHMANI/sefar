@@ -608,7 +608,8 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                         } /* els.kr
                               //popold[i] = pop[i].clone();
                               copy_solution(&pop[i], &mut popold[i], problem_size);
-                          }*/
+                          }
+                          */
                     }
                 } // THE MAIN LOOP
             self.partition_size_p,                
@@ -867,6 +868,7 @@ impl<'a> Display for GSKparams<'a> {
         )
     }
 }
+
 #[cfg(test)]
 mod gsk_test {
     use super::*;
