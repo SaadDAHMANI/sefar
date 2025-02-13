@@ -47,6 +47,7 @@ impl OptimizationResult {
         match &self.convergence_trend {
             None => {}
             Some(vector) => {
+                write!(writer, "Best-fitness history \n")?;
                 for x in vector.iter() {
                     write!(writer, "{x}\n")?;
                 }

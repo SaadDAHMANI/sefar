@@ -197,7 +197,10 @@ fn go_f1_test1() {
 
     // Save the results:
     let file = "/home/sd/Documents/Rust_apps/GO.csv";
-    let _result = result.save(None, &file);
+
+    let header = format!("{:?}", settings);
+
+    let _result = result.save(Some(&header), &file);
     println!("Saving optimization results on file : {:?}", _result);
 }
 

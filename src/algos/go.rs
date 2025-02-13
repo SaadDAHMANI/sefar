@@ -8,6 +8,7 @@ use rand::rngs::ThreadRng;
 use rand_distr::{Distribution, Uniform};
 #[cfg(feature = "parallel")]
 use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
+use std::fmt::Display;
 use std::time::Instant;
 
 ///
@@ -443,5 +444,15 @@ impl<'a> Default for GOparams<'a> {
             lower_bounds: &[-100.0f64, -100.0, -100.0],
             upper_bounds: &[100.0f64, 100.0, 100.0],
         }
+    }
+}
+
+impl<'a> Display for GOparams<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Popo.Size: {}, Problem dim.: {}, Max.Iter: {}",
+            self.population_size, self.problem_dimension, self.max_iterations
+        )
     }
 }
