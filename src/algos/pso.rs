@@ -264,8 +264,14 @@ impl<'a> Display for PSOparams<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Pop.Size: {}, Problem dim.: {}, Max.Iter: {}, c1: {}, c2: {}",
-            self.population_size, self.problem_dimension, self.max_iterations, self.c1, self.c2
+            "Pop.Size: {}, Problem dim.: {}, Max.Iter: {}, c1: {}, c2: {}, LB: {:?}, UB: {:?}",
+            self.population_size,
+            self.problem_dimension,
+            self.max_iterations,
+            self.c1,
+            self.c2,
+            self.get_lower_bounds(),
+            self.get_upper_bounds()
         )
     }
 }

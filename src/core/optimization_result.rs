@@ -45,8 +45,13 @@ impl OptimizationResult {
         }
 
         match &self.convergence_trend {
-            None => {}
+            None => {
+                write!(writer, "Error-Report: {:?}\n", self.err_report)?;
+            }
             Some(vector) => {
+                write!(writer, "Best-fitness: {:?}\n", self.best_fitness)?;
+                write!(writer, "Best-Solution: {:?}\n", self.best_genome)?;
+                write!(writer, "Computation-Time: {:?}\n", self.computation_time)?;
                 write!(writer, "Best-fitness history \n")?;
                 for x in vector.iter() {
                     write!(writer, "{x}\n")?;

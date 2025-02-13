@@ -341,10 +341,10 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
         //println!("Iter : {}, FES: {}, Max_FES {}", iter, fes, max_fes);
 
         // Compute the best fitness for the best solution
-        best_x.fitness = Some(self.problem.objectivefunction(&mut best_x.genes));
+        gbest_x.fitness = Some(self.problem.objectivefunction(&mut gbest_x.genes));
 
         let result: OptimizationResult = OptimizationResult {
-            best_genome: Some(best_x),
+            best_genome: Some(gbest_x),
             best_fitness: Some(gbestfitness),
             convergence_trend: Some(gbesthistory),
             computation_time: Some(duration),
