@@ -3,6 +3,7 @@
 //
 
 extern crate rand;
+use std::fmt::Display;
 //use rand::distributions::{Distribution, Uniform};
 //use rand::prelude::ThreadRng;
 use std::time::Instant;
@@ -256,5 +257,15 @@ impl<'a> Default for PSOparams<'a> {
             c1: 2.0f64,
             c2: 1.0f64,
         }
+    }
+}
+
+impl<'a> Display for PSOparams<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Pop.Size: {}, Problem dim.: {}, Max.Iter: {}, c1: {}, c2: {}",
+            self.population_size, self.problem_dimension, self.max_iterations, self.c1, self.c2
+        )
     }
 }
