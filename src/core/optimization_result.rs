@@ -1,10 +1,10 @@
 //use std::fmt::Display;
+use crate::core::genome::Genome;
+use std::fmt::Display;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
 use std::time::Duration;
-
-use crate::core::genome::Genome;
 
 #[derive(Debug, Clone)]
 pub struct OptimizationResult {
@@ -60,16 +60,11 @@ impl OptimizationResult {
     }
 }
 
-/*  impl Display for OptimizationResult{
+impl Display for OptimizationResult {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Best-fitness : {:?}; Best-solution : {:?}; Time : {:?}; Err-report: {:?}", self.best_fitness, self.best_genome, self.computation_time, self.err_report)
-    }
-} */
-
-impl ToString for OptimizationResult {
-    fn to_string(&self) -> String {
-        format!(
-            "Best-fitness : {:?} \n; Best-solution : {:?} \n; Time : {:?} \n; Err-report: {:?}",
+        write!(
+            f,
+            "Best-fitness : {:?}; Best-solution : {:?}; Time : {:?}; Err-report: {:?}",
             self.best_fitness, self.best_genome, self.computation_time, self.err_report
         )
     }

@@ -598,24 +598,23 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 
                     // UPDATE THE SEARCH POPULATION:
                     for i in 0..pop_size {
-                        if children_fitness[iPartition Size< fitnK: {}, Kfs[i], Kr: {} {
+                        if children_fitness[i] < fitness[i] {
                             //  popold[i] = ui[i].clone();
                             // copy_solution(&ui[i], &mut popold[i], problem_size);
 
                             // COPY BETTER SOULTIONS TO THE SEARCH POPULATION:
-                            copy_solution(&ui[i], &mut pop[i], problem_size;
-                            // COPY THE FITNESS OF THE BETTER SOLUTION TOO:f                            fitness[i] = children_fitness[i];
-                        } /* els.kr
+                            copy_solution(&ui[i], &mut pop[i], problem_size);
+                            // COPY THE FITNESS OF THE BETTER SOLUTION TOO:
+                            fitness[i] = children_fitness[i];
+                        } /* else {
                               //popold[i] = pop[i].clone();
                               copy_solution(&pop[i], &mut popold[i], problem_size);
-                          }
-                          */
+                          }*/
                     }
                 } // THE MAIN LOOP
-            self.partition_size_p,                
 
                 let mut result: OptimizationResult =
-                    OptimizationResult::get_n
+                    OptimizationResult::get_none(String::from("n/a"));
 
                 let duration = chronos.elapsed();
                 result.best_genome = Some(bsf_solution);
@@ -850,22 +849,6 @@ impl<'a> Default for GSKparams<'a> {
             kr: 0.9f64,
             k: 10.0f64,
         }
-    }
-}
-
-impl<'a> Display for GSKparams<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "Pop.Size: {}, Problem dim.: {}, Max.Iter: {}, Partition Size: {}, K: {}, Kf: {}, Kr: {}",
-            self.population_size,
-            self.problem_dimension,
-            self.max_iterations,
-            self.partition_size_p,            
-            self.k,
-            self.kf,
-            self.kr
-        )
     }
 }
 

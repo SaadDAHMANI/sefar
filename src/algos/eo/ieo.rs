@@ -5,6 +5,7 @@
 extern crate rand;
 use rand::distributions::{Distribution, Uniform};
 //use rand::prelude::ThreadRng;
+use std::fmt::Display;
 use std::time::Instant;
 
 #[cfg(feature = "parallel")]
@@ -385,6 +386,22 @@ impl<'a> Default for IEOparams<'a> {
             gp: 0.5f64,
             pool_size_rate: 0.2,
         }
+    }
+}
+
+impl<'a> Display for IEOparams<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Pop.Size: {}, Problem dim.: {}, Max.Iter: {}, a1: {}, a2: {}, GP: {}, Pool Size Rate:{}",
+            self.population_size,
+            self.problem_dimension,
+            self.max_iterations,
+            self.a1,
+            self.a2,
+            self.gp,
+            self.pool_size_rate
+         )
     }
 }
 
