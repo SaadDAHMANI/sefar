@@ -52,7 +52,7 @@ impl OptimizationResult {
                 write!(writer, "Best-fitness: {:?}\n", self.best_fitness)?;
                 write!(writer, "Best-Solution: {:?}\n", self.best_genome)?;
                 write!(writer, "Computation-Time: {:?}\n", self.computation_time)?;
-                write!(writer, "Best-fitness history \n")?;
+                write!(writer, "Best-fitness history: \n")?;
                 for x in vector.iter() {
                     write!(writer, "{x}\n")?;
                 }

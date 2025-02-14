@@ -340,8 +340,8 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
         let duration = chronos.elapsed();
         //println!("Iter : {}, FES: {}, Max_FES {}", iter, fes, max_fes);
 
-        // Compute the best fitness for the best solution
-        gbest_x.fitness = Some(self.problem.objectivefunction(&mut gbest_x.genes));
+        // Save the best fitness for the best solution
+        gbest_x.fitness = Some(gbestfitness);
 
         let result: OptimizationResult = OptimizationResult {
             best_genome: Some(gbest_x),
