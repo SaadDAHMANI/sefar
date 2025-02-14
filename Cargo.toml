@@ -1,6 +1,6 @@
 [package]
 name = "sefar"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2021"
 authors = ["Saad Dahmani <sd.dahmani2000@gmail.com>"]
 description = "sefar is library for evolutionary optimization algorithms."
