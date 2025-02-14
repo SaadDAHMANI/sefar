@@ -201,7 +201,7 @@ fn go_f1_test1() {
     let header = format!("{}", settings);
 
     let _result = result.save(Some(&header), &file);
-    println!("Saving optimization results on file : {:?}", _result);
+    println!("Saving optimization results in teh file: {:?}", _result);
 }
 
 #[allow(dead_code)]

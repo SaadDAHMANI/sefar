@@ -31,7 +31,7 @@ In the current version of [Sefar](https://github.com/SaadDAHMANI/sefar), only th
 ```toml
 
 [dependencies]
-sefar = "0.1.7"
+sefar = "0.1.8"
 ```
 
 2. In the *main.rs* file :
@@ -74,6 +74,17 @@ fn main() {
     // Best-solution : Some(Genome { id: 22, genes: [-7.586125521377413e-28, -7.519595439155215e-28, -2.2218253597758204e-29, -6.135485510888784e-29, -3.7827445210037567e-28], fitness: Some(1.2882857900967827e-54) });
     // Time : Some(11.606888ms);
     // Err-report: None
+
+    // Now you can save the optimization result in file like this:
+    // give the file path: 
+    let file = "./GO_results.csv";
+
+    // add a header to the file (optionaly):
+    let header = format!("{}", settings);
+
+    // write the 'result' in the given file
+    let _result = result.save(Some(&header), &file);
+    println!("Saving optimization results in file : {:?}", _result);
 }
 
 // Define the objective function to minimize. Here, the Sphere function is implemented.
