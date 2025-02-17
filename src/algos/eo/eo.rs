@@ -284,7 +284,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                         iter, ceq1_fit, ceq1
                     );
 
-                    println!("Iter : {}, Best-fit : {}", iter, ceq1_fit);
+                    // println!("Iter : {}, Best-fit : {}", iter, ceq1_fit);
                 }
 
                 //return results

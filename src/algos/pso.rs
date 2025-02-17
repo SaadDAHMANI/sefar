@@ -149,6 +149,9 @@ impl<'a, T: Problem> EOA for PSO<'a, T> {
                         }
                     }
                     cgcurve[t] = gbest_x.fitness.unwrap();
+
+                    #[cfg(feature = "report")]
+                    println!("Iter : {}, best-fitness : {}", t, gbest_x.fitness);
                 }
 
                 //return results

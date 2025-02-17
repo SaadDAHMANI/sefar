@@ -594,7 +594,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                         g, bsf_fit_var, bsf_solution
                     );*/
 
-                    //#[cfg(feature = "report")]
+                    #[cfg(feature = "report")]
                     println!("Iter : {}, best-fitness : {}", g, bsf_fit_var);
 
                     // UPDATE THE SEARCH POPULATION:

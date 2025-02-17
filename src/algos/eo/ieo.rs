@@ -253,7 +253,7 @@ impl<'a, T: Problem> EOA for IEO<'a, T> {
                     convergence_curve[iter] = ceq1_fit;
                     iter += 1;
 
-                    //#[cfg(feature = "report")]
+                    #[cfg(feature = "report")]
                     println!("Iter : {}, Best-fit : {}", iter, ceq1_fit);
                 }
 
