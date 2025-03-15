@@ -402,13 +402,13 @@ impl Default for BiEOparams {
     ///
     ///  use sefar::algos::eo::*;
     ///
-    ///  EOparams{
-    ///     population_size : 10,
-    ///     dimensions : 3,
-    ///     max_iterations : 100,
-    ///     a1 : 2.0f64,
-    ///     a2 : 1.0f64,
-    ///     gp : 0.5f64,
+    /// BiEOparams {
+    ///    population_size: 10,
+    ///    problem_dimension: 3,
+    ///    max_iterations: 100,
+    ///    a1: 2.0f64,
+    ///    a2: 1.0f64,
+    ///    gp: 0.5f64,
     /// };
     /// ~~~
     ///

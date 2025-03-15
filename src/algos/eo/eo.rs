@@ -389,7 +389,7 @@ impl<'a> Default for EOparams<'a> {
     ///
     ///  EOparams{
     ///     population_size : 10,
-    ///     dimensions : 3,
+    ///     problem_dimension : 3,
     ///     max_iterations : 100,
     ///     lower_bounds : &[100.0f64, 100.0, 100.0],
     ///     upper_bounds : &[-100.0f64, -100.0, -100.0],
@@ -417,7 +417,7 @@ impl<'a> Display for EOparams<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Pop.Size: {}, Problem dim.: {}, Max.Iter: {}, a1: {}, a2: {}, GP: {}, LB: {:?}, UB: {:?}", 
+            "Pop.Size: {}, Problem dim.: {}, Max.Iter: {}, a1: {}, a2: {}, GP: {}, LB: {:?}, UB: {:?}",
             self.population_size,
             self.problem_dimension,
             self.max_iterations,

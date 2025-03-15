@@ -14,7 +14,7 @@ use sefar::algos::gsk::{GSKparams, GSK};
 //use sefar::algos::lshade_spacma::{LshadeSpacma, LshadeSpacmaParams};
 
 const DIM: usize = 5;
-const POP_SIZE: usize = 10;
+const POP_SIZE: usize = 12;
 const KMAX: usize = 10;
 
 fn main() {
@@ -28,8 +28,8 @@ fn main() {
     //--------------------------------------------------------------------
     //println!("Evaluation with Max_Iter = {}", KMAX);
 
-    println!("______________________GO : F1______________________");
-    go_f1_test1();
+    // println!("______________________GO : F1______________________");
+    // go_f1_test1();
 
     /*
      println!("______________________GO : F2______________________");
@@ -47,6 +47,9 @@ fn main() {
 
     //meo_test1();
     //bieo_f1_binary_test();
+
+    println!("------------------GSK : F1---------------------");
+    gsk_f1_test1();
 }
 /*
 #[allow(dead_code)]

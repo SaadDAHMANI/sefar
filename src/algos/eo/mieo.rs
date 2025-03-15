@@ -362,11 +362,11 @@ impl<'a> Default for MIEOparams<'a> {
     ///
     /// ~~~
     ///
-    ///  use sefar::algos::ieo::*;
+    ///  use sefar::algos::eo::mieo::*;
     ///
-    ///  IEOparams{
+    ///  MIEOparams{
     ///     population_size : 10,
-    ///     dimensions : 3,
+    ///     problem_dimension : 3,
     ///     max_iterations : 100,
     ///     lower_bounds : &[100.0f64, 100.0, 100.0],
     ///     upper_bounds : &[-100.0f64, -100.0, -100.0],

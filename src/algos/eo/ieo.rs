@@ -359,11 +359,11 @@ impl<'a> Default for IEOparams<'a> {
     ///
     /// ~~~
     ///
-    ///  use sefar::algos::ieo::*;
+    ///  use sefar::algos::eo::ieo::*;
     ///
     ///  IEOparams{
     ///     population_size : 10,
-    ///     dimensions : 3,
+    ///     problem_dimension : 3,
     ///     max_iterations : 100,
     ///     lower_bounds : &[100.0f64, 100.0, 100.0],
     ///     upper_bounds : &[-100.0f64, -100.0, -100.0],
