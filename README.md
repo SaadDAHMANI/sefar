@@ -31,7 +31,7 @@ In the current version of [Sefar](https://github.com/SaadDAHMANI/sefar), only th
 ```toml
 
 [dependencies]
-sefar = "0.1.8"
+sefar = "0.2.0"
 ```
 
 2. In the *main.rs* file :
@@ -119,10 +119,10 @@ cargo run --features parallel;
 
 |Algorithm       | *_report_* feature | *_parallel_* feature |
 |----------------|--------------------| ---------------------|
-|*PSO*           | :heavy_check_mark: |                      |
-|*EO*            | :heavy_check_mark: | :heavy_check_mark:   |
-|*GO*            | :heavy_check_mark: | :heavy_check_mark:   |
-|*GSK*           | :heavy_check_mark: | :heavy_check_mark:   |
+|*PSO*           | [x]                |                      |
+|*EO*            | [x]                | [x]                  |
+|*GO*            | [x]                | [x]                  |
+|*GSK*           | [x]                | [x]                  |
 |*LSHADE_SPACMA* |                    |                      |
-|*BiEO*          | :heavy_check_mark: |                      |
-|*IEO*            | :heavy_check_mark: | :heavy_check_mark:   |
+|*BiEO*          | [x]                |                      |
+|*IEO*           | [x]                | [x]                  |

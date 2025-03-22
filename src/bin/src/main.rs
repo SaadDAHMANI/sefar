@@ -23,7 +23,7 @@ fn main() {
     //apgsk_f1_test1();
 
     // #[cfg(not(feature = "parallel"))]
-    // gsk_f1_test1();
+    gsk_f1_test1();
 
     //--------------------------------------------------------------------
     //println!("Evaluation with Max_Iter = {}", KMAX);
