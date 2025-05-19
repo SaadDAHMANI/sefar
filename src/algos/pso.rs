@@ -53,8 +53,8 @@ impl<'a, T: Problem> EOA for PSO<'a, T> {
                 let w_max: f64 = 0.9;
                 let w_min: f64 = 0.2;
 
-                let mut v_max = Vec::new();
-                let mut v_min = Vec::new();
+                let mut v_max = Vec::with_capacity(dim);
+                let mut v_min = Vec::with_capacity(dim);
 
                 for i in 0..dim {
                     v_max.push((ub[i] - lb[i]) * 0.2f64);
