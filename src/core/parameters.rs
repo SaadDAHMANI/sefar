@@ -1,3 +1,5 @@
+use crate::core::OptError;
+
 pub trait Parameters {
     fn get_population_size(&self) -> usize {
         10usize
@@ -29,64 +31,39 @@ pub trait Parameters {
         ub
     }
 
-    fn check(&self) -> Result<(), String> {
-        let mut errors: usize = 0;
-        let mut msg: String = String::new();
-
+    fn check(&self) -> Result<(), OptError> {
         if self.get_population_size() == 0 {
-            msg = String::from("population_size must be greater than 0!; \n");
-            errors += 1;
+            return Err(OptError::PopulationSizeIsNull);
         }
 
         if self.get_problem_dimension() == 0 {
-            msg = format!(
-                "{} Search space dimension (i.e., problem dimension or decision variables) must be greater than 0!; \n",
-                msg
-            );
-            errors += 1;
+            return Err(OptError::ProblemDimensionIsNull);
         }
 
         if self.get_max_iterations() == 0 {
-            msg = format!(
-                "{} Iterations count (max_iterations) must be greater than 0!; \n",
-                msg
-            );
-            errors += 1;
+            return Err(OptError::MaxIterationsIsNull);
         }
 
         if self.get_lower_bounds().is_empty() {
-            msg = format!("{} Lower_bounds length must be greater than 0!; \n", msg);
-            errors += 1;
+            return Err(OptError::EmptyLB);
         }
 
         if self.get_upper_bounds().is_empty() {
-            msg = format!("{} Upper_bounds length must be greater than 0!; \n", msg);
-            errors += 1;
+            return Err(OptError::EmptyUB);
         }
 
         if self.get_lower_bounds().len() != self.get_upper_bounds().len() {
-            msg = format!(
-                "{} Lower_bounds & Upper_bounds lengths must be equal!; \n",
-                msg
-            );
-            errors += 1;
+            return Err(OptError::LBLengthNotEqualsUBlength);
         }
 
-        if self.get_lower_bounds().len() != self.get_problem_dimension()
-            || self.get_upper_bounds().len() != self.get_problem_dimension()
-        {
-            msg = format!(
-                "{} Lower_bounds & Upper_bounds lengths must equal search space dimension!; \n",
-                msg
-            );
-            errors += 1;
+        if self.get_lower_bounds().len() != self.get_problem_dimension() {
+            return Err(OptError::LBLengthNoEqualsProblemDim);
         }
 
-        if errors > 0 {
-            msg = format!("There are [{}] errors : \n {}", errors, msg.trim());
-            Err(msg)
-        } else {
-            Ok(())
+        if self.get_upper_bounds().len() != self.get_problem_dimension() {
+            return Err(OptError::LBLengthNoEqualsProblemDim);
         }
+
+        Ok(())
     }
 }

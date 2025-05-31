@@ -14,6 +14,9 @@ pub trait EvolutionaryAlgo {
     }
 }
 
+///
+/// A custom error to represent EOA errors.
+///
 #[derive(Debug, Clone, Copy, Error, PartialEq, Eq)]
 pub enum OptError {
     #[error("Search population size is eqal to 0!")]
@@ -25,15 +28,21 @@ pub enum OptError {
     #[error("Problem dimension is equal to 0!")]
     ProblemDimensionIsNull,
 
-    #[error("Maximum number of iterations equals 0!")]
+    #[error("Maximum number of iterations is equal to 0!")]
     MaxIterationsIsNull,
 
-    #[error("Length of Lower bound vector not equals problem dimension!")]
+    #[error("Length of Lower-bound vector is not equal to problem dimension!")]
     LBLengthNoEqualsProblemDim,
 
-    #[error("Length of upper bound vector not equals problem dimension!")]
+    #[error("Length of upper-bound vector is not equal to problem dimension!")]
     UBLengthNoEqualsProblemDim,
 
-    #[error("Length of Lower bound vector not equals problem dimension!")]
+    #[error("Lengths of Lower-bound and upper-bound vectors are not equal!")]
     LBLengthNotEqualsUBlength,
+
+    #[error("Lower-bound vector is empty!")]
+    EmptyLB,
+
+    #[error("Upper-bound vector is empty!")]
+    EmptyUB,
 }
