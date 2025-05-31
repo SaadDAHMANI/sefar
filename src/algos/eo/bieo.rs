@@ -16,6 +16,7 @@ use crate::core::genome::Genome;
 use crate::core::optimization_result::OptimizationResult;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
+use crate::core::OptError;
 
 ///
 /// Binary Equilibrium Optimizer (BiEO)
@@ -52,7 +53,7 @@ impl<'a, T: Problem> EOA for BiEO<'a, T> {
         //let params = self.params.clone();
 
         match self.params.check() {
-            Err(error) => OptimizationResult::get_none(error),
+            Err(error) => OptimizationResult::get_empty(Some(error)),
             Ok(()) => {
                 let dim = self.params.get_problem_dimension();
                 let particles_no = self.params.get_population_size();
@@ -353,7 +354,7 @@ impl BiEOparams {
         a1: f64,
         a2: f64,
         gp: f64,
-    ) -> Result<BiEOparams, String> {
+    ) -> Result<BiEOparams, OptError> {
         let params = BiEOparams {
             population_size: p_size,
             problem_dimension: dim,

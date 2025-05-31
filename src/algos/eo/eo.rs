@@ -16,6 +16,7 @@ use crate::core::genome::Genome;
 use crate::core::optimization_result::OptimizationResult;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
+use crate::core::OptError;
 
 ///
 /// Equilibrium Optimizer (EO)
@@ -46,7 +47,7 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
         //let params = self.params.clone();
 
         match self.params.check() {
-            Err(error) => OptimizationResult::get_none(error),
+            Err(error) => OptimizationResult::get_empty(Some(error)),
             Ok(()) => {
                 let dim = self.params.get_problem_dimension();
                 let particles_no = self.params.get_population_size();
@@ -338,7 +339,7 @@ impl<'a> EOparams<'a> {
         a1: f64,
         a2: f64,
         gp: f64,
-    ) -> Result<EOparams<'a>, String> {
+    ) -> Result<EOparams<'a>, OptError> {
         let params = EOparams {
             population_size: p_size,
             problem_dimension: dim,

@@ -4,6 +4,7 @@ use crate::core::genome::Genome;
 use crate::core::optimization_result::OptimizationResult;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
+use crate::core::OptError;
 
 //use rand::rngs::ThreadRng;
 use rand_distr::{Distribution, Uniform};
@@ -391,7 +392,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
     /// ```
     fn run(&mut self) -> OptimizationResult {
         match self.params.check() {
-            Err(eror) => OptimizationResult::get_none(eror),
+            Err(eror) => OptimizationResult::get_empty(Some(eror)),
             Ok(()) => {
                 let chronos = Instant::now();
 
@@ -633,8 +634,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                     }
                 } // THE MAIN LOOP
 
-                let mut result: OptimizationResult =
-                    OptimizationResult::get_none(String::from("n/a"));
+                let mut result: OptimizationResult = OptimizationResult::get_empty(None);
 
                 let duration = chronos.elapsed();
                 result.best_genome = Some(bsf_solution);
@@ -651,7 +651,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 ///
 /// Define parameters for the Gaining-Sharing Knowledge (GSK) Algorithm.
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct GSKparams<'a> {
     /// Number of search agents.
     pub population_size: usize,
@@ -753,86 +753,33 @@ impl<'a> Parameters for GSKparams<'a> {
         self.upper_bounds.to_vec()
     }
 
-    fn check(&self) -> Result<(), String> {
-        let mut errors: usize = 0;
-        let mut msg: String = String::new();
-
-        if self.population_size < 12 {
-            msg = String::from("population_size must be greater than or equals 12!; \n");
-            errors += 1;
-        }
-
-        if self.get_problem_dimension() == 0 {
-            msg = format!("{} Search space dimension (i.e., problem dimension or decision variables) must be greater than 0!; \n", msg);
-            errors += 1;
-        }
-
-        if self.get_max_iterations() == 0 {
-            msg = format!(
-                "{} Iterations count (max_iterations) must be greater than 0!; \n",
-                msg
-            );
-            errors += 1;
-        }
-
-        if self.get_lower_bounds().is_empty() {
-            msg = format!("{} Lower_bounds length must be greater than 0!; \n", msg);
-            errors += 1;
-        }
-
-        if self.get_upper_bounds().is_empty() {
-            msg = format!("{} Upper_bounds length must be greater than 0!; \n", msg);
-            errors += 1;
-        }
-
-        if self.get_lower_bounds().len() != self.get_upper_bounds().len() {
-            msg = format!(
-                "{} Lower_bounds & Upper_bounds lengths must be equal!; \n",
-                msg
-            );
-            errors += 1;
-        }
-
-        if self.get_lower_bounds().len() != self.get_problem_dimension()
-            || self.get_upper_bounds().len() != self.get_problem_dimension()
-        {
-            msg = format!(
-                "{} Lower_bounds & Upper_bounds lengths must equal search space dimension!; \n",
-                msg
-            );
-            errors += 1;
-        }
+    fn check(&self) -> Result<(), OptError> {
+        //-------------------------------------
 
         if self.k <= 0.0 {
-            msg = format!(
-                "{} The knowledge rate 'k' should be greater than 0! [actual value k={:?}]; \n",
-                msg, self.k
-            );
-            errors += 1;
-        };
+            return Err(OptError::BadParameterValue {
+                parameter: String::from("GSK - Knowledge rate 'k' should be greater than 0!"),
+                actual: self.k,
+            });
+        }
 
         if self.kf <= 0.0 {
-            msg = format!(
-                "{} The knowledge factor 'kf' should be greater than 0! [actual value kf={:?}]; \n",
-                msg, self.kf
-            );
-            errors += 1;
-        };
+            return Err(OptError::BadParameterValue {
+                parameter: String::from("GSK - Knowledge factor 'kf' should be greater than 0!"),
+                actual: self.kf,
+            });
+        }
 
         if self.kr < 0.0 || self.kr > 1.0 {
-            msg = format!(
-                "{} The knowledge ratio 'kr' should be in the range [0, 1]! [actual value kr={:?}]; \n",
-                msg, self.kr
-            );
-            errors += 1;
-        };
-
-        if errors > 0 {
-            msg = format!("There are [{}] errors : \n {}", errors, msg.trim());
-            Err(msg)
-        } else {
-            Ok(())
+            return Err(OptError::BadParameterValue {
+                parameter: String::from(
+                    "GSK - The knowledge ratio 'kr' should be in the range [0, 1]!",
+                ),
+                actual: self.kr,
+            });
         }
+
+        Ok(())
     }
 }
 

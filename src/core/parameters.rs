@@ -53,15 +53,24 @@ pub trait Parameters {
         }
 
         if self.get_lower_bounds().len() != self.get_upper_bounds().len() {
-            return Err(OptError::LBLengthNotEqualsUBlength);
+            return Err(OptError::LBLengthNotEqualsUBlength {
+                lb_len: self.get_lower_bounds().len(),
+                ub_len: self.get_upper_bounds().len(),
+            });
         }
 
         if self.get_lower_bounds().len() != self.get_problem_dimension() {
-            return Err(OptError::LBLengthNoEqualsProblemDim);
+            return Err(OptError::LBLengthNoEqualsProblemDim {
+                lb_len: self.get_lower_bounds().len(),
+                problem_dim: self.get_problem_dimension(),
+            });
         }
 
         if self.get_upper_bounds().len() != self.get_problem_dimension() {
-            return Err(OptError::LBLengthNoEqualsProblemDim);
+            return Err(OptError::UBLengthNoEqualsProblemDim {
+                ub_len: self.get_lower_bounds().len(),
+                problem_dim: self.get_problem_dimension(),
+            });
         }
 
         Ok(())

@@ -1,5 +1,7 @@
 //use std::fmt::Display;
 use crate::core::genome::Genome;
+use crate::core::OptError;
+
 use std::fmt::Display;
 use std::fs::File;
 use std::io::{BufWriter, Write};
@@ -12,18 +14,18 @@ pub struct OptimizationResult {
     pub best_fitness: Option<f64>,
     pub convergence_trend: Option<Vec<f64>>,
     pub computation_time: Option<Duration>,
-    pub err_report: Option<String>,
+    pub err_report: Option<OptError>,
 }
 
 #[allow(dead_code)]
 impl OptimizationResult {
-    pub fn get_none(msg: String) -> OptimizationResult {
+    pub fn get_empty(opt_error: Option<OptError>) -> OptimizationResult {
         OptimizationResult {
             best_genome: None,
             best_fitness: None,
             convergence_trend: None,
             computation_time: None,
-            err_report: Some(msg),
+            err_report: opt_error,
         }
     }
 }

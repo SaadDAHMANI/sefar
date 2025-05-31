@@ -13,6 +13,7 @@ use crate::core::genome::Genome;
 use crate::core::optimization_result::OptimizationResult;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
+use crate::core::OptError;
 //use crate::common::*;
 
 pub struct PSO<'a, T: Problem> {
@@ -38,7 +39,7 @@ impl<'a, T: Problem> EOA for PSO<'a, T> {
         //let params = self.clone();
 
         match self.params.check() {
-            Err(error) => OptimizationResult::get_none(error),
+            Err(error) => OptimizationResult::get_empty(Some(error)),
             Ok(()) => {
                 let dim = self.params.problem_dimension;
                 let ub = self.params.upper_bounds;
@@ -191,7 +192,7 @@ impl<'a> PSOparams<'a> {
         ub: &'a [f64],
         c1: f64,
         c2: f64,
-    ) -> Result<PSOparams<'a>, String> {
+    ) -> Result<PSOparams<'a>, OptError> {
         let params = PSOparams {
             population_size: p_size,
             problem_dimension: dim,

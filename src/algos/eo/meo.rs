@@ -55,7 +55,7 @@ impl<'a, T: Problem> EOA for MEO<'a, T> {
         //let params = self.params.clone();
 
         match self.params.check() {
-            Err(error) => OptimizationResult::get_none(error),
+            Err(error) => OptimizationResult::get_empty(Some(error)),
             Ok(()) => {
                 let dim = self.params.get_problem_dimension(); //self.params.get_dimensions();
                 let particles_no = self.params.get_population_size(); //self.params.get_population_size();
