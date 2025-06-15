@@ -41,6 +41,17 @@ impl Problem for Sphere {
         let fitness = genome.iter().fold(0.0f64, |sum, g| sum + g.powi(2));
         fitness
     }
+
+    fn iteration_changed(
+        &self,
+        _current_iteration: usize,
+        _current_best_genome: &crate::core::genome::Genome,
+    ) {
+        println!(
+            "Iteration : {}, best.fitness : {:?}",
+            _current_iteration, _current_best_genome.fitness
+        );
+    }
 }
 
 ///

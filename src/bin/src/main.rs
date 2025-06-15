@@ -23,7 +23,6 @@ fn main() {
     //apgsk_f1_test1();
 
     // #[cfg(not(feature = "parallel"))]
-    gsk_f1_test1();
 
     //--------------------------------------------------------------------
     //println!("Evaluation with Max_Iter = {}", KMAX);
@@ -43,13 +42,13 @@ fn main() {
 
     //eo_f1_test1();
 
-    //peo_f1_test1();
+    peo_f1_test1();
 
     //meo_test1();
     //bieo_f1_binary_test();
 
-    println!("------------------GSK : F1---------------------");
-    gsk_f1_test1();
+    // println!("------------------GSK : F1---------------------");
+    //gsk_f1_test1();
 }
 /*
 #[allow(dead_code)]
