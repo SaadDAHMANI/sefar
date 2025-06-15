@@ -300,15 +300,13 @@ impl<'a, T: Problem> EOA for BiEO<'a, T> {
                     }
 
                     convergence_curve[iter] = ceq1_fit;
-                    iter += 1;
 
-                    #[cfg(feature = "report")]
-                    println!(
-                        "Iter : {}, Best-fit : {}, Best-solution : {:?}",
-                        iter, ceq1_fit, ceq1
+                    self.problem.iteration_changed(
+                        iter,
+                        &Genome::from(ceq1_index, &ceq1.clone(), ceq1_fit),
                     );
 
-                    //println!("Iter : {}, Best-fit : {}", iter, ceq1_fit);
+                    iter += 1;
                 }
 
                 //return results
