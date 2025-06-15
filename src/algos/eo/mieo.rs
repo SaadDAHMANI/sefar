@@ -255,10 +255,17 @@ impl<'a, T: Problem> EOA for MIEO<'a, T> {
                     // println!("seq--> End computation in : {:?}", duration);
 
                     convergence_curve[iter] = ceq1_fit;
+
+                    ceq1.fitness = Some(ceq1_fit);
+
+                    self.problem.iteration_changed(iter, &ceq1);
+
                     iter += 1;
 
+                    /*
                     #[cfg(feature = "report")]
                     println!("Iter : {}, Best-fit : {}", iter, ceq1_fit);
+                    */
                 }
 
                 //return results

@@ -277,15 +277,11 @@ impl<'a, T: Problem> EOA for EO<'a, T> {
                     // println!("seq--> End computation in : {:?}", duration);
 
                     convergence_curve[iter] = ceq1_fit;
+
+                    self.problem
+                        .iteration_changed(iter, &Genome::from(ceq1_index, &ceq1, ceq1_fit));
+
                     iter += 1;
-
-                    #[cfg(feature = "report")]
-                    println!(
-                        "Iter : {}, Best-fit : {}, Best-solution : {:?}",
-                        iter, ceq1_fit, ceq1
-                    );
-
-                    // println!("Iter : {}, Best-fit : {}", iter, ceq1_fit);
                 }
 
                 //return results

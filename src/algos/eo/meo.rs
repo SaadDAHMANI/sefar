@@ -144,11 +144,11 @@ impl<'a, T: Problem> EOA for MEO<'a, T> {
                 }
 
                 // check
-
-                for g in c.iter() {
-                    println!("id: {}, fit: {:?}", g.id, g.fitness);
-                }
-
+                /*
+                                for g in c.iter() {
+                                    println!("id: {}, fit: {:?}", g.id, g.fitness);
+                                }
+                */
                 // the main loop of EO
                 while iter < max_iter {
                     for i in 0..c.len() {
@@ -294,6 +294,10 @@ impl<'a, T: Problem> EOA for MEO<'a, T> {
                     // println!("seq--> End computation in : {:?}", duration);
 
                     convergence_curve[iter] = ceq1_fit;
+
+                    self.problem
+                        .iteration_changed(iter, &Genome::from(ceq1_index, &ceq1, ceq1_fit));
+
                     iter += 1;
                 }
 
