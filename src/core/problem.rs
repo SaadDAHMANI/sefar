@@ -12,8 +12,11 @@ pub trait Problem: Send + Sync + Clone {
         genome.iter().fold(0.0f64, |sum, x| sum + x)
     }
 
+    ///
+    /// Define a custom behavior when ierations progress.
+    ///
     #[allow(dead_code)]
-    fn iteration_changed(&self, _current_iteration: usize, _current_best_genome: &Genome) {}
+    fn iteration_increment(&self, _current_iteration: usize, _current_best_genome: &Genome) {}
     ///
     /// Define the objective function to be called in parallel mode.
     /// In parallel mode, the problem cannot be modified when the objective function is called.

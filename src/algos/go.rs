@@ -336,9 +336,9 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
                         println!("Iter : {}, best-fitness : {}", iter, gbestfitness);
             */
 
-            self.problem.iteration_changed(iter, &gbest_x);
-
             iter += 1;
+
+            self.problem.iteration_increment(iter, &gbest_x);
         }
 
         let duration = chronos.elapsed();

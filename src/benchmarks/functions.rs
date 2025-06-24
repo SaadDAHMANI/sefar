@@ -42,7 +42,7 @@ impl Problem for Sphere {
         fitness
     }
 
-    fn iteration_changed(
+    fn iteration_increment(
         &self,
         _current_iteration: usize,
         _current_best_genome: &crate::core::genome::Genome,

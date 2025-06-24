@@ -301,12 +301,12 @@ impl<'a, T: Problem> EOA for BiEO<'a, T> {
 
                     convergence_curve[iter] = ceq1_fit;
 
-                    self.problem.iteration_changed(
+                    iter += 1;
+
+                    self.problem.iteration_increment(
                         iter,
                         &Genome::from(ceq1_index, &ceq1.clone(), ceq1_fit),
                     );
-
-                    iter += 1;
                 }
 
                 //return results

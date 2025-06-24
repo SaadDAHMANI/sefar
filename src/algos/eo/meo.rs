@@ -295,10 +295,10 @@ impl<'a, T: Problem> EOA for MEO<'a, T> {
 
                     convergence_curve[iter] = ceq1_fit;
 
-                    self.problem
-                        .iteration_changed(iter, &Genome::from(ceq1_index, &ceq1, ceq1_fit));
-
                     iter += 1;
+
+                    self.problem
+                        .iteration_increment(iter, &Genome::from(ceq1_index, &ceq1, ceq1_fit));
                 }
 
                 //return results

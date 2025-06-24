@@ -625,8 +625,8 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                                 g, bsf_fit_var, bsf_solution
                             );*/
 
-                            #[cfg(feature = "report")]
-                            println!("Iter : {}, best-fitness : {}", g, bsf_fit_var);
+                            //  #[cfg(feature = "report")]
+                            //  println!("Iter : {}, best-fitness : {}", g, bsf_fit_var);
 
                             // UPDATE THE SEARCH POPULATION:
                             for i in 0..pop_size {
@@ -643,6 +643,10 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                                       copy_solution(&pop[i], &mut popold[i], problem_size);
                                   }*/
                             }
+
+                            bsf_solution.fitness = Some(bsf_fit_var);
+
+                            self.problem.iteration_increment(g, &bsf_solution);
                         } // THE MAIN LOOP
 
                         let mut result: OptimizationResult = OptimizationResult::get_empty(None);

@@ -258,9 +258,9 @@ impl<'a, T: Problem> EOA for MIEO<'a, T> {
 
                     ceq1.fitness = Some(ceq1_fit);
 
-                    self.problem.iteration_changed(iter, &ceq1);
-
                     iter += 1;
+
+                    self.problem.iteration_increment(iter, &ceq1);
 
                     /*
                     #[cfg(feature = "report")]

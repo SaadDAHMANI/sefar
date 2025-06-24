@@ -151,7 +151,7 @@ impl<'a, T: Problem> EOA for PSO<'a, T> {
                     }
                     cgcurve[t] = gbest_x.fitness.unwrap();
 
-                    self.problem.iteration_changed(t, &gbest_x);
+                    self.problem.iteration_increment(t, &gbest_x);
                 }
 
                 //return results
