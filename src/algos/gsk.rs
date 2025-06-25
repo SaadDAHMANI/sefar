@@ -403,6 +403,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                         let pop_size: usize = self.params.get_population_size();
                         let max_iter: usize = self.params.max_iterations;
                         let problem_size: usize = self.params.problem_dimension;
+                        let mut break_process: bool = false;
                         //let max_nfes: usize = pop_size * (max_iter + 1);
                         //--------------------------------------------------
                         //let mut nfes: usize = 0; // function evaluation counter.
@@ -646,7 +647,11 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 
                             bsf_solution.fitness = Some(bsf_fit_var);
 
-                            self.problem.iteration_increment(g, &bsf_solution);
+                            self.problem
+                                .iteration_increment(g, &bsf_solution, &mut break_process);
+                            if break_process {
+                                break;
+                            }
                         } // THE MAIN LOOP
 
                         let mut result: OptimizationResult = OptimizationResult::get_empty(None);

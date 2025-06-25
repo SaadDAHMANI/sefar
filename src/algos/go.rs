@@ -87,6 +87,7 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
         let n: usize = self.params.population_size;
         let d: usize = self.params.problem_dimension;
         let max_iter: usize = self.params.max_iterations;
+        let mut break_process: bool = false;
 
         let ub = self.params.upper_bounds;
         let lb = self.params.lower_bounds;
@@ -338,7 +339,11 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
 
             iter += 1;
 
-            self.problem.iteration_increment(iter, &gbest_x);
+            self.problem
+                .iteration_increment(iter, &gbest_x, &mut break_process);
+            if break_process {
+                break;
+            }
         }
 
         let duration = chronos.elapsed();

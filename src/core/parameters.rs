@@ -9,6 +9,7 @@ pub trait Parameters {
         10usize
     }
 
+    /// The defaut stopping citerion is Max-Iteration = 1.
     fn get_max_iterations(&self) -> usize {
         1usize
     }

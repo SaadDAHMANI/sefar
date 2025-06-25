@@ -63,6 +63,7 @@ impl<'a, T: Problem> EOA for MEO<'a, T> {
                 let ub = self.params.get_upper_bounds();
                 let max_iter = self.params.get_max_iterations();
 
+                let mut break_process: bool = false;
                 //
                 // a1=2;
                 // a2=1;
@@ -297,8 +298,14 @@ impl<'a, T: Problem> EOA for MEO<'a, T> {
 
                     iter += 1;
 
-                    self.problem
-                        .iteration_increment(iter, &Genome::from(ceq1_index, &ceq1, ceq1_fit));
+                    self.problem.iteration_increment(
+                        iter,
+                        &Genome::from(ceq1_index, &ceq1, ceq1_fit),
+                        &mut break_process,
+                    );
+                    if break_process {
+                        break;
+                    }
                 }
 
                 //return results

@@ -53,6 +53,7 @@ impl<'a, T: Problem> EOA for IEO<'a, T> {
                 let dim = self.params.get_problem_dimension();
                 let particles_no = self.params.get_population_size();
                 let max_iter = self.params.get_max_iterations();
+                let mut break_process: bool = false;
 
                 let ub = self.params.get_upper_bounds();
 
@@ -257,7 +258,11 @@ impl<'a, T: Problem> EOA for IEO<'a, T> {
 
                     iter += 1;
 
-                    self.problem.iteration_increment(iter, &ceq1);
+                    self.problem
+                        .iteration_increment(iter, &ceq1, &mut break_process);
+                    if break_process {
+                        break;
+                    }
                     // #[cfg(feature = "report")]
                     // println!("Iter : {}, Best-fit : {}", iter, ceq1_fit);
                 }

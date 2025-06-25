@@ -46,6 +46,7 @@ impl<'a, T: Problem> EOA for PSO<'a, T> {
                 let lb = self.params.lower_bounds;
                 let max_iter = self.params.max_iterations;
                 let nop = self.params.population_size;
+                let mut break_process: bool = false;
 
                 // Define the PSO's paramters
                 let c1: f64 = self.params.c1;
@@ -151,7 +152,11 @@ impl<'a, T: Problem> EOA for PSO<'a, T> {
                     }
                     cgcurve[t] = gbest_x.fitness.unwrap();
 
-                    self.problem.iteration_increment(t, &gbest_x);
+                    self.problem
+                        .iteration_increment(t, &gbest_x, &mut break_process);
+                    if break_process {
+                        break;
+                    }
                 }
 
                 //return results

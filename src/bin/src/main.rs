@@ -14,8 +14,8 @@ use sefar::algos::gsk::{GSKparams, GSK};
 //use sefar::algos::lshade_spacma::{LshadeSpacma, LshadeSpacmaParams};
 
 const DIM: usize = 5;
-const POP_SIZE: usize = 12;
-const KMAX: usize = 10;
+const POP_SIZE: usize = 30;
+const KMAX: usize = 1000;
 
 fn main() {
     // lshade_spacma_test1();

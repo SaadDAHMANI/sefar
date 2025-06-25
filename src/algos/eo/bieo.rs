@@ -17,7 +17,6 @@ use crate::core::optimization_result::OptimizationResult;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
 use crate::core::OptError;
-
 ///
 /// Binary Equilibrium Optimizer (BiEO)
 /// Reference:
@@ -57,8 +56,8 @@ impl<'a, T: Problem> EOA for BiEO<'a, T> {
             Ok(()) => {
                 let dim = self.params.get_problem_dimension();
                 let particles_no = self.params.get_population_size();
-                let max_iter = self.params.get_max_iterations();
-
+                let max_iter: usize = self.params.get_max_iterations();
+                let mut break_process: bool = false;
                 //#[cfg(feature = "binary")]
                 let ub: Vec<f64> = vec![1.0; dim];
 
@@ -306,7 +305,12 @@ impl<'a, T: Problem> EOA for BiEO<'a, T> {
                     self.problem.iteration_increment(
                         iter,
                         &Genome::from(ceq1_index, &ceq1.clone(), ceq1_fit),
+                        &mut break_process,
                     );
+
+                    if break_process {
+                        break;
+                    }
                 }
 
                 //return results

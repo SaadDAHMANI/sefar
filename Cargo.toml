@@ -1,6 +1,6 @@
 [package]
 name = "sefar"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["Saad Dahmani <sd.dahmani2000@gmail.com>"]
 description = "sefar is library for evolutionary optimization algorithms."
@@ -19,6 +19,6 @@ rayon = "1.10.0"
 thiserror = "2.0.12"
 
 [features]
-report = []
+#report = []
 parallel = []
 #deep_report = [report]

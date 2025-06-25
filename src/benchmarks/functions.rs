@@ -44,13 +44,20 @@ impl Problem for Sphere {
 
     fn iteration_increment(
         &self,
-        _current_iteration: usize,
-        _current_best_genome: &crate::core::genome::Genome,
+        current_iteration: usize,
+        current_best_genome: &crate::core::genome::Genome,
+        break_process: &mut bool,
     ) {
-        println!(
-            "Iteration : {}, best.fitness : {:?}",
-            _current_iteration, _current_best_genome.fitness
-        );
+        if let Some(best_fit) = current_best_genome.fitness {
+            if best_fit > 0.00001 {
+                println!(
+                    "Iteration : {}, best.fitness : {:?}",
+                    current_iteration, best_fit
+                );
+            } else {
+                *break_process = true;
+            }
+        }
     }
 }
 
