@@ -332,6 +332,7 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
             }
 
             gbesthistory[iter] = gbestfitness;
+            gbest_x.fitness = Some(gbestfitness);
             /*
                         #[cfg(feature = "report")]
                         println!("Iter : {}, best-fitness : {}", iter, gbestfitness);

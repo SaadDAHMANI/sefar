@@ -31,7 +31,7 @@ In the current version of [Sefar](https://github.com/SaadDAHMANI/sefar), only th
 ```toml
 
 [dependencies]
-sefar = "0.2.0"
+sefar = "0.2.1"
 ```
 
 2. In the *main.rs* file :
@@ -100,6 +100,31 @@ pub struct F1{}
 impl Problem for F1 {
     fn objectivefunction(&mut self, genome : &[f64])->f64 {
        genome.iter().fold(0.0f64, |sum, x| sum + x.powi(2))
+    }
+
+ ///
+    /// Define a custom behavior when ierations progress.
+    ///
+    /// # Arguments
+    ///
+    /// * `current_iter` - The current iteration.
+    /// * `current_best_genome` - The current best solution.
+    /// * `beak_process` - Break optimization process by :`*break_process = true`;
+    ///
+       fn iteration_increment(
+        &self,
+        current_iter: usize,
+        current_best_genome: &crate::core::genome::Genome,
+        break_process: &mut bool,
+    ) {
+        println!(
+            "Iter: {}, current best-fit : {:?}",
+            current_iter, current_best_genome.fitness
+        );
+
+        if current_iter > 100 {
+            *break_process = true;
+        }
     }
 }
 ```
