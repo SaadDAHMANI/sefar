@@ -62,17 +62,17 @@ impl Problem for Sphere {
         &self,
         current_iteration: usize,
         current_best_genome: &crate::core::genome::Genome,
-        break_process: &mut bool,
+        _break_process: &mut bool,
     ) {
         if let Some(best_fit) = current_best_genome.fitness {
-            if best_fit > 0.00001 {
-                println!(
-                    "Iteration : {}, best.fitness : {:?}",
-                    current_iteration, best_fit
-                );
-            } else {
-                *break_process = true;
-            }
+            //  if best_fit > 0.00001 {
+            println!(
+                "Iteration : {}, best.fitness : {:?}",
+                current_iteration, best_fit
+            );
+            //  } else {
+            //      *break_process = true;
+            //  }
         }
     }
 }

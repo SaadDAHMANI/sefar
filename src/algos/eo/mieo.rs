@@ -49,6 +49,27 @@ impl<'a, T: Problem> EOA for MIEO<'a, T> {
         match self.params.check() {
             Err(error) => OptimizationResult::get_empty(Some(error)),
             Ok(()) => {
+                //--------------------------------------------------------------
+
+                #[cfg(feature = "parallel")]
+                {
+                    let nbr_threads = match self.params.num_threads {
+                        None => 1,
+                        Some(nthreads) => nthreads,
+                    };
+                    match rayon::ThreadPoolBuilder::new()
+                        .num_threads(nbr_threads)
+                        .build_global()
+                    {
+                        Ok(_) => println!("Thread pool init ..."),
+                        Err(_) => {
+                            return OptimizationResult::get_empty(Some(
+                                OptError::ThreadPoolBuildErr,
+                            ))
+                        }
+                    };
+                }
+                // -------------------------------------------------------------
                 let dim = self.params.get_problem_dimension();
                 let particles_no = self.params.get_population_size();
                 let max_iter = self.params.get_max_iterations();
@@ -314,6 +335,9 @@ pub struct MIEOparams<'a> {
     pub gp: f64,
     /// The minimum size of the equilibrium pool.
     pub min_pool_size: usize,
+
+    /// Number of threads for parallel execution.
+    pub num_threads: Option<usize>,
 }
 
 #[allow(dead_code)]
@@ -339,6 +363,7 @@ impl<'a> MIEOparams<'a> {
             a2,
             gp,
             min_pool_size,
+            num_threads: None,
         };
 
         match params.check() {
@@ -388,6 +413,7 @@ impl<'a> Default for MIEOparams<'a> {
     ///     a2 : 1.0f64,
     ///     gp : 0.5f64,
     ///     min_pool_size: 4,
+    ///     num_threads : None, // Use a single thread (sequential mode)
     /// };
     /// ~~~
     ///
@@ -402,6 +428,7 @@ impl<'a> Default for MIEOparams<'a> {
             a2: 1.0f64,
             gp: 0.5f64,
             min_pool_size: 4,
+            num_threads: None,
         }
     }
 }
@@ -447,6 +474,7 @@ mod ieo_params_tests {
             a2: 1.0f64,
             gp: 0.5f64,
             min_pool_size: 4,
+            num_threads: Some(1),
         };
 
         let sl_ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];

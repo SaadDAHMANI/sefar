@@ -49,6 +49,9 @@ pub enum OptError {
     #[error("Bad parameter value.")]
     BadParameterValue { parameter: String, actual: f64 },
 
+    #[error(" ")]
+    ThreadPoolBuildErr,
+
     #[error("Undefined error")]
     Other,
 }

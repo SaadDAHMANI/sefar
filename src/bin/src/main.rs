@@ -1,4 +1,4 @@
-use sefar::algos::eo::{BiEO, BiEOparams, EOparams, EO, MEO};
+use sefar::algos::eo::{BiEO, BiEOparams, EOparams, MIEOparams, EO, MEO, MIEO};
 
 use sefar::algos::pso::{PSOparams, PSO};
 use sefar::benchmarks::functions::{Sphere, SumAbsFunction, F2};
@@ -13,8 +13,8 @@ use sefar::algos::gsk::{GSKparams, GSK};
 
 //use sefar::algos::lshade_spacma::{LshadeSpacma, LshadeSpacmaParams};
 
-const DIM: usize = 5;
-const POP_SIZE: usize = 30;
+const DIM: usize = 30;
+const POP_SIZE: usize = 50;
 const KMAX: usize = 1000;
 
 fn main() {
@@ -27,8 +27,8 @@ fn main() {
     //--------------------------------------------------------------------
     //println!("Evaluation with Max_Iter = {}", KMAX);
 
-    // println!("______________________GO : F1______________________");
-    // go_f1_test1();
+    //  println!("______________________GO : F1______________________");
+    //    go_f1_test1();
 
     /*
      println!("______________________GO : F2______________________");
@@ -42,13 +42,16 @@ fn main() {
 
     //eo_f1_test1();
 
-    peo_f1_test1();
+    // peo_f1_test1();
 
     //meo_test1();
     //bieo_f1_binary_test();
 
     // println!("------------------GSK : F1---------------------");
     //gsk_f1_test1();
+
+    // println!("------------------MIEO : F1---------------------");
+    para_mieo_test1();
 }
 /*
 #[allow(dead_code)]
@@ -438,6 +441,37 @@ fn para_meo_test1() {
 
     println!(
         "EO result : \n best fitness : {:?} \n best genome : {:?}",
+        result.best_fitness, result.best_genome
+    );
+    println!("Computation time : {:?}", result.computation_time);
+    println!("Err : {:?}", result.err_report);
+}
+
+#[allow(dead_code)]
+fn para_mieo_test1() {
+    let mut settings = MIEOparams::default();
+
+    settings.population_size = POP_SIZE;
+    settings.problem_dimension = DIM;
+    settings.max_iterations = KMAX;
+
+    //-------Number of threads ----------
+    settings.num_threads = Some(1);
+
+    let lb = vec![-100.0f64; DIM];
+    let ub = vec![100.0f64; DIM];
+
+    settings.lower_bounds = lb.as_slice();
+    settings.upper_bounds = ub.as_slice();
+
+    let mut fo = Sphere {};
+
+    let mut algo: MIEO<Sphere> = MIEO::new(&settings, &mut fo);
+
+    let result = algo.run();
+
+    println!(
+        "MIEO result : \n best fitness : {:?} \n best genome : {:?}",
         result.best_fitness, result.best_genome
     );
     println!("Computation time : {:?}", result.computation_time);
