@@ -16,7 +16,7 @@ pub trait Problem: Send + Sync + Clone {
     /// * The fitness value of the `genome` as f64.
     ///  
     #[cfg(not(feature = "parallel"))]
-    fn objectivefunction(&mut self, genome: &[f64]) -> f64 {
+    fn objectivefunction(&mut self, genome: &mut [f64]) -> f64 {
         genome.iter().fold(0.0f64, |sum, x| sum + x.abs())
     }
 
