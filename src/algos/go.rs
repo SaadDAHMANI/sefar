@@ -33,9 +33,9 @@ pub struct GO<'a, T: Problem> {
 
 impl<'a, T: Problem> GO<'a, T> {
     ///
-    /// Return a new instance of the Growth Optimizer (GO) algorithm.
-    /// settings: The optimization parameters,
-    /// problem: The problem to optimize.
+    /// Return a new instance of  Growth Optimizer (GO) algorithm.
+    /// settings: Optimization parameters,
+    /// problem: Problem to optimize.
     ///
     pub fn new(settings: &'a GOparams, problem: &'a mut T) -> Self {
         GO {
