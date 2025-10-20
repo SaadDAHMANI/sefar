@@ -13,6 +13,7 @@ use std::time::Instant;
 
 ///
 /// GO : Growth Optimizer & Binary-GO
+///
 /// Reference:
 /// Growth Optimizer: A powerful metaheuristic algorithm for solving continuous and
 /// discrete global optimization problems (2023).
