@@ -1,3 +1,4 @@
+use sefar::algos::eao::{EAOparams, EAO};
 use sefar::algos::eo::{BiEO, BiEOparams, EOparams, MIEOparams, EO, MEO, MIEO};
 
 use sefar::algos::pso::{PSOparams, PSO};
@@ -51,8 +52,25 @@ fn main() {
     //gsk_f1_test1();
 
     // println!("------------------MIEO : F1---------------------");
-    para_mieo_test1();
+    //  para_mieo_test1();
+
+    eao_f1_test1();
 }
+
+#[allow(dead_code)]
+fn eao_f1_test1() {
+    let settings = EAOparams::new(10, 5, 1, &[-100.0; 5], &[100.0; 5], 0.1);
+    let mut fo: SumAbsFunction = SumAbsFunction {};
+    let mut algo: EAO<SumAbsFunction> = EAO::new(&settings, &mut fo);
+
+    let result = algo.run();
+
+    println!(
+        "EAO : F0 (SumAbsFunction) test; Result: {:?}",
+        result.to_string()
+    );
+}
+
 /*
 #[allow(dead_code)]
 fn lshade_spacma_test1() {

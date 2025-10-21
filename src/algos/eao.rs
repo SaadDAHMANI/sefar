@@ -48,6 +48,68 @@ impl<'a, T: Problem> EAO<'a, T> {
             params: settings,
         }
     }
+
+    fn pick_two_random_distinct_substrates(&self) -> (usize, usize) {
+        let between = Uniform::from(0..self.params.population_size);
+        let mut rng = rand::thread_rng();
+
+        let indx1: usize = between.sample(&mut rng);
+        let mut indx2: usize = indx1;
+        let mut counter: usize = 0;
+
+        while indx1 == indx2 {
+            indx2 = between.sample(&mut rng);
+            counter += 1;
+            if counter > 100 {
+                break;
+            }
+            // println!("counter = {}", counter);
+        }
+        (indx1, indx2)
+    }
+
+    fn do_second_substrate_position(
+        &self,
+        candidate_a: &mut Genome,
+        substrate: &Genome,
+        best_substrate: &Genome,
+        s1: &Genome,
+        s2: &Genome,
+        af: f64,
+    ) {
+        let active_dim = self.params.problem_dimension;
+        let ec = self.params.ec;
+
+        let mut rand_vec = vec![0.0; active_dim];
+        randomize(&mut rand_vec);
+
+        //  println!("rand_vc : {:?}", rand_vec);
+
+        let sca1: Vec<f64> = rand_vec.iter().map(|x| ec + (1.0 - ec) * x).collect();
+
+        // println!("scA1: {:?}", sca1);
+
+        randomize(&mut rand_vec);
+
+        // println!("rand_vc : {:?}", rand_vec);
+        let exa: Vec<f64> = rand_vec
+            .iter()
+            .map(|x| (ec + (1.0 - ec) * x) * af)
+            .collect();
+
+        // println!("exa : {:?}", exa);
+        for j in 0..active_dim {
+            candidate_a.genes[j] = substrate.genes[j]
+                + sca1[j] * (s1.genes[j] - s2.genes[j])
+                + (exa[j] * (best_substrate.genes[j] - substrate.genes[j]));
+        }
+
+        // Space bound
+        for j in 0..active_dim {
+            candidate_a.genes[j] = f64::min(candidate_a.genes[j], self.params.upper_bounds[j]);
+            candidate_a.genes[j] = f64::max(candidate_a.genes[j], self.params.lower_bounds[j]);
+        }
+    }
 }
 
 impl<'a, T: Problem> EOA for EAO<'a, T> {
@@ -70,7 +132,18 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
 
         let mut convergence_curve = vec![0.0f64; max_iter];
 
+        // random vector of dim length
+        let mut rand_vec: Vec<f64> = vec![0.0; active_site_dimension];
+
         let mut af: f64 = 0.0;
+
+        let mut first_substrate_position: Genome = Genome::new(enzyme_count, active_site_dimension);
+        let mut first_evaluation: f64 = 0.0;
+        let mut s1 = first_substrate_position.clone();
+        let mut s2 = first_substrate_position.clone();
+        let mut candidate_a = first_substrate_position.clone();
+
+        let mut candidate_a_fitness: f64 = 0.0;
         // =============================================================
         let mut substrate_pool = self.initialize(self.params, InitializationMode::RealUniform);
 
@@ -99,12 +172,14 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
 
         // [OptimalCatalysis, idx] = min(ReactionRate);
 
-        let mut best_substrate: f64 = reaction_rate
+        let best_idx: usize = reaction_rate
             .iter()
-            .copied()
-            .min_by(|a, b| a.partial_cmp(b).unwrap())
-            .unwrap_or(f64::MAX);
-        // _____________________________________________________________
+            .enumerate()
+            .min_by(|(_, a), (_, b)| a.total_cmp(b))
+            .map(|(i, _)| i)
+            .unwrap_or(0);
+
+        let mut best_substrate = substrate_pool[best_idx].clone();
         // =============================================================
 
         // MAIN LOOP
@@ -112,7 +187,48 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
             af = f64::sqrt(t as f64 / max_iter as f64);
 
             for i in 0..enzyme_count {
-                //  1) Update FirstSubstratePosition
+                // === 1) Update FirstSubstratePosition
+
+                // FirstSubstratePosition = (BestSubstrate - SubstratePool(i,:)) +
+                // rand(1, ActiveSiteDimension).* sin(AF * SubstratePool(i,:));
+                randomize(&mut rand_vec);
+                for j in 0..active_site_dimension {
+                    first_substrate_position.genes[j] = (best_substrate.genes[j]
+                        - substrate_pool[i].genes[j])
+                        + (rand_vec[j] * f64::sin(af * substrate_pool[i].genes[j]));
+                }
+
+                // FirstSubstratePosition = max(min(FirstSubstratePosition, UB),LB);
+                for j in 0..active_site_dimension {
+                    first_substrate_position.genes[j] =
+                        f64::min(first_substrate_position.genes[j], ub[j]);
+                    first_substrate_position.genes[j] =
+                        f64::max(first_substrate_position.genes[j], lb[j]);
+                }
+                //  FirstEvaluation = EvaluateCatalysis(FirstSubstratePosition);
+                first_evaluation = self
+                    .problem
+                    .objectivefunction(&mut first_substrate_position.genes);
+
+                // === 2) Pick two random distinct Substrates
+                let (indx1, indx2) = self.pick_two_random_distinct_substrates();
+                // S1 = SubstratePool(Substrates(1), :);
+                // S2 = SubstratePool(Substrates(2), :);
+                copy_vector(&substrate_pool[indx1].genes, &mut s1.genes);
+                copy_vector(&substrate_pool[indx2].genes, &mut s2.genes);
+                // ====== 2.1) vector-valued random factors for each dimension
+
+                // println!("(s1, s2) = ({}, {})", s1, s2);
+                self.do_second_substrate_position(
+                    &mut candidate_a,
+                    &substrate_pool[i],
+                    &best_substrate,
+                    &s1,
+                    &s2,
+                    af,
+                );
+
+                candidate_a_fitness = self.problem.objectivefunction(&mut candidate_a.genes);
             }
         }
 
