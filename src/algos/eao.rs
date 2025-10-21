@@ -6,8 +6,8 @@ use crate::core::genome::Genome;
 use crate::core::optimization_result::OptimizationResult;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
-use rand::rngs::ThreadRng;
-use rand_distr::num_traits::real::Real;
+// use rand::rngs::ThreadRng;
+// use rand_distr::num_traits::real::Real;
 use rand_distr::{Distribution, Uniform};
 // #[cfg(feature = "parallel")]
 // use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
@@ -154,29 +154,27 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
         // random vector of dim length
         let mut rand_vec: Vec<f64> = vec![0.0; active_site_dimension];
 
-        let mut af: f64 = 0.0;
-
         let mut first_substrate_position: Genome = Genome::new(enzyme_count, active_site_dimension);
         let mut second_substrate_position = first_substrate_position.clone();
         let mut updated_position = first_substrate_position.clone();
 
-        let mut first_evaluation: f64 = 0.0;
-        let mut second_evaluation: f64 = 0.0;
-        let mut updated_fitness: f64 = 0.0;
+        let mut _first_evaluation: f64 = 0.0;
+        let mut _second_evaluation: f64 = 0.0;
+        let mut _updated_fitness: f64 = 0.0;
 
         // best fitness so-far
         let mut optimal_catalysis: f64 = f64::MAX; // MAX for minimization
 
         // best solution
-        let mut best_substrate = first_substrate_position.clone();
+        let mut _best_substrate = first_substrate_position.clone();
 
         let mut s1 = first_substrate_position.clone();
         let mut s2 = first_substrate_position.clone();
         let mut candidate_a = first_substrate_position.clone();
         let mut candidate_b = first_substrate_position.clone();
 
-        let mut candidate_a_fitness: f64 = 0.0;
-        let mut candidate_b_fitness: f64 = 0.0;
+        let mut _candidate_a_fitness: f64 = 0.0;
+        let mut _candidate_b_fitness: f64 = 0.0;
         // =============================================================
         let mut substrate_pool = self.initialize(self.params, InitializationMode::RealUniform);
 
@@ -216,8 +214,8 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
         // =============================================================
 
         // MAIN LOOP
-        for t in 1..max_iter + 1 {
-            af = f64::sqrt(t as f64 / max_iter as f64);
+        for t in 0..max_iter {
+            let af = f64::sqrt((t + 1) as f64 / max_iter as f64);
 
             for i in 0..enzyme_count {
                 // === 1) Update FirstSubstratePosition
@@ -239,7 +237,7 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
                         f64::max(first_substrate_position.genes[j], lb[j]);
                 }
                 //  FirstEvaluation = EvaluateCatalysis(FirstSubstratePosition);
-                first_evaluation = self
+                _first_evaluation = self
                     .problem
                     .objectivefunction(&mut first_substrate_position.genes);
 
@@ -262,54 +260,54 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
                     af,
                 );
 
-                candidate_a_fitness = self.problem.objectivefunction(&mut candidate_a.genes);
-                candidate_b_fitness = self.problem.objectivefunction(&mut candidate_b.genes);
+                _candidate_a_fitness = self.problem.objectivefunction(&mut candidate_a.genes);
+                _candidate_b_fitness = self.problem.objectivefunction(&mut candidate_b.genes);
 
-                if candidate_a_fitness < candidate_b_fitness {
+                if _candidate_a_fitness < _candidate_b_fitness {
                     copy_solution(
                         &candidate_a,
                         &mut second_substrate_position,
                         active_site_dimension,
                     );
-                    second_evaluation = candidate_a_fitness;
+                    _second_evaluation = _candidate_a_fitness;
                 } else {
                     copy_solution(
                         &candidate_b,
                         &mut second_substrate_position,
                         active_site_dimension,
                     );
-                    second_evaluation = candidate_b_fitness;
+                    _second_evaluation = _candidate_b_fitness;
                 }
 
                 //== 3) Compare FirstSubstratePosition vs. SecondSubstratePosition
-                if first_evaluation < second_evaluation {
+                if _first_evaluation < _second_evaluation {
                     copy_solution(
                         &first_substrate_position,
                         &mut updated_position,
                         active_site_dimension,
                     );
-                    updated_fitness = first_evaluation;
+                    _updated_fitness = _first_evaluation;
                 } else {
                     copy_solution(
                         &second_substrate_position,
                         &mut updated_position,
                         active_site_dimension,
                     );
-                    updated_fitness = second_evaluation;
+                    _updated_fitness = _second_evaluation;
                 };
 
                 // == 4) Update SubstratePool & Global Best
-                if updated_fitness < reaction_rate[i] {
+                if _updated_fitness < reaction_rate[i] {
                     copy_solution(
                         &updated_position,
                         &mut substrate_pool[i],
                         active_site_dimension,
                     );
-                    reaction_rate[i] = updated_fitness;
+                    reaction_rate[i] = _updated_fitness;
 
                     // Copy the best sol:
-                    if updated_fitness < optimal_catalysis {
-                        optimal_catalysis = updated_fitness;
+                    if _updated_fitness < optimal_catalysis {
+                        optimal_catalysis = _updated_fitness;
                         copy_solution(
                             &updated_position,
                             &mut best_substrate,
@@ -319,11 +317,11 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
                 };
             }
 
-            convergence_curve[t - 1] = optimal_catalysis;
+            convergence_curve[t] = optimal_catalysis;
             best_substrate.fitness = Some(optimal_catalysis);
 
             self.problem
-                .iteration_increment(t - 1, &best_substrate, &mut break_process);
+                .iteration_increment(t, &best_substrate, &mut break_process);
             if break_process {
                 break;
             }
