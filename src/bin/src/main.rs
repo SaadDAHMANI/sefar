@@ -72,8 +72,8 @@ fn eao_f1_test1() {
 
     settings.ec = 0.1;
 
-    let mut fo: SumAbsFunction = SumAbsFunction {};
-    let mut algo: EAO<SumAbsFunction> = EAO::new(&settings, &mut fo);
+    let mut fo: Sphere = Sphere {};
+    let mut algo: EAO<Sphere> = EAO::new(&settings, &mut fo);
 
     let result = algo.run();
 

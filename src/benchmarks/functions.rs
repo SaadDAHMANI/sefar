@@ -14,16 +14,17 @@ impl Problem for SumAbsFunction {
         &self,
         current_iter: usize,
         current_best_genome: &crate::core::genome::Genome,
-        break_process: &mut bool,
+        _break_process: &mut bool,
     ) {
         println!(
             "Iter: {}, current best-fit : {:?}",
             current_iter, current_best_genome.fitness
         );
-
+        /*
         if current_iter > 100 {
             *break_process = true;
         }
+        */
     }
 
     #[cfg(feature = "parallel")]
