@@ -408,7 +408,7 @@ impl<'a> EAOparams<'a> {
     /// lb : The lower bounds of the search space.
     /// ub : The upper bounds of the search space.
     /// ec : Enzyme concentration, default value = 0.1.
-    /// num_threads : number of threads for parrallel optimization.
+
     #[allow(dead_code)]
     pub fn new(
         pop_size: usize,
@@ -417,7 +417,6 @@ impl<'a> EAOparams<'a> {
         lb: &'a [f64],
         ub: &'a [f64],
         ec: f64,
-        num_threads: Option<usize>,
     ) -> Self {
         EAOparams {
             population_size: pop_size,
@@ -426,7 +425,7 @@ impl<'a> EAOparams<'a> {
             lower_bounds: lb,
             upper_bounds: ub,
             ec,
-            num_threads,
+            num_threads: None,
         }
     }
 }
