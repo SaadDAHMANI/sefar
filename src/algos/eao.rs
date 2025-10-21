@@ -8,7 +8,6 @@ use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
 // use rand::rngs::ThreadRng;
 // use rand_distr::num_traits::real::Real;
-use crate::core::OptError;
 use rand_distr::{Distribution, Uniform};
 #[cfg(feature = "parallel")]
 use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
@@ -157,7 +156,7 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
                         Ok(_) => println!("Thread pool init. for {} threads ... ", nbr_threads),
                         Err(_) => {
                             return OptimizationResult::get_empty(Some(
-                                OptError::ThreadPoolBuildErr,
+                                crate::core::OptError::ThreadPoolBuildErr,
                             ))
                         }
                     };
