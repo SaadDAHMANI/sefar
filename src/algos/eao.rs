@@ -320,6 +320,7 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
             }
 
             convergence_curve[t - 1] = optimal_catalysis;
+            best_substrate.fitness = Some(optimal_catalysis);
 
             self.problem
                 .iteration_increment(t - 1, &best_substrate, &mut break_process);

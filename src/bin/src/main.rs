@@ -59,7 +59,19 @@ fn main() {
 
 #[allow(dead_code)]
 fn eao_f1_test1() {
-    let settings = EAOparams::new(10, 5, 1, &[-100.0; 5], &[100.0; 5], 0.1);
+    let mut settings = EAOparams::default();
+    settings.population_size = POP_SIZE;
+    settings.problem_dimension = DIM;
+    settings.max_iterations = KMAX;
+
+    let lb = vec![-10.0f64; DIM];
+    let ub = vec![10.0f64; DIM];
+
+    settings.lower_bounds = lb.as_slice();
+    settings.upper_bounds = ub.as_slice();
+
+    settings.ec : 0.1;
+
     let mut fo: SumAbsFunction = SumAbsFunction {};
     let mut algo: EAO<SumAbsFunction> = EAO::new(&settings, &mut fo);
 
