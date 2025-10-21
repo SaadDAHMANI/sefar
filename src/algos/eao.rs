@@ -9,8 +9,8 @@ use crate::core::problem::Problem;
 // use rand::rngs::ThreadRng;
 // use rand_distr::num_traits::real::Real;
 use rand_distr::{Distribution, Uniform};
-// #[cfg(feature = "parallel")]
-// use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
+#[cfg(feature = "parallel")]
+use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
 use std::fmt::Display;
 use std::time::Instant;
 
@@ -192,10 +192,10 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
             substrate_pool
                 .par_iter_mut()
                 .for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));
-            for i in 0..n {
+            for i in 0..enzyme_count {
                 match substrate_pool[i].fitness {
-                    None => substrate_pool[i] = f64::MAX,
-                    Some(fit) => substrate_pool[i] = fit,
+                    None => reaction_rate[i] = f64::MAX,
+                    Some(fit) => reaction_rate[i] = fit,
                 };
             }
         }
