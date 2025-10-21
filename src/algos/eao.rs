@@ -8,6 +8,7 @@ use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
 // use rand::rngs::ThreadRng;
 // use rand_distr::num_traits::real::Real;
+use crate::core::OptError;
 use rand_distr::{Distribution, Uniform};
 #[cfg(feature = "parallel")]
 use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
@@ -138,206 +139,237 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
     fn run(&mut self) -> OptimizationResult {
         let chronos = Instant::now();
 
-        let enzyme_count: usize = self.params.population_size;
-        let active_site_dimension: usize = self.params.problem_dimension;
+        match self.params.check() {
+            Err(error) => OptimizationResult::get_empty(Some(error)),
+            Ok(()) => {
+                // ------------------------------------------------------------
 
-        let max_iter: usize = self.params.max_iterations;
-        let mut break_process: bool = false;
+                #[cfg(feature = "parallel")]
+                {
+                    let nbr_threads = match self.params.num_threads {
+                        None => 1,
+                        Some(nthreads) => nthreads,
+                    };
+                    match rayon::ThreadPoolBuilder::new()
+                        .num_threads(nbr_threads)
+                        .build_global()
+                    {
+                        Ok(_) => println!("Thread pool init. for {} threads ... ", nbr_threads),
+                        Err(_) => {
+                            return OptimizationResult::get_empty(Some(
+                                OptError::ThreadPoolBuildErr,
+                            ))
+                        }
+                    };
+                }
+                // ------------------------------------------------------------
+                let enzyme_count: usize = self.params.population_size;
+                let active_site_dimension: usize = self.params.problem_dimension;
 
-        let ub = self.params.upper_bounds;
-        let lb = self.params.lower_bounds;
+                let max_iter: usize = self.params.max_iterations;
+                let mut break_process: bool = false;
 
-        let mut reaction_rate: Vec<f64> = vec![0.0; enzyme_count];
+                let ub = self.params.upper_bounds;
+                let lb = self.params.lower_bounds;
 
-        let mut convergence_curve = vec![0.0f64; max_iter];
+                let mut reaction_rate: Vec<f64> = vec![0.0; enzyme_count];
 
-        // random vector of dim length
-        let mut rand_vec: Vec<f64> = vec![0.0; active_site_dimension];
+                let mut convergence_curve = vec![0.0f64; max_iter];
 
-        let mut first_substrate_position: Genome = Genome::new(enzyme_count, active_site_dimension);
-        let mut second_substrate_position = first_substrate_position.clone();
-        let mut updated_position = first_substrate_position.clone();
+                // random vector of dim length
+                let mut rand_vec: Vec<f64> = vec![0.0; active_site_dimension];
 
-        let mut _first_evaluation: f64 = 0.0;
-        let mut _second_evaluation: f64 = 0.0;
-        let mut _updated_fitness: f64 = 0.0;
+                let mut first_substrate_position: Genome =
+                    Genome::new(enzyme_count, active_site_dimension);
+                let mut second_substrate_position = first_substrate_position.clone();
+                let mut updated_position = first_substrate_position.clone();
 
-        // best fitness so-far
-        let mut optimal_catalysis: f64 = f64::MAX; // MAX for minimization
+                let mut _first_evaluation: f64 = 0.0;
+                let mut _second_evaluation: f64 = 0.0;
+                let mut _updated_fitness: f64 = 0.0;
 
-        // best solution
-        let mut _best_substrate = first_substrate_position.clone();
+                // best fitness so-far
+                let mut optimal_catalysis: f64 = f64::MAX; // MAX for minimization
 
-        let mut s1 = first_substrate_position.clone();
-        let mut s2 = first_substrate_position.clone();
-        let mut candidate_a = first_substrate_position.clone();
-        let mut candidate_b = first_substrate_position.clone();
+                // best solution
+                let mut _best_substrate = first_substrate_position.clone();
 
-        let mut _candidate_a_fitness: f64 = 0.0;
-        let mut _candidate_b_fitness: f64 = 0.0;
-        // =============================================================
-        let mut substrate_pool = self.initialize(self.params, InitializationMode::RealUniform);
+                let mut s1 = first_substrate_position.clone();
+                let mut s2 = first_substrate_position.clone();
+                let mut candidate_a = first_substrate_position.clone();
+                let mut candidate_b = first_substrate_position.clone();
 
-        // ______________ fitness evaluation ___________________________
-        //Evaluation of search agents
-        // Sequential mode
-        #[cfg(not(feature = "parallel"))]
-        for i in 0..enzyme_count {
-            reaction_rate[i] = self.problem.objectivefunction(&mut substrate_pool[i].genes);
-        }
+                let mut _candidate_a_fitness: f64 = 0.0;
+                let mut _candidate_b_fitness: f64 = 0.0;
+                // =============================================================
+                let mut substrate_pool =
+                    self.initialize(self.params, InitializationMode::RealUniform);
 
-        //___________Parallel mode________________
-        #[cfg(feature = "parallel")]
-        {
-            substrate_pool
-                .par_iter_mut()
-                .for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));
-            for i in 0..enzyme_count {
-                match substrate_pool[i].fitness {
-                    None => reaction_rate[i] = f64::MAX,
-                    Some(fit) => reaction_rate[i] = fit,
-                };
-            }
-        }
-        //________________________________________
-
-        // [OptimalCatalysis, idx] = min(ReactionRate);
-
-        let best_idx: usize = reaction_rate
-            .iter()
-            .enumerate()
-            .min_by(|(_, a), (_, b)| a.total_cmp(b))
-            .map(|(i, _)| i)
-            .unwrap_or(0);
-
-        let mut best_substrate = substrate_pool[best_idx].clone();
-        // =============================================================
-
-        // MAIN LOOP
-        for t in 0..max_iter {
-            let af = f64::sqrt((t + 1) as f64 / max_iter as f64);
-
-            for i in 0..enzyme_count {
-                // === 1) Update FirstSubstratePosition
-
-                // FirstSubstratePosition = (BestSubstrate - SubstratePool(i,:)) +
-                // rand(1, ActiveSiteDimension).* sin(AF * SubstratePool(i,:));
-                randomize(&mut rand_vec);
-                for j in 0..active_site_dimension {
-                    first_substrate_position.genes[j] = (best_substrate.genes[j]
-                        - substrate_pool[i].genes[j])
-                        + (rand_vec[j] * f64::sin(af * substrate_pool[i].genes[j]));
+                // ______________ fitness evaluation ___________________________
+                //Evaluation of search agents
+                // Sequential mode
+                #[cfg(not(feature = "parallel"))]
+                for i in 0..enzyme_count {
+                    reaction_rate[i] = self.problem.objectivefunction(&mut substrate_pool[i].genes);
                 }
 
-                // FirstSubstratePosition = max(min(FirstSubstratePosition, UB),LB);
-                for j in 0..active_site_dimension {
-                    first_substrate_position.genes[j] =
-                        f64::min(first_substrate_position.genes[j], ub[j]);
-                    first_substrate_position.genes[j] =
-                        f64::max(first_substrate_position.genes[j], lb[j]);
-                }
-                //  FirstEvaluation = EvaluateCatalysis(FirstSubstratePosition);
-                _first_evaluation = self
-                    .problem
-                    .objectivefunction(&mut first_substrate_position.genes);
-
-                // === 2) Pick two random distinct Substrates
-                let (indx1, indx2) = self.pick_two_random_distinct_substrates();
-                // S1 = SubstratePool(Substrates(1), :);
-                // S2 = SubstratePool(Substrates(2), :);
-                copy_vector(&substrate_pool[indx1].genes, &mut s1.genes);
-                copy_vector(&substrate_pool[indx2].genes, &mut s2.genes);
-                // ====== 2.1) vector-valued random factors for each dimension
-
-                // println!("(s1, s2) = ({}, {})", s1, s2);
-                self.do_second_substrate_position(
-                    &mut candidate_a,
-                    &mut candidate_b,
-                    &substrate_pool[i],
-                    &best_substrate,
-                    &s1,
-                    &s2,
-                    af,
-                );
-
-                _candidate_a_fitness = self.problem.objectivefunction(&mut candidate_a.genes);
-                _candidate_b_fitness = self.problem.objectivefunction(&mut candidate_b.genes);
-
-                if _candidate_a_fitness < _candidate_b_fitness {
-                    copy_solution(
-                        &candidate_a,
-                        &mut second_substrate_position,
-                        active_site_dimension,
-                    );
-                    _second_evaluation = _candidate_a_fitness;
-                } else {
-                    copy_solution(
-                        &candidate_b,
-                        &mut second_substrate_position,
-                        active_site_dimension,
-                    );
-                    _second_evaluation = _candidate_b_fitness;
-                }
-
-                //== 3) Compare FirstSubstratePosition vs. SecondSubstratePosition
-                if _first_evaluation < _second_evaluation {
-                    copy_solution(
-                        &first_substrate_position,
-                        &mut updated_position,
-                        active_site_dimension,
-                    );
-                    _updated_fitness = _first_evaluation;
-                } else {
-                    copy_solution(
-                        &second_substrate_position,
-                        &mut updated_position,
-                        active_site_dimension,
-                    );
-                    _updated_fitness = _second_evaluation;
-                };
-
-                // == 4) Update SubstratePool & Global Best
-                if _updated_fitness < reaction_rate[i] {
-                    copy_solution(
-                        &updated_position,
-                        &mut substrate_pool[i],
-                        active_site_dimension,
-                    );
-                    reaction_rate[i] = _updated_fitness;
-
-                    // Copy the best sol:
-                    if _updated_fitness < optimal_catalysis {
-                        optimal_catalysis = _updated_fitness;
-                        copy_solution(
-                            &updated_position,
-                            &mut best_substrate,
-                            active_site_dimension,
-                        );
+                //___________Parallel mode________________
+                #[cfg(feature = "parallel")]
+                {
+                    substrate_pool
+                        .par_iter_mut()
+                        .for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));
+                    for i in 0..enzyme_count {
+                        match substrate_pool[i].fitness {
+                            None => reaction_rate[i] = f64::MAX,
+                            Some(fit) => reaction_rate[i] = fit,
+                        };
                     }
+                }
+                //________________________________________
+
+                // [OptimalCatalysis, idx] = min(ReactionRate);
+
+                let best_idx: usize = reaction_rate
+                    .iter()
+                    .enumerate()
+                    .min_by(|(_, a), (_, b)| a.total_cmp(b))
+                    .map(|(i, _)| i)
+                    .unwrap_or(0);
+
+                let mut best_substrate = substrate_pool[best_idx].clone();
+                // =============================================================
+
+                // MAIN LOOP
+                for t in 0..max_iter {
+                    let af = f64::sqrt((t + 1) as f64 / max_iter as f64);
+
+                    for i in 0..enzyme_count {
+                        // === 1) Update FirstSubstratePosition
+
+                        // FirstSubstratePosition = (BestSubstrate - SubstratePool(i,:)) +
+                        // rand(1, ActiveSiteDimension).* sin(AF * SubstratePool(i,:));
+                        randomize(&mut rand_vec);
+                        for j in 0..active_site_dimension {
+                            first_substrate_position.genes[j] = (best_substrate.genes[j]
+                                - substrate_pool[i].genes[j])
+                                + (rand_vec[j] * f64::sin(af * substrate_pool[i].genes[j]));
+                        }
+
+                        // FirstSubstratePosition = max(min(FirstSubstratePosition, UB),LB);
+                        for j in 0..active_site_dimension {
+                            first_substrate_position.genes[j] =
+                                f64::min(first_substrate_position.genes[j], ub[j]);
+                            first_substrate_position.genes[j] =
+                                f64::max(first_substrate_position.genes[j], lb[j]);
+                        }
+                        //  FirstEvaluation = EvaluateCatalysis(FirstSubstratePosition);
+                        _first_evaluation = self
+                            .problem
+                            .objectivefunction(&mut first_substrate_position.genes);
+
+                        // === 2) Pick two random distinct Substrates
+                        let (indx1, indx2) = self.pick_two_random_distinct_substrates();
+                        // S1 = SubstratePool(Substrates(1), :);
+                        // S2 = SubstratePool(Substrates(2), :);
+                        copy_vector(&substrate_pool[indx1].genes, &mut s1.genes);
+                        copy_vector(&substrate_pool[indx2].genes, &mut s2.genes);
+                        // ====== 2.1) vector-valued random factors for each dimension
+
+                        // println!("(s1, s2) = ({}, {})", s1, s2);
+                        self.do_second_substrate_position(
+                            &mut candidate_a,
+                            &mut candidate_b,
+                            &substrate_pool[i],
+                            &best_substrate,
+                            &s1,
+                            &s2,
+                            af,
+                        );
+
+                        _candidate_a_fitness =
+                            self.problem.objectivefunction(&mut candidate_a.genes);
+                        _candidate_b_fitness =
+                            self.problem.objectivefunction(&mut candidate_b.genes);
+
+                        if _candidate_a_fitness < _candidate_b_fitness {
+                            copy_solution(
+                                &candidate_a,
+                                &mut second_substrate_position,
+                                active_site_dimension,
+                            );
+                            _second_evaluation = _candidate_a_fitness;
+                        } else {
+                            copy_solution(
+                                &candidate_b,
+                                &mut second_substrate_position,
+                                active_site_dimension,
+                            );
+                            _second_evaluation = _candidate_b_fitness;
+                        }
+
+                        //== 3) Compare FirstSubstratePosition vs. SecondSubstratePosition
+                        if _first_evaluation < _second_evaluation {
+                            copy_solution(
+                                &first_substrate_position,
+                                &mut updated_position,
+                                active_site_dimension,
+                            );
+                            _updated_fitness = _first_evaluation;
+                        } else {
+                            copy_solution(
+                                &second_substrate_position,
+                                &mut updated_position,
+                                active_site_dimension,
+                            );
+                            _updated_fitness = _second_evaluation;
+                        };
+
+                        // == 4) Update SubstratePool & Global Best
+                        if _updated_fitness < reaction_rate[i] {
+                            copy_solution(
+                                &updated_position,
+                                &mut substrate_pool[i],
+                                active_site_dimension,
+                            );
+                            reaction_rate[i] = _updated_fitness;
+
+                            // Copy the best sol:
+                            if _updated_fitness < optimal_catalysis {
+                                optimal_catalysis = _updated_fitness;
+                                copy_solution(
+                                    &updated_position,
+                                    &mut best_substrate,
+                                    active_site_dimension,
+                                );
+                            }
+                        };
+                    }
+
+                    convergence_curve[t] = optimal_catalysis;
+                    best_substrate.fitness = Some(optimal_catalysis);
+
+                    self.problem
+                        .iteration_increment(t, &best_substrate, &mut break_process);
+                    if break_process {
+                        break;
+                    }
+                }
+
+                best_substrate.fitness =
+                    Some(self.problem.objectivefunction(&mut best_substrate.genes));
+
+                let duration = chronos.elapsed();
+                let result = OptimizationResult {
+                    best_genome: Some(best_substrate),
+                    best_fitness: Some(optimal_catalysis),
+                    convergence_trend: Some(convergence_curve),
+                    computation_time: Some(duration),
+                    err_report: None,
                 };
-            }
-
-            convergence_curve[t] = optimal_catalysis;
-            best_substrate.fitness = Some(optimal_catalysis);
-
-            self.problem
-                .iteration_increment(t, &best_substrate, &mut break_process);
-            if break_process {
-                break;
+                result
             }
         }
-
-        best_substrate.fitness = Some(self.problem.objectivefunction(&mut best_substrate.genes));
-
-        let duration = chronos.elapsed();
-        let result = OptimizationResult {
-            best_genome: Some(best_substrate),
-            best_fitness: Some(optimal_catalysis),
-            convergence_trend: Some(convergence_curve),
-            computation_time: Some(duration),
-            err_report: None,
-        };
-        result
     }
 }
 
@@ -363,6 +395,9 @@ pub struct EAOparams<'a> {
 
     /// Enzyme Concentration EC. The default value = 0.1
     pub ec: f64,
+
+    /// Number of threads for parallel execution.
+    pub num_threads: Option<usize>,
 }
 
 impl<'a> EAOparams<'a> {
@@ -374,7 +409,7 @@ impl<'a> EAOparams<'a> {
     /// lb : The lower bounds of the search space.
     /// ub : The upper bounds of the search space.
     /// ec : Enzyme concentration, default value = 0.1.
-    ///
+    /// num_threads : number of threads for parrallel optimization.
     #[allow(dead_code)]
     pub fn new(
         pop_size: usize,
@@ -383,6 +418,7 @@ impl<'a> EAOparams<'a> {
         lb: &'a [f64],
         ub: &'a [f64],
         ec: f64,
+        num_threads: Option<usize>,
     ) -> Self {
         EAOparams {
             population_size: pop_size,
@@ -391,6 +427,7 @@ impl<'a> EAOparams<'a> {
             lower_bounds: lb,
             upper_bounds: ub,
             ec,
+            num_threads,
         }
     }
 }
@@ -443,6 +480,7 @@ impl<'a> Default for EAOparams<'a> {
             lower_bounds: &[-100.0f64, -100.0, -100.0],
             upper_bounds: &[100.0f64, 100.0, 100.0],
             ec: 0.1,
+            num_threads: None,
         }
     }
 }

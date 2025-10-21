@@ -61,7 +61,7 @@ impl<'a, T: Problem> EOA for MIEO<'a, T> {
                         .num_threads(nbr_threads)
                         .build_global()
                     {
-                        Ok(_) => println!("Thread pool init ..."),
+                        Ok(_) => println!("Thread pool init. for {} threads ...", nbr_threads),
                         Err(_) => {
                             return OptimizationResult::get_empty(Some(
                                 OptError::ThreadPoolBuildErr,

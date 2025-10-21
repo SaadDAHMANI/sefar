@@ -17,6 +17,7 @@
 - [X] Gaining-Sharing Knowledge ([GSK](https://doi.org/10.1007/s13042-019-01053-x));
 - [-] Gaining-Sharing Knowledge Based Algorithm With Adaptive Parameters ([APGSK](https://doi:10.1109/ACCESS.2021.3076091));
 - [-] LSHADE_SPACMA([LSHADE_SPACMA](https://ieeexplore.ieee.org/document/7969307))
+- [X] Enzyme action optimizer ([EAO](https://link.springer.com/article/10.1007/s11227-025-07052-w))
 
 ## Binary optimization
 The binary optimizatin in the older versions of [Sefar](https://github.com/SaadDAHMANI/sefar) will be replaced by more efficent binary optimization algorithms.*
