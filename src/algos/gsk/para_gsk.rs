@@ -10,7 +10,7 @@ use crate::core::problem::Problem;
 use rand_distr::{Distribution, Uniform};
 
 #[cfg(feature = "parallel")]
-use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
+use rayon::iter::{IndexedParallelIterator, IntoParallelRefMutIterator, ParallelIterator};
 
 // use std::fmt::Display;
 use std::time::Instant;
@@ -304,6 +304,7 @@ impl<'a, T: Problem> ParaGSK<'a, T> {
         result_mask
     }
 
+    #[cfg(not(feature = "parallel"))]
     fn update_gained_shared_junior(
         &self,
         gained_shared_junior: &mut Vec<Vec<f64>>,
@@ -339,6 +340,42 @@ impl<'a, T: Problem> ParaGSK<'a, T> {
                 }
             }
         }
+    }
+
+    #[cfg(feature = "parallel")]
+    fn para_update_gained_shared_junior(
+        &self,
+        gained_shared_junior: &mut Vec<Vec<f64>>,
+        pop: &Vec<Genome>,
+        fitness: &Vec<f64>,
+        rg1: &Vec<usize>,
+        rg2: &Vec<usize>,
+        rg3: &Vec<usize>,
+        kf: f64,
+        pop_size: usize,
+    ) {
+        //let pop_size = self.params.population_size;
+        let problem_size = self.params.problem_dimension;
+
+        // ========== parallel update ==========
+        gained_shared_junior
+            .par_iter_mut()
+            .enumerate()
+            .for_each(|(i, jv)| {
+                if fitness[i] > fitness[rg3[i]] {
+                    for j in 0..problem_size {
+                        jv[j] = pop[i].genes[j]
+                            + kf * ((pop[rg1[i]].genes[j] - pop[rg2[i]].genes[j])
+                                + (pop[rg3[i]].genes[j] - pop[i].genes[j]));
+                    }
+                } else {
+                    for j in 0..problem_size {
+                        jv[j] = pop[i].genes[j]
+                            + kf * ((pop[rg1[i]].genes[j] - pop[rg2[i]].genes[j])
+                                + (pop[i].genes[j] - pop[rg3[i]].genes[j]));
+                    }
+                }
+            });
     }
 
     fn update_gained_shared_senior(
@@ -493,17 +530,34 @@ impl<'a, T: Problem> EOA for ParaGSK<'a, T> {
                             // Gained_Shared_Junior=zeros(pop_size, problem_size);
                             let mut gained_shared_junior =
                                 vec![vec![0.0f64; problem_size]; pop_size];
-                            self.update_gained_shared_junior(
-                                &mut gained_shared_junior,
-                                &pop,
-                                &fitness,
-                                &rg1,
-                                &rg2,
-                                &rg3,
-                                kf,
-                                pop_size,
-                            );
 
+                            #[cfg(not(feature = "parallel"))]
+                            {
+                                self.update_gained_shared_junior(
+                                    &mut gained_shared_junior,
+                                    &pop,
+                                    &fitness,
+                                    &rg1,
+                                    &rg2,
+                                    &rg3,
+                                    kf,
+                                    pop_size,
+                                );
+                            }
+
+                            #[cfg(feature = "parallel")]
+                            {
+                                self.para_update_gained_shared_junior(
+                                    &mut gained_shared_junior,
+                                    &pop,
+                                    &fitness,
+                                    &rg1,
+                                    &rg2,
+                                    &rg3,
+                                    kf,
+                                    pop_size,
+                                );
+                            }
                             // PSEUDO-CODE FOR SENIOR GAINING SHARING KNOWLEDGE PHASE:
                             let mut gained_shared_senior =
                                 vec![vec![0.0f64; problem_size]; pop_size];

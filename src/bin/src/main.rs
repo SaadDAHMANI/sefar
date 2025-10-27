@@ -1,3 +1,4 @@
+// use rayon::iter::IndexedParallelIterator;
 use sefar::algos::eao::{EAOparams, EAO};
 use sefar::algos::eo::{BiEO, BiEOparams, EOparams, MIEOparams, EO, MEO, MIEO};
 
@@ -10,7 +11,7 @@ use sefar::core::optimization_result::OptimizationResult;
 // use sefar::algos::apgsk::{APGSKparams, APGSK};
 
 use sefar::algos::go::{GOparams, GO};
-use sefar::algos::gsk::{GSKparams, GSK};
+use sefar::algos::gsk::{para_gsk::ParaGSK, GSKparams, GSK};
 
 //use sefar::algos::lshade_spacma::{LshadeSpacma, LshadeSpacmaParams};
 
@@ -52,9 +53,12 @@ fn main() {
     //gsk_f1_test1();
 
     // println!("------------------MIEO : F1---------------------");
+
     //  para_mieo_test1();
 
-    eao_f1_test1();
+    //  eao_f1_test1();
+
+    para_gsk_f1_test1();
 }
 
 #[allow(dead_code)]
@@ -179,7 +183,7 @@ fn gsk_f1_test1() {
     );
 }
 
-#[cfg(feature = "parallel")]
+// #[cfg(feature = "parallel")]
 #[allow(dead_code)]
 fn para_gsk_f1_test1() {
     let mut settings: GSKparams = GSKparams::default();
@@ -199,12 +203,12 @@ fn para_gsk_f1_test1() {
 
     let mut fo = Sphere {};
 
-    let mut algo: GSK<Sphere> = GSK::new(&settings, &mut fo);
+    let mut algo: ParaGSK<Sphere> = ParaGSK::new(&settings, &mut fo);
 
     let result: OptimizationResult = algo.run();
 
     println!(
-        "Parallel Gaining-Sharing Knowledge optimizer (Para-GSK) : F1 (Sphere) test; Result: {:?}",
+        "Parallel Gaining-Sharing Knowledge optimizer (ParaGSK) : F1 (Sphere) test; Result: {:?}",
         result.to_string()
     );
 }
