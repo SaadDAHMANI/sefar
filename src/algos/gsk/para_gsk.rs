@@ -352,7 +352,6 @@ impl<'a, T: Problem> ParaGSK<'a, T> {
         rg2: &Vec<usize>,
         rg3: &Vec<usize>,
         kf: f64,
-        pop_size: usize,
     ) {
         //let pop_size = self.params.population_size;
         let problem_size = self.params.problem_dimension;
@@ -378,6 +377,7 @@ impl<'a, T: Problem> ParaGSK<'a, T> {
             });
     }
 
+    #[cfg(not(feature = "parallel"))]
     fn update_gained_shared_senior(
         &self,
         gained_shared_senior: &mut Vec<Vec<f64>>,
@@ -413,6 +413,69 @@ impl<'a, T: Problem> ParaGSK<'a, T> {
                 }
             }
         }
+    }
+
+    #[cfg(feature = "parallel")]
+    fn para_update_gained_shared_senior(
+        &self,
+        gained_shared_senior: &mut Vec<Vec<f64>>,
+        pop: &Vec<Genome>,
+        fitness: &Vec<f64>,
+        r1: &Vec<usize>,
+        r2: &Vec<usize>,
+        r3: &Vec<usize>,
+        kf: f64,
+    ) {
+        //let pop_size = self.params.population_size;
+        let problem_size = self.params.problem_dimension;
+        /*
+        for i in 0..pop_size {
+            if fitness[i] > fitness[r2[i]] {
+                for j in 0..problem_size {
+                    // Gained_Shared_Senior(ind,:) = pop(ind,:) +
+                    // KF*ones(sum(ind), problem_size) .* (pop(R1(ind),:) - pop(ind,:) +
+                    // pop(R2(ind),:) - pop(R3(ind), :)) ;
+                    gained_shared_senior[i][j] = pop[i].genes[j]
+                        + kf * ((pop[r1[i]].genes[j] - pop[i].genes[j])
+                            + (pop[r2[i]].genes[j] - pop[r3[i]].genes[j]));
+                }
+            } else {
+                for j in 0..problem_size {
+                    // Gained_Shared_Senior(ind,:) = pop(ind,:) +
+                    // KF*ones(sum(ind), problem_size) .* (pop(R1(ind),:) - pop(R2(ind),:) +
+                    // pop(ind,:) - pop(R3(ind), :)) ;
+                    gained_shared_senior[i][j] = pop[i].genes[j]
+                        + kf * ((pop[r1[i]].genes[j] - pop[r2[i]].genes[j])
+                            + (pop[i].genes[j] - pop[r3[i]].genes[j]));
+                }
+            }
+        }
+        */
+        // =================================
+        gained_shared_senior
+            .par_iter_mut()
+            .enumerate()
+            .for_each(|(i, sv)| {
+                if fitness[i] > fitness[r2[i]] {
+                    for j in 0..problem_size {
+                        // Gained_Shared_Senior(ind,:) = pop(ind,:) +
+                        // KF*ones(sum(ind), problem_size) .* (pop(R1(ind),:) - pop(ind,:) +
+                        // pop(R2(ind),:) - pop(R3(ind), :)) ;
+                        sv[j] = pop[i].genes[j]
+                            + kf * ((pop[r1[i]].genes[j] - pop[i].genes[j])
+                                + (pop[r2[i]].genes[j] - pop[r3[i]].genes[j]));
+                    }
+                } else {
+                    for j in 0..problem_size {
+                        // Gained_Shared_Senior(ind,:) = pop(ind,:) +
+                        // KF*ones(sum(ind), problem_size) .* (pop(R1(ind),:) - pop(R2(ind),:) +
+                        // pop(ind,:) - pop(R3(ind), :)) ;
+                        sv[j] = pop[i].genes[j]
+                            + kf * ((pop[r1[i]].genes[j] - pop[r2[i]].genes[j])
+                                + (pop[i].genes[j] - pop[r3[i]].genes[j]));
+                    }
+                }
+            });
     }
 }
 
@@ -452,6 +515,11 @@ impl<'a, T: Problem> EOA for ParaGSK<'a, T> {
                         let mut children_fitness: Vec<f64> = vec![0.0f64; pop_size];
                         let mut run_funcvals: Vec<f64> = vec![0.0f64; max_iter + 1];
                         //--------------------------------------------------
+
+                        let mut gained_shared_junior = vec![vec![0.0f64; problem_size]; pop_size];
+                        let mut gained_shared_senior = vec![vec![0.0f64; problem_size]; pop_size];
+
+                        // -------------------------------------------------
 
                         let g_max_f64: f64 = max_iter as f64;
                         // Initialize the main population:
@@ -528,9 +596,6 @@ impl<'a, T: Problem> EOA for ParaGSK<'a, T> {
 
                             // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE:
                             // Gained_Shared_Junior=zeros(pop_size, problem_size);
-                            let mut gained_shared_junior =
-                                vec![vec![0.0f64; problem_size]; pop_size];
-
                             #[cfg(not(feature = "parallel"))]
                             {
                                 self.update_gained_shared_junior(
@@ -540,6 +605,18 @@ impl<'a, T: Problem> EOA for ParaGSK<'a, T> {
                                     &rg1,
                                     &rg2,
                                     &rg3,
+                                    kf,
+                                    pop_size,
+                                );
+
+                                // PSEUDO-CODE FOR SENIOR GAINING SHARING KNOWLEDGE PHASE:
+                                self.update_gained_shared_senior(
+                                    &mut gained_shared_senior,
+                                    &pop,
+                                    &fitness,
+                                    &r1,
+                                    &r2,
+                                    &r3,
                                     kf,
                                     pop_size,
                                 );
@@ -555,23 +632,20 @@ impl<'a, T: Problem> EOA for ParaGSK<'a, T> {
                                     &rg2,
                                     &rg3,
                                     kf,
-                                    pop_size,
+                                );
+
+                                // PSEUDO-CODE FOR SENIOR GAINING SHARING KNOWLEDGE PHASE:
+
+                                self.para_update_gained_shared_senior(
+                                    &mut gained_shared_senior,
+                                    &pop,
+                                    &fitness,
+                                    &r1,
+                                    &r2,
+                                    &r3,
+                                    kf,
                                 );
                             }
-                            // PSEUDO-CODE FOR SENIOR GAINING SHARING KNOWLEDGE PHASE:
-                            let mut gained_shared_senior =
-                                vec![vec![0.0f64; problem_size]; pop_size];
-                            self.update_gained_shared_senior(
-                                &mut gained_shared_senior,
-                                &pop,
-                                &fitness,
-                                &r1,
-                                &r2,
-                                &r3,
-                                kf,
-                                pop_size,
-                            );
-
                             // check the lower and the upper bound.
                             self.bound_constraint(&mut gained_shared_junior, &pop, pop_size);
                             self.bound_constraint(&mut gained_shared_senior, &pop, pop_size);
