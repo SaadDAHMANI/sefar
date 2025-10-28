@@ -1,7 +1,6 @@
 // use rayon::iter::IndexedParallelIterator;
 use sefar::algos::eao::{EAOparams, EAO};
-use sefar::algos::eo::{BiEO, BiEOparams, EOparams, MIEOparams, EO, MEO, MIEO};
-
+use sefar::algos::eo::{BiEO, BiEOparams, EOparams, IEOparams, MIEOparams, EO, IEO, MEO, MIEO};
 use sefar::algos::pso::{PSOparams, PSO};
 use sefar::benchmarks::functions::{Sphere, SumAbsFunction, F2};
 use sefar::core::eoa::EOA;
@@ -42,7 +41,7 @@ fn main() {
 
     //pco_f1_test1();
 
-    eo_f1_test1();
+    ieo_f1_test1();
 
     // peo_f1_test1();
 
@@ -377,6 +376,34 @@ fn eo_f1_test1() {
     let mut fo = Sphere {};
 
     let mut eo: EO<Sphere> = EO::new(&settings, &mut fo);
+
+    let result = eo.run();
+
+    // Print the results:
+    println!("The optimization results of EO : {}", result.to_string());
+    println!(
+        "The last in convergence curve : {:?}",
+        result.convergence_trend.unwrap().last()
+    );
+}
+
+#[allow(dead_code)]
+fn ieo_f1_test1() {
+    let mut settings: IEOparams = IEOparams::default();
+
+    settings.population_size = POP_SIZE;
+    settings.problem_dimension = DIM;
+    settings.max_iterations = KMAX;
+
+    let lb = vec![-100.0f64; DIM];
+    let ub = vec![100.0f64; DIM];
+
+    settings.lower_bounds = lb.as_slice();
+    settings.upper_bounds = ub.as_slice();
+
+    let mut fo = Sphere {};
+
+    let mut eo: IEO<Sphere> = IEO::new(&settings, &mut fo);
 
     let result = eo.run();
 
