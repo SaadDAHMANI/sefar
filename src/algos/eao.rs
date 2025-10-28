@@ -240,7 +240,8 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
                 // =============================================================
 
                 // MAIN LOOP
-                for t in 0..max_iter {
+                let mut t: usize = 0;
+                while t < max_iter {
                     let af = f64::sqrt((t + 1) as f64 / max_iter as f64);
 
                     for i in 0..enzyme_count {
@@ -351,8 +352,10 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
                     self.problem
                         .iteration_increment(t, &best_substrate, &mut break_process);
                     if break_process {
+                        t += 1;
                         break;
                     }
+                    t += 1;
                 }
 
                 best_substrate.fitness =
@@ -362,7 +365,7 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
                 let result = OptimizationResult {
                     best_genome: Some(best_substrate),
                     best_fitness: Some(optimal_catalysis),
-                    convergence_trend: Some(convergence_curve),
+                    convergence_trend: Some(convergence_curve[0..t].to_vec()),
                     computation_time: Some(duration),
                     err_report: None,
                 };

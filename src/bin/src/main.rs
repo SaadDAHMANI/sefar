@@ -15,9 +15,9 @@ use sefar::algos::gsk::{para_gsk::ParaGSK, GSKparams, GSK};
 
 //use sefar::algos::lshade_spacma::{LshadeSpacma, LshadeSpacmaParams};
 
-const DIM: usize = 30;
-const POP_SIZE: usize = 50;
-const KMAX: usize = 1000;
+const DIM: usize = 10;
+const POP_SIZE: usize = 20;
+const KMAX: usize = 10;
 
 fn main() {
     // lshade_spacma_test1();
@@ -50,13 +50,13 @@ fn main() {
     //bieo_f1_binary_test();
 
     // println!("------------------GSK : F1---------------------");
-    gsk_f1_test1();
+    //  gsk_f1_test1();
 
     // println!("------------------MIEO : F1---------------------");
 
     //  para_mieo_test1();
 
-    //  eao_f1_test1();
+    eao_f1_test1();
 
     //  para_gsk_f1_test1();
 }
@@ -84,6 +84,11 @@ fn eao_f1_test1() {
     println!(
         "EAO : F0 (SumAbsFunction) test; Result: {:?}",
         result.to_string()
+    );
+
+    println!(
+        "EAO: Last value in Convergence curve : {:?}",
+        result.convergence_trend.unwrap().last()
     );
 }
 
