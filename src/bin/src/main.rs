@@ -17,7 +17,7 @@ use sefar::algos::gsk::{para_gsk::ParaGSK, GSKparams, GSK};
 
 const DIM: usize = 10;
 const POP_SIZE: usize = 20;
-const KMAX: usize = 10;
+const KMAX: usize = 100;
 
 fn main() {
     // lshade_spacma_test1();
@@ -42,7 +42,7 @@ fn main() {
 
     //pco_f1_test1();
 
-    //eo_f1_test1();
+    eo_f1_test1();
 
     // peo_f1_test1();
 
@@ -56,7 +56,7 @@ fn main() {
 
     //  para_mieo_test1();
 
-    eao_f1_test1();
+    //  eao_f1_test1();
 
     //  para_gsk_f1_test1();
 }
@@ -381,7 +381,11 @@ fn eo_f1_test1() {
     let result = eo.run();
 
     // Print the results:
-    println!("The optimization results of GO : {}", result.to_string());
+    println!("The optimization results of EO : {}", result.to_string());
+    println!(
+        "The last in convergence curve : {:?}",
+        result.convergence_trend.unwrap().last()
+    );
 }
 
 #[allow(dead_code)]

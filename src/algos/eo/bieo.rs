@@ -100,9 +100,6 @@ impl<'a, T: Problem> EOA for BiEO<'a, T> {
                 //let mut ceq3_index : usize = 0;
                 //let mut ceq4_index : usize = 0;
 
-                // Iter=0; V=1;
-                let mut iter = 0;
-
                 // to store agents fitness values
                 let mut fitness = vec![0.0f64; particles_no];
                 let mut fit_old = vec![0.0f64; particles_no];
@@ -137,6 +134,9 @@ impl<'a, T: Problem> EOA for BiEO<'a, T> {
                 //#[cfg(feature = "binary")]
                 let mut c: Vec<Genome> =
                     self.initialize(self.params, InitializationMode::BinaryUnifrom);
+
+                // Iter=0; V=1;
+                let mut iter = 0;
 
                 // the main loop of EO
                 while iter < max_iter {
@@ -300,8 +300,6 @@ impl<'a, T: Problem> EOA for BiEO<'a, T> {
 
                     convergence_curve[iter] = ceq1_fit;
 
-                    iter += 1;
-
                     self.problem.iteration_increment(
                         iter,
                         &Genome::from(ceq1_index, &ceq1.clone(), ceq1_fit),
@@ -309,8 +307,10 @@ impl<'a, T: Problem> EOA for BiEO<'a, T> {
                     );
 
                     if break_process {
+                        iter += 1;
                         break;
                     }
+                    iter += 1;
                 }
 
                 //return results
@@ -318,7 +318,7 @@ impl<'a, T: Problem> EOA for BiEO<'a, T> {
                 let result = OptimizationResult {
                     best_genome: Some(Genome::from(ceq1_index, &ceq1, ceq1_fit)),
                     best_fitness: Some(ceq1_fit),
-                    convergence_trend: Some(convergence_curve),
+                    convergence_trend: Some(convergence_curve[0..iter].to_vec()),
                     computation_time: Some(duration),
                     err_report: None,
                 };
