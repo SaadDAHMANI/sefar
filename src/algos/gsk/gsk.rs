@@ -412,7 +412,11 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                         let mut fitness: Vec<f64> = vec![0.0f64; pop_size];
                         let mut children_fitness: Vec<f64> = vec![0.0f64; pop_size];
                         let mut run_funcvals: Vec<f64> = vec![0.0f64; max_iter + 1];
-                        //--------------------------------------------------
+                        // ------------------------------------------------------------
+
+                        let mut gained_shared_junior = vec![vec![0.0f64; problem_size]; pop_size];
+                        let mut gained_shared_senior = vec![vec![0.0f64; problem_size]; pop_size];
+                        // ------------------------------------------------------------
 
                         let g_max_f64: f64 = max_iter as f64;
                         // Initialize the main population:
@@ -489,8 +493,6 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 
                             // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE:
                             // Gained_Shared_Junior=zeros(pop_size, problem_size);
-                            let mut gained_shared_junior =
-                                vec![vec![0.0f64; problem_size]; pop_size];
                             self.update_gained_shared_junior(
                                 &mut gained_shared_junior,
                                 &pop,
@@ -503,8 +505,6 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                             );
 
                             // PSEUDO-CODE FOR SENIOR GAINING SHARING KNOWLEDGE PHASE:
-                            let mut gained_shared_senior =
-                                vec![vec![0.0f64; problem_size]; pop_size];
                             self.update_gained_shared_senior(
                                 &mut gained_shared_senior,
                                 &pop,
