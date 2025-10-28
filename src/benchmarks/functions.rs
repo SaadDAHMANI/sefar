@@ -70,11 +70,10 @@ impl Problem for Sphere {
                 "Iteration : {}, best.fitness : {:?}",
                 current_iteration, best_fit
             );
-            /*
+
             if best_fit < 0.001 {
                 *_break_process = true;
             };
-            */
         }
     }
 }

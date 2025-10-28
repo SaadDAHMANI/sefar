@@ -28,8 +28,8 @@ fn main() {
     //--------------------------------------------------------------------
     //println!("Evaluation with Max_Iter = {}", KMAX);
 
-    //  println!("______________________GO : F1______________________");
-    //    go_f1_test1();
+    println!("______________________GO : F1______________________");
+    go_f1_test1();
 
     /*
      println!("______________________GO : F2______________________");
@@ -41,7 +41,7 @@ fn main() {
 
     //pco_f1_test1();
 
-    ieo_f1_test1();
+    // ieo_f1_test1();
 
     // peo_f1_test1();
 
@@ -241,14 +241,18 @@ fn go_f1_test1() {
 
     let result: OptimizationResult = algo.run();
     println!("The optimization results of GO : {}", result.to_string());
-
+    println!(
+        "The last value in CV : {:?}",
+        result.convergence_trend.unwrap().last()
+    );
+    /*
     // Save the results:
     let file = "/home/sd/Documents/Rust_apps/GO.csv";
 
     let header = format!("{}", settings);
 
     let _result = result.save(Some(&header), &file);
-    println!("Saving optimization results in teh file: {:?}", _result);
+    println!("Saving optimization results in teh file: {:?}", _result);*/
 }
 
 #[allow(dead_code)]
