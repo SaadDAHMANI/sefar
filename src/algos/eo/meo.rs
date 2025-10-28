@@ -295,17 +295,18 @@ impl<'a, T: Problem> EOA for MEO<'a, T> {
                     // println!("seq--> End computation in : {:?}", duration);
 
                     convergence_curve[iter] = ceq1_fit;
-
-                    iter += 1;
-
                     self.problem.iteration_increment(
                         iter,
                         &Genome::from(ceq1_index, &ceq1, ceq1_fit),
                         &mut break_process,
                     );
                     if break_process {
+                        iter += 1;
+
                         break;
                     }
+
+                    iter += 1;
                 }
 
                 //return results
@@ -313,7 +314,7 @@ impl<'a, T: Problem> EOA for MEO<'a, T> {
                 let result = OptimizationResult {
                     best_genome: Some(Genome::from(ceq1_index, &ceq1, ceq1_fit)),
                     best_fitness: Some(ceq1_fit),
-                    convergence_trend: Some(convergence_curve),
+                    convergence_trend: Some(convergence_curve[0..iter].to_vec()),
                     computation_time: Some(duration),
                     err_report: None,
                 };

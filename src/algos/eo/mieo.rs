@@ -279,20 +279,16 @@ impl<'a, T: Problem> EOA for MIEO<'a, T> {
                     convergence_curve[iter] = ceq1_fit;
 
                     ceq1.fitness = Some(ceq1_fit);
-
-                    iter += 1;
-
                     self.problem
                         .iteration_increment(iter, &ceq1, &mut break_process);
 
                     if break_process {
+                        iter += 1;
+
                         break;
                     }
 
-                    /*
-                    #[cfg(feature = "report")]
-                    println!("Iter : {}, Best-fit : {}", iter, ceq1_fit);
-                    */
+                    iter += 1;
                 }
 
                 //return results
@@ -300,7 +296,7 @@ impl<'a, T: Problem> EOA for MIEO<'a, T> {
                 let result = OptimizationResult {
                     best_genome: Some(ceq1),
                     best_fitness: Some(ceq1_fit),
-                    convergence_trend: Some(convergence_curve),
+                    convergence_trend: Some(convergence_curve[0..iter].to_vec()),
                     computation_time: Some(duration),
                     err_report: None,
                 };

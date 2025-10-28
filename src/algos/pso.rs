@@ -84,7 +84,9 @@ impl<'a, T: Problem> EOA for PSO<'a, T> {
                 let mut pbest_x = self.initialize(self.params, InitializationMode::RealUniform);
 
                 // Main PSO loop
-                for t in 0..max_iter {
+                let mut t: usize = 0;
+
+                while t < max_iter {
                     //let mut gbest_index : usize = 0;
 
                     for k in 0..nop {
@@ -155,8 +157,10 @@ impl<'a, T: Problem> EOA for PSO<'a, T> {
                     self.problem
                         .iteration_increment(t, &gbest_x, &mut break_process);
                     if break_process {
+                        t += 1;
                         break;
                     }
+                    t += 1;
                 }
 
                 //return results
@@ -164,7 +168,7 @@ impl<'a, T: Problem> EOA for PSO<'a, T> {
                 let result = OptimizationResult {
                     best_fitness: gbest_x.fitness,
                     best_genome: Some(gbest_x),
-                    convergence_trend: Some(cgcurve),
+                    convergence_trend: Some(cgcurve[0..t].to_vec()),
                     computation_time: Some(duration),
                     err_report: None,
                 };

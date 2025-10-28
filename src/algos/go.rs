@@ -339,13 +339,14 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
                         println!("Iter : {}, best-fitness : {}", iter, gbestfitness);
             */
 
-            iter += 1;
-
             self.problem
                 .iteration_increment(iter, &gbest_x, &mut break_process);
             if break_process {
+                iter += 1;
+
                 break;
             }
+            iter += 1;
         }
 
         let duration = chronos.elapsed();
@@ -357,7 +358,7 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
         let result: OptimizationResult = OptimizationResult {
             best_genome: Some(gbest_x),
             best_fitness: Some(gbestfitness),
-            convergence_trend: Some(gbesthistory),
+            convergence_trend: Some(gbesthistory[0..iter].to_vec()),
             computation_time: Some(duration),
             err_report: None,
         };
