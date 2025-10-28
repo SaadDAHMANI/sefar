@@ -617,10 +617,6 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                                     copy_solution(&ui[i], &mut bsf_solution, problem_size);
                                 }
                             }
-                            // SAVE THE BEST- FITNESS (convergence trend):
-                            //run_funcvals = [run_funcvals;bsf_fit_var];
-                            run_funcvals[g] = bsf_fit_var;
-
                             /* println!(
                                 "iter : {} -- best_fit : {} -- best_sol:{:?}",
                                 g, bsf_fit_var, bsf_solution
@@ -645,6 +641,10 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                                   }*/
                             }
 
+                            // SAVE THE BEST- FITNESS (convergence trend):
+                            //run_funcvals = [run_funcvals;bsf_fit_var];
+                            run_funcvals[g] = bsf_fit_var;
+
                             bsf_solution.fitness = Some(bsf_fit_var);
 
                             self.problem
@@ -659,7 +659,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                         let duration = chronos.elapsed();
                         result.best_genome = Some(bsf_solution);
                         result.best_fitness = Some(bsf_fit_var);
-                        result.convergence_trend = Some(run_funcvals);
+                        result.convergence_trend = Some(run_funcvals[0..g + 1].to_vec());
                         result.computation_time = Some(duration);
                         result.err_report = None;
                         result

@@ -50,7 +50,7 @@ fn main() {
     //bieo_f1_binary_test();
 
     // println!("------------------GSK : F1---------------------");
-    //gsk_f1_test1();
+    gsk_f1_test1();
 
     // println!("------------------MIEO : F1---------------------");
 
@@ -58,7 +58,7 @@ fn main() {
 
     //  eao_f1_test1();
 
-    para_gsk_f1_test1();
+    //  para_gsk_f1_test1();
 }
 
 #[allow(dead_code)]
@@ -180,6 +180,10 @@ fn gsk_f1_test1() {
     println!(
         "Gaining-Sharing Knowledge optimizer (GSK) : F1 (Sphere) test; Result: {:?}",
         result.to_string()
+    );
+    println!(
+        "Last value in Convergence curve: {:?}",
+        result.convergence_trend.unwrap().last()
     );
 }
 
