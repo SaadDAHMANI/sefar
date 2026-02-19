@@ -49,28 +49,6 @@ impl<'a, T: Problem> EOA for MIEO<'a, T> {
         match self.params.check() {
             Err(error) => OptimizationResult::get_empty(Some(error)),
             Ok(()) => {
-                //--------------------------------------------------------------
-                /*
-                #[cfg(feature = "parallel")]
-                {
-                    let nbr_threads = match self.params.num_threads {
-                        None => 1,
-                        Some(nthreads) => nthreads,
-                    };
-                    match rayon::ThreadPoolBuilder::new()
-                        .num_threads(nbr_threads)
-                        .build_global()
-                    {
-                        Ok(_) => println!("Thread pool init. for {} threads ...", nbr_threads),
-                        Err(_) => {
-                            return OptimizationResult::get_empty(Some(
-                                OptError::ThreadPoolBuildErr,
-                            ))
-                        }
-                    };
-                }
-                */
-                // -------------------------------------------------------------
                 let dim = self.params.get_problem_dimension();
                 let particles_no = self.params.get_population_size();
                 let max_iter = self.params.get_max_iterations();

@@ -141,31 +141,6 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
         match self.params.check() {
             Err(error) => OptimizationResult::get_empty(Some(error)),
             Ok(()) => {
-                // ------------------------------------------------------------
-                /*
-                #[cfg(feature = "parallel")]
-                {
-                    use rayon::max_num_threads;
-
-                    let nbr_threads = match self.params.num_threads {
-                        None => 1,
-                        Some(nthreads) => usize::max(nthreads, 1),
-                    };
-
-                    match rayon::ThreadPoolBuilder::new()
-                        .num_threads(nbr_threads)
-                        .build()
-                    {
-                        Ok(_) => println!("Thread pool init. for {} threads ... ", nbr_threads),
-                        Err(_) => {
-                            return OptimizationResult::get_empty(Some(
-                                crate::core::OptError::ThreadPoolBuildErr,
-                            ))
-                        }
-                    };
-                }
-                */
-                // ------------------------------------------------------------
                 let enzyme_count: usize = self.params.population_size;
                 let active_site_dimension: usize = self.params.problem_dimension;
 
@@ -403,9 +378,6 @@ pub struct EAOparams<'a> {
 
     /// Enzyme Concentration EC. The default value = 0.1
     pub ec: f64,
-
-    /// Number of threads for parallel execution.
-    pub num_threads: Option<usize>,
 }
 
 impl<'a> EAOparams<'a> {
@@ -434,7 +406,6 @@ impl<'a> EAOparams<'a> {
             lower_bounds: lb,
             upper_bounds: ub,
             ec,
-            num_threads: None,
         }
     }
 }
@@ -487,7 +458,6 @@ impl<'a> Default for EAOparams<'a> {
             lower_bounds: &[-100.0f64, -100.0, -100.0],
             upper_bounds: &[100.0f64, 100.0, 100.0],
             ec: 0.1,
-            num_threads: None,
         }
     }
 }
