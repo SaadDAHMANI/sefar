@@ -104,11 +104,13 @@ pub trait EOA {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum InitializationMode {
     RealUniform,
     BinaryUnifrom,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ThreadNumber {
     Default,
     Specific(usize),
