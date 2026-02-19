@@ -145,13 +145,16 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
 
                 #[cfg(feature = "parallel")]
                 {
+                    use rayon::max_num_threads;
+
                     let nbr_threads = match self.params.num_threads {
                         None => 1,
-                        Some(nthreads) => nthreads,
+                        Some(nthreads) => usize::max(nthreads, 1),
                     };
+
                     match rayon::ThreadPoolBuilder::new()
                         .num_threads(nbr_threads)
-                        .build_global()
+                        .build()
                     {
                         Ok(_) => println!("Thread pool init. for {} threads ... ", nbr_threads),
                         Err(_) => {
@@ -256,6 +259,8 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
                                 + (rand_vec[j] * f64::sin(af * substrate_pool[i].genes[j]));
                         }
 
+                        // SPACE BOUND
+                        //
                         // FirstSubstratePosition = max(min(FirstSubstratePosition, UB),LB);
                         for j in 0..active_site_dimension {
                             first_substrate_position.genes[j] =

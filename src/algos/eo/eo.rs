@@ -330,6 +330,9 @@ pub struct EOparams<'a> {
     pub a2: f64,
     /// EO parameter
     pub gp: f64,
+
+    /// Number of threads for parallel execution.
+    pub num_threads: Option<usize>,
 }
 
 #[allow(dead_code)]
@@ -343,6 +346,7 @@ impl<'a> EOparams<'a> {
         a1: f64,
         a2: f64,
         gp: f64,
+        num_threads: Option<usize>,
     ) -> Result<EOparams<'a>, OptError> {
         let params = EOparams {
             population_size: p_size,
@@ -353,6 +357,7 @@ impl<'a> EOparams<'a> {
             a1,
             a2,
             gp,
+            num_threads,
         };
 
         match params.check() {
@@ -414,6 +419,7 @@ impl<'a> Default for EOparams<'a> {
             a1: 2.0f64,
             a2: 1.0f64,
             gp: 0.5f64,
+            num_threads: Some(1),
         }
     }
 }
@@ -457,6 +463,7 @@ mod eo_params_tests {
             a1: 2.0f64,
             a2: 1.0f64,
             gp: 0.5f64,
+            num_threads: Some(1),
         };
 
         let sl_ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
@@ -478,8 +485,18 @@ mod eo_params_tests {
         let _ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
         let _lb = vec![-1.0f64, -2.0, -3.0, -4.0, -5.0];
 
-        let p = EOparams::new(10, 10, 100, _lb.as_slice(), _ub.as_slice(), 0.5, 0.5, 0.5)
-            .unwrap_or_default();
+        let p = EOparams::new(
+            10,
+            10,
+            100,
+            _lb.as_slice(),
+            _ub.as_slice(),
+            0.5,
+            0.5,
+            0.5,
+            Some(1),
+        )
+        .unwrap_or_default();
         assert_eq!(p.a1, 2.0f64);
         assert_eq!(p.a2, 1.0f64);
         assert_eq!(p.gp, 0.50f64);
@@ -490,8 +507,18 @@ mod eo_params_tests {
         let _ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
         let _lb = vec![-1.0f64, -2.0, -3.0, -4.0, -5.0];
 
-        let p = EOparams::new(10, 5, 100, _lb.as_slice(), _ub.as_slice(), 0.5, 0.5, 0.5)
-            .unwrap_or_default();
+        let p = EOparams::new(
+            10,
+            5,
+            100,
+            _lb.as_slice(),
+            _ub.as_slice(),
+            0.5,
+            0.5,
+            0.5,
+            Some(1),
+        )
+        .unwrap_or_default();
         assert_eq!(p.a1, 0.50f64);
         assert_eq!(p.a2, 0.50f64);
         assert_eq!(p.gp, 0.50f64);
