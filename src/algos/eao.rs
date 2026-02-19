@@ -142,7 +142,7 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
             Err(error) => OptimizationResult::get_empty(Some(error)),
             Ok(()) => {
                 // ------------------------------------------------------------
-
+                /*
                 #[cfg(feature = "parallel")]
                 {
                     use rayon::max_num_threads;
@@ -164,6 +164,7 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
                         }
                     };
                 }
+                */
                 // ------------------------------------------------------------
                 let enzyme_count: usize = self.params.population_size;
                 let active_site_dimension: usize = self.params.problem_dimension;
