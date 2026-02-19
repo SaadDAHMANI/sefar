@@ -534,8 +534,6 @@ fn para_mieo_test1() {
     settings.max_iterations = KMAX;
 
     //-------Number of threads ----------
-    settings.num_threads = Some(1);
-
     let lb = vec![-100.0f64; DIM];
     let ub = vec![100.0f64; DIM];
 

@@ -3,6 +3,8 @@ use crate::core::optimization_result::OptimizationResult;
 use crate::core::parameters::Parameters;
 use rand::distributions::{Distribution, Uniform};
 
+#[cfg(feature = "parallel")]
+use crate::core::OptError;
 ///
 /// Public trait for Evolutionary Optimization Algorithms
 ///
@@ -83,9 +85,31 @@ pub trait EOA {
             *item = between.sample(&mut rng);
         }
     }
+
+    #[cfg(feature = "parallel")]
+    fn initialize_parallel(&self, num_threads: ThreadNumber) -> Result<usize, OptError> {
+        match num_threads {
+            ThreadNumber::Default => Ok(rayon::current_num_threads()),
+            ThreadNumber::Specific(value) => {
+                let nbr_threads = value.max(1).min(14);
+                match rayon::ThreadPoolBuilder::new()
+                    .num_threads(nbr_threads)
+                    .build_global()
+                {
+                    Ok(_) => Ok(rayon::current_num_threads()),
+                    Err(_) => Err(OptError::ThreadPoolBuildErr),
+                }
+            }
+        }
+    }
 }
 
 pub enum InitializationMode {
     RealUniform,
     BinaryUnifrom,
+}
+
+pub enum ThreadNumber {
+    Default,
+    Specific(usize),
 }
