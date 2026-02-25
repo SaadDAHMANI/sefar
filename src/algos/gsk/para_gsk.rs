@@ -90,7 +90,7 @@ impl<'a, T: Problem> ParaGSK<'a, T> {
         #[cfg(feature = "parallel")]
         {
             pop.par_iter_mut()
-                .for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));
+                .for_each(|g| g.fitness = Some(self.problem.objectivefunction(&mut g.genes)));
             for i in 0..n {
                 match pop[i].fitness {
                     None => fitness[i] = f64::MAX,

@@ -132,7 +132,7 @@ impl<'a, T: Problem> EOA for MIEO<'a, T> {
                     #[cfg(feature = "parallel")]
                     {
                         c.par_iter_mut().for_each(|g| {
-                            g.fitness = Some(self.problem.objectivefunction(&g.genes))
+                            g.fitness = Some(self.problem.objectivefunction(&mut g.genes))
                         });
                         for i in 0..particles_no {
                             match c[i].fitness {

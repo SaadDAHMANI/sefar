@@ -194,9 +194,9 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
                 //___________Parallel mode________________
                 #[cfg(feature = "parallel")]
                 {
-                    substrate_pool
-                        .par_iter_mut()
-                        .for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));
+                    substrate_pool.par_iter_mut().for_each(|g| {
+                        g.fitness = Some(self.problem.objectivefunction(&mut g.genes))
+                    });
                     for i in 0..enzyme_count {
                         match substrate_pool[i].fitness {
                             None => reaction_rate[i] = f64::MAX,

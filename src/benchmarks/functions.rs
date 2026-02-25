@@ -28,7 +28,7 @@ impl Problem for SumAbsFunction {
     }
 
     #[cfg(feature = "parallel")]
-    fn objectivefunction(&self, genome: &[f64]) -> f64 {
+    fn objectivefunction(&self, genome: &mut [f64]) -> f64 {
         let fitness = genome.iter().fold(0.0f64, |sum, g| sum + g.abs());
         fitness
     }
@@ -54,7 +54,7 @@ impl Problem for Sphere {
     }
 
     #[cfg(feature = "parallel")]
-    fn objectivefunction(&self, genome: &[f64]) -> f64 {
+    fn objectivefunction(&self, genome: &mut [f64]) -> f64 {
         let fitness = genome.iter().fold(0.0f64, |sum, g| sum + g.powi(2));
         fitness
     }
@@ -94,7 +94,7 @@ impl Problem for F2 {
     }
 
     #[cfg(feature = "parallel")]
-    fn objectivefunction(&self, genome: &[f64]) -> f64 {
+    fn objectivefunction(&self, genome: &mut [f64]) -> f64 {
         let sum = genome.iter().fold(0.0f64, |sum, g| sum + g.abs());
         let prod = genome.iter().fold(1.0f64, |prod, g| prod * f64::abs(*g));
         sum + prod

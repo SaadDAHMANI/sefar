@@ -88,7 +88,7 @@ impl<'a, T: Problem> GSK<'a, T> {
         #[cfg(feature = "parallel")]
         {
             pop.par_iter_mut()
-                .for_each(|g| g.fitness = Some(self.problem.objectivefunction(&g.genes)));
+                .for_each(|g| g.fitness = Some(self.problem.objectivefunction(&mut g.genes)));
             for i in 0..n {
                 match pop[i].fitness {
                     None => fitness[i] = f64::MAX,
@@ -96,6 +96,7 @@ impl<'a, T: Problem> GSK<'a, T> {
                 };
             }
         }
+        // --------------------------------------
     }
 
     fn find_indices(&self, x: &Vec<usize>, target: usize) -> usize {
