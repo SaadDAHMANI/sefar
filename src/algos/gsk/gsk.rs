@@ -492,30 +492,65 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                             //println!("Rg3 : {:?}", rg3);
                             let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best, p);
 
-                            // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE:
-                            // Gained_Shared_Junior=zeros(pop_size, problem_size);
-                            self.update_gained_shared_junior(
-                                &mut gained_shared_junior,
-                                &pop,
-                                &fitness,
-                                &rg1,
-                                &rg2,
-                                &rg3,
-                                kf,
-                                pop_size,
-                            );
+                            #[cfg(not(feature = "parallel"))]
+                            {
+                                // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE:
+                                // Gained_Shared_Junior=zeros(pop_size, problem_size);
+                                self.update_gained_shared_junior(
+                                    &mut gained_shared_junior,
+                                    &pop,
+                                    &fitness,
+                                    &rg1,
+                                    &rg2,
+                                    &rg3,
+                                    kf,
+                                    pop_size,
+                                );
 
-                            // PSEUDO-CODE FOR SENIOR GAINING SHARING KNOWLEDGE PHASE:
-                            self.update_gained_shared_senior(
-                                &mut gained_shared_senior,
-                                &pop,
-                                &fitness,
-                                &r1,
-                                &r2,
-                                &r3,
-                                kf,
-                                pop_size,
-                            );
+                                // PSEUDO-CODE FOR SENIOR GAINING SHARING KNOWLEDGE PHASE:
+                                self.update_gained_shared_senior(
+                                    &mut gained_shared_senior,
+                                    &pop,
+                                    &fitness,
+                                    &r1,
+                                    &r2,
+                                    &r3,
+                                    kf,
+                                    pop_size,
+                                );
+                            }
+
+                            #[cfg(feature = "parallel")]
+                            {
+                                // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE:
+                                // Gained_Shared_Junior=zeros(pop_size, problem_size);
+                                rayon::join(
+                                    || {
+                                        self.update_gained_shared_junior(
+                                            &mut gained_shared_junior,
+                                            &pop,
+                                            &fitness,
+                                            &rg1,
+                                            &rg2,
+                                            &rg3,
+                                            kf,
+                                            pop_size,
+                                        )
+                                    },
+                                    ||
+                                // PSEUDO-CODE FOR SENIOR GAINING SHARING KNOWLEDGE PHASE:
+                                self.update_gained_shared_senior(
+                                    &mut gained_shared_senior,
+                                    &pop,
+                                    &fitness,
+                                    &r1,
+                                    &r2,
+                                    &r3,
+                                    kf,
+                                    pop_size,
+                                ),
+                                );
+                            }
 
                             // check the lower and the upper bound.
                             self.bound_constraint(&mut gained_shared_junior, &pop, pop_size);
