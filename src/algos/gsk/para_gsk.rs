@@ -620,6 +620,9 @@ impl<'a, T: Problem> EOA for ParaGSK<'a, T> {
                                     kf,
                                     pop_size,
                                 );
+                                // check the lower and the upper bound.
+                                self.bound_constraint(&mut gained_shared_junior, &pop, pop_size);
+                                self.bound_constraint(&mut gained_shared_senior, &pop, pop_size);
                             }
 
                             #[cfg(feature = "parallel")]
@@ -645,10 +648,25 @@ impl<'a, T: Problem> EOA for ParaGSK<'a, T> {
                                     &r3,
                                     kf,
                                 );
+
+                                // check the lower and the upper bound.
+                                rayon::join(
+                                    || {
+                                        self.bound_constraint(
+                                            &mut gained_shared_junior,
+                                            &pop,
+                                            pop_size,
+                                        )
+                                    },
+                                    || {
+                                        self.bound_constraint(
+                                            &mut gained_shared_senior,
+                                            &pop,
+                                            pop_size,
+                                        )
+                                    },
+                                );
                             }
-                            // check the lower and the upper bound.
-                            self.bound_constraint(&mut gained_shared_junior, &pop, pop_size);
-                            self.bound_constraint(&mut gained_shared_senior, &pop, pop_size);
 
                             //println!("gained_sharied_junior = {:?}", gained_shared_junior);
                             //-------------------------------------------------------------------------------

@@ -518,6 +518,10 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                                     kf,
                                     pop_size,
                                 );
+
+                                // check the lower and the upper bound.
+                                self.bound_constraint(&mut gained_shared_junior, &pop, pop_size);
+                                self.bound_constraint(&mut gained_shared_senior, &pop, pop_size);
                             }
 
                             #[cfg(feature = "parallel")]
@@ -550,12 +554,25 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                                     pop_size,
                                 ),
                                 );
+
+                                // check the lower and the upper bound.
+                                rayon::join(
+                                    || {
+                                        self.bound_constraint(
+                                            &mut gained_shared_junior,
+                                            &pop,
+                                            pop_size,
+                                        )
+                                    },
+                                    || {
+                                        self.bound_constraint(
+                                            &mut gained_shared_senior,
+                                            &pop,
+                                            pop_size,
+                                        )
+                                    },
+                                );
                             }
-
-                            // check the lower and the upper bound.
-                            self.bound_constraint(&mut gained_shared_junior, &pop, pop_size);
-                            self.bound_constraint(&mut gained_shared_senior, &pop, pop_size);
-
                             //println!("gained_sharied_junior = {:?}", gained_shared_junior);
                             //-------------------------------------------------------------------------------
                             // D_Gained_Shared_Junior_mask=rand(pop_size, problem_size)<=(D_Gained_Shared_Junior(:, ones(1, problem_size))./problem_size);
