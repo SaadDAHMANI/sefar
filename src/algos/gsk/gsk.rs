@@ -1026,9 +1026,10 @@ mod gsk_test {
 
         //let ans_r2: Vec<usize> = vec![8, 3, 11, 11, 6, 8, 10, 9, 7, 4, 1, 2];
 
-        let (rg1, rg2, _rg3) = gsk.gained_shared_junior_r1r2r3(&ind_best, settings.population_size);
+        let (_rg1, _rg2, _rg3) =
+            gsk.gained_shared_junior_r1r2r3(&ind_best, settings.population_size);
         //let rg1 : Vec<usize> = vec![]
-        let rg3: Vec<usize> = vec![9, 3, 9, 7, 7, 0, 11, 0, 3, 8, 5, 4];
+        let _rg3: Vec<usize> = vec![9, 3, 9, 7, 7, 0, 11, 0, 3, 8, 5, 4];
 
         let g1: Genome = Genome {
             id: 1,
@@ -1110,9 +1111,7 @@ mod gsk_test {
             &mut gained_shared_junior,
             &pop,
             &fitness,
-            &rg1,
-            &rg2,
-            &rg3,
+            &ind_best,
             kf,
             settings.get_population_size(),
         );
@@ -1141,7 +1140,7 @@ mod gsk_test {
 
         let r1: Vec<usize> = vec![5; settings.population_size];
         let r3: Vec<usize> = vec![8; settings.population_size];
-        let r2: Vec<usize> = vec![2, 7, 2, 4, 6, 10, 7, 6, 9, 0, 3, 1];
+        let _r2: Vec<usize> = vec![2, 7, 2, 4, 6, 10, 7, 6, 9, 0, 3, 1];
 
         //----check r1 and r3
         assert_eq!(_r1, r1);
@@ -1223,14 +1222,13 @@ mod gsk_test {
         let mut gained_shared_senior =
             vec![vec![0.0f64; settings.problem_dimension]; settings.population_size];
         let kf: f64 = 0.5;
-
+        let p = 10.0;
         gsk.update_gained_shared_senior(
             &mut gained_shared_senior,
             &pop,
             &fitness,
-            &r1,
-            &r2,
-            &r3,
+            &ind_best,
+            p,
             kf,
             settings.get_population_size(),
         );
