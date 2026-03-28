@@ -427,13 +427,13 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                         // Initialize the current population
                         let mut pop = self.initialize(self.params, InitializationMode::RealUniform); //popold.clone();
 
-                        let mut objfn_duration: Vec<f64> = vec![0.0; max_iter + 1];
+                        // let mut objfn_duration: Vec<f64> = vec![0.0; max_iter + 1];
 
-                        let mut learning_duration: Vec<f64> = vec![0.0; max_iter];
-                        let timer1 = Instant::now();
-                        // Objective function evaluation:
+                        // let mut learning_duration: Vec<f64> = vec![0.0; max_iter];
+                        // let timer1 = Instant::now();
+                        ////  Objective function evaluation:
                         self.evaluate_solutions(&mut pop, &mut fitness);
-                        objfn_duration[0] = timer1.elapsed().as_secs_f64();
+                        // objfn_duration[0] = timer1.elapsed().as_secs_f64();
 
                         // Save the best fitness value for convergence trend:
                         for i in 0..pop_size {
@@ -495,7 +495,8 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                             //let (rg1, rg2, rg3) = self.gained_shared_junior_r1r2r3(&ind_best, pop_size);
                             //println!("Rg3 : {:?}", rg3);
                             //  let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best, p);
-                            let learning_timer = Instant::now();
+
+                            // let learning_timer = Instant::now();
 
                             #[cfg(not(feature = "parallel"))]
                             {
@@ -651,7 +652,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                                 }
                             }
 
-                            learning_duration[g - 1] = learning_timer.elapsed().as_secs_f64();
+                            // learning_duration[g - 1] = learning_timer.elapsed().as_secs_f64();
 
                             //  children_fitness = feval(ui); %
                             /* for i in 0..pop_size {
@@ -661,11 +662,11 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                             }*/
                             // Objective function evaluation for childrens
 
-                            let timer = Instant::now();
+                            // let timer = Instant::now();
 
                             self.evaluate_solutions(&mut ui, &mut children_fitness);
 
-                            objfn_duration[g] = timer.elapsed().as_secs_f64();
+                            // objfn_duration[g] = timer.elapsed().as_secs_f64();
 
                             // SAVE THE BEST SOLUTION:
                             // if children_fitness(i) < bsf_fit_var
@@ -718,12 +719,12 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                         let mut result: OptimizationResult = OptimizationResult::get_empty(None);
 
                         let duration = chronos.elapsed();
-
-                        let objfn_time = objfn_duration.iter().fold(0.0, |sum, t| sum + t);
-                        println!("Obj.fun time (total) = {objfn_time} S.");
-                        let learn_time = learning_duration.iter().fold(0.0, |sum, t| sum + t);
-                        println!("Learning time (total) = {learn_time} S.");
-
+                        /*
+                              let objfn_time = objfn_duration.iter().fold(0.0, |sum, t| sum + t);
+                              println!("Obj.fun time (total) = {objfn_time} S.");
+                              let learn_time = learning_duration.iter().fold(0.0, |sum, t| sum + t);
+                              println!("Learning time (total) = {learn_time} S.");
+                        */
                         result.best_genome = Some(bsf_solution);
                         result.best_fitness = Some(bsf_fit_var);
                         result.convergence_trend = Some(run_funcvals[0..g + 1].to_vec());
