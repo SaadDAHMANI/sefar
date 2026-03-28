@@ -398,7 +398,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                 match self.params.check() {
                     Err(eror) => OptimizationResult::get_empty(Some(eror)),
                     Ok(()) => {
-                        let chronos = Instant::now();
+                        // let chronos = Instant::now();
 
                         //-------------------------------------------------
                         let pop_size: usize = self.params.get_population_size();
@@ -428,8 +428,13 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                         // Initialize the current population
                         let mut pop = self.initialize(self.params, InitializationMode::RealUniform); //popold.clone();
 
+                        let chronos = Instant::now();
                         // Objective function evaluation:
                         self.evaluate_solutions(&mut pop, &mut fitness);
+                        println!(
+                            "1. Objective function evaluation time = {:?}",
+                            chronos.elapsed()
+                        );
 
                         // Save the best fitness value for convergence trend:
                         for i in 0..pop_size {
@@ -655,9 +660,13 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                                 ui[i].fitness = Some(children_fitness[i]);
                                 //nfes += 1;
                             }*/
-
                             // Objective function evaluation for childrens
+                            let chronos = Instant::now();
                             self.evaluate_solutions(&mut ui, &mut children_fitness);
+                            println!(
+                                "2. Objective function evaluation time = {:?}",
+                                chronos.elapsed()
+                            );
 
                             // SAVE THE BEST SOLUTION:
                             // if children_fitness(i) < bsf_fit_var
