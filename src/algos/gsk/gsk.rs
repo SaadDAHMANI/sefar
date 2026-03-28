@@ -308,12 +308,11 @@ impl<'a, T: Problem> GSK<'a, T> {
         gained_shared_junior: &mut Vec<Vec<f64>>,
         pop: &Vec<Genome>,
         fitness: &Vec<f64>,
-        rg1: &Vec<usize>,
-        rg2: &Vec<usize>,
-        rg3: &Vec<usize>,
+        ind_best: &Vec<usize>,
         kf: f64,
         pop_size: usize,
     ) {
+        let (rg1, rg2, rg3) = self.gained_shared_junior_r1r2r3(ind_best, pop_size);
         //let pop_size = self.params.population_size;
         let problem_size = self.params.problem_dimension;
 
@@ -345,12 +344,12 @@ impl<'a, T: Problem> GSK<'a, T> {
         gained_shared_senior: &mut Vec<Vec<f64>>,
         pop: &Vec<Genome>,
         fitness: &Vec<f64>,
-        r1: &Vec<usize>,
-        r2: &Vec<usize>,
-        r3: &Vec<usize>,
+        ind_best: &Vec<usize>,
+        p: f64,
         kf: f64,
         pop_size: usize,
     ) {
+        let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best, p);
         //let pop_size = self.params.population_size;
         let problem_size = self.params.problem_dimension;
 
@@ -428,9 +427,12 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                         // Initialize the current population
                         let mut pop = self.initialize(self.params, InitializationMode::RealUniform); //popold.clone();
 
+                        let mut objfn_duration: Vec<f64> = vec![0.0; max_iter + 1];
+
                         let chronos = Instant::now();
                         // Objective function evaluation:
                         self.evaluate_solutions(&mut pop, &mut fitness);
+                        objfn_duration[0] = chronos.elapsed().as_secs_f64();
                         println!(
                             "1.Objective function evaluation time = {:?}",
                             chronos.elapsed()
@@ -493,22 +495,20 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                             //println!("fit : {:?} \n sort indexes are : {:?}", fitness, ind_best);
                             //------------------------------------------------------------
 
-                            let (rg1, rg2, rg3) =
-                                self.gained_shared_junior_r1r2r3(&ind_best, pop_size);
+                            //let (rg1, rg2, rg3) = self.gained_shared_junior_r1r2r3(&ind_best, pop_size);
                             //println!("Rg3 : {:?}", rg3);
-                            let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best, p);
+                            //  let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best, p);
 
                             #[cfg(not(feature = "parallel"))]
                             {
+                                //println!("Rg3 : {:?}", rg3);
                                 // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE:
                                 // Gained_Shared_Junior=zeros(pop_size, problem_size);
                                 self.update_gained_shared_junior(
                                     &mut gained_shared_junior,
                                     &pop,
                                     &fitness,
-                                    &rg1,
-                                    &rg2,
-                                    &rg3,
+                                    &ind_best,
                                     kf,
                                     pop_size,
                                 );
@@ -518,9 +518,8 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                                     &mut gained_shared_senior,
                                     &pop,
                                     &fitness,
-                                    &r1,
-                                    &r2,
-                                    &r3,
+                                    &ind_best,
+                                    p,
                                     kf,
                                     pop_size,
                                 );
@@ -532,6 +531,10 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 
                             #[cfg(feature = "parallel")]
                             {
+                                // let (rg1, rg2, rg3) =
+                                // self.gained_shared_junior_r1r2r3(&ind_best, pop_size);
+                                //println!("Rg3 : {:?}", rg3);
+
                                 // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE:
                                 // Gained_Shared_Junior=zeros(pop_size, problem_size);
                                 rayon::join(
@@ -540,9 +543,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                                             &mut gained_shared_junior,
                                             &pop,
                                             &fitness,
-                                            &rg1,
-                                            &rg2,
-                                            &rg3,
+                                            &ind_best,
                                             kf,
                                             pop_size,
                                         )
@@ -553,9 +554,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                                     &mut gained_shared_senior,
                                     &pop,
                                     &fitness,
-                                    &r1,
-                                    &r2,
-                                    &r3,
+                                    &ind_best, p,
                                     kf,
                                     pop_size,
                                 ),
