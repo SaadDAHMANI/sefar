@@ -626,8 +626,6 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                                 &d_gained_shared_senior_rand_mask,
                                 pop_size,
                             );
-
-                            learning_duration[g - 1] = learning_timer.elapsed().as_secs_f64();
                             //ui=pop;
 
                             for i in 0..pop_size {
@@ -652,6 +650,8 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                                     }
                                 }
                             }
+
+                            learning_duration[g - 1] = learning_timer.elapsed().as_secs_f64();
 
                             //  children_fitness = feval(ui); %
                             /* for i in 0..pop_size {
