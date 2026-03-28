@@ -397,7 +397,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                 match self.params.check() {
                     Err(eror) => OptimizationResult::get_empty(Some(eror)),
                     Ok(()) => {
-                        // let chronos = Instant::now();
+                        let chronos = Instant::now();
 
                         //-------------------------------------------------
                         let pop_size: usize = self.params.get_population_size();
@@ -429,14 +429,10 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 
                         let mut objfn_duration: Vec<f64> = vec![0.0; max_iter + 1];
 
-                        let chronos = Instant::now();
+                        let timer1 = Instant::now();
                         // Objective function evaluation:
                         self.evaluate_solutions(&mut pop, &mut fitness);
-                        objfn_duration[0] = chronos.elapsed().as_secs_f64();
-                        println!(
-                            "1.Objective function evaluation time = {:?}",
-                            chronos.elapsed()
-                        );
+                        objfn_duration[0] = timer1.elapsed().as_secs_f64();
 
                         // Save the best fitness value for convergence trend:
                         for i in 0..pop_size {
@@ -718,12 +714,16 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 
                         let mut result: OptimizationResult = OptimizationResult::get_empty(None);
 
+                        let duration = chronos.elapsed();
+
                         let avg_time = objfn_duration.iter().fold(0.0, |sum, t| sum + t)
                             / objfn_duration.len() as f64;
-                        println!("Obj.fun time = {avg_time}");
+                        println!(
+                            "Obj.fun time = {avg_time}, Count = {}",
+                            objfn_duration.len()
+                        );
                         println!("Timing = {:?}", objfn_duration);
 
-                        let duration = chronos.elapsed();
                         result.best_genome = Some(bsf_solution);
                         result.best_fitness = Some(bsf_fit_var);
                         result.convergence_trend = Some(run_funcvals[0..g + 1].to_vec());
