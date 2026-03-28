@@ -662,11 +662,11 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                             }*/
                             // Objective function evaluation for childrens
 
+                            let timer = Instant::now();
+
                             self.evaluate_solutions(&mut ui, &mut children_fitness);
-                            println!(
-                                "2. Objective function evaluation time = {:?}",
-                                chronos.elapsed()
-                            );
+
+                            objfn_duration[g] = timer.elapsed().as_secs_f64();
 
                             // SAVE THE BEST SOLUTION:
                             // if children_fitness(i) < bsf_fit_var
@@ -717,6 +717,11 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                         } // THE MAIN LOOP
 
                         let mut result: OptimizationResult = OptimizationResult::get_empty(None);
+
+                        let avg_time = objfn_duration.iter().fold(0.0, |sum, t| sum + t)
+                            / objfn_duration.len() as f64;
+                        println!("Obj.fun time = {avg_time}");
+                        println!("Timing = {:?}", objfn_duration);
 
                         let duration = chronos.elapsed();
                         result.best_genome = Some(bsf_solution);
