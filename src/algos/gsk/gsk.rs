@@ -716,13 +716,8 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 
                         let duration = chronos.elapsed();
 
-                        let avg_time = objfn_duration.iter().fold(0.0, |sum, t| sum + t)
-                            / objfn_duration.len() as f64;
-                        println!(
-                            "Obj.fun time = {avg_time}, Count = {}",
-                            objfn_duration.len()
-                        );
-                        println!("Timing = {:?}", objfn_duration);
+                        let total_time = objfn_duration.iter().fold(0.0, |sum, t| sum + t);
+                        println!("Obj.fun time (total) = {total_time} S.");
 
                         result.best_genome = Some(bsf_solution);
                         result.best_fitness = Some(bsf_fit_var);
