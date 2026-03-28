@@ -429,6 +429,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 
                         let mut objfn_duration: Vec<f64> = vec![0.0; max_iter + 1];
 
+                        let mut learning_duration: Vec<f64> = vec![0.0; max_iter];
                         let timer1 = Instant::now();
                         // Objective function evaluation:
                         self.evaluate_solutions(&mut pop, &mut fitness);
@@ -494,6 +495,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                             //let (rg1, rg2, rg3) = self.gained_shared_junior_r1r2r3(&ind_best, pop_size);
                             //println!("Rg3 : {:?}", rg3);
                             //  let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best, p);
+                            let learning_timer = Instant::now();
 
                             #[cfg(not(feature = "parallel"))]
                             {
@@ -625,6 +627,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                                 pop_size,
                             );
 
+                            learning_duration[g - 1] = learning_timer.elapsed().as_secs_f64();
                             //ui=pop;
 
                             for i in 0..pop_size {
@@ -716,8 +719,10 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 
                         let duration = chronos.elapsed();
 
-                        let total_time = objfn_duration.iter().fold(0.0, |sum, t| sum + t);
-                        println!("Obj.fun time (total) = {total_time} S.");
+                        let objfn_time = objfn_duration.iter().fold(0.0, |sum, t| sum + t);
+                        println!("Obj.fun time (total) = {objfn_time} S.");
+                        let learn_time = learning_duration.iter().fold(0.0, |sum, t| sum + t);
+                        println!("Learning time (total) = {learn_time} S.");
 
                         result.best_genome = Some(bsf_solution);
                         result.best_fitness = Some(bsf_fit_var);
