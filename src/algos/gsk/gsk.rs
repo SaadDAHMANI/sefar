@@ -432,7 +432,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                         // Objective function evaluation:
                         self.evaluate_solutions(&mut pop, &mut fitness);
                         println!(
-                            "1. Objective function evaluation time = {:?}",
+                            "1.Objective function evaluation time = {:?}",
                             chronos.elapsed()
                         );
 
@@ -460,6 +460,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                         let problem_size_f64: f64 = problem_size as f64;
 
                         //THE MAIN LOOP
+
                         while g < max_iter {
                             g += 1;
                             // D_Gained_Shared_Junior=ceil((problem_size)*(1-g/G_Max).^K);
@@ -661,7 +662,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                                 //nfes += 1;
                             }*/
                             // Objective function evaluation for childrens
-                            let chronos = Instant::now();
+
                             self.evaluate_solutions(&mut ui, &mut children_fitness);
                             println!(
                                 "2. Objective function evaluation time = {:?}",
