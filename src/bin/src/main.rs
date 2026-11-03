@@ -1,6 +1,6 @@
 // use rayon::iter::IndexedParallelIterator;
 use sefar::algos::eao::{EAOparams, EAO};
-use sefar::algos::eo::{BiEO, BiEOparams, EOparams, IEOparams, MIEOparams, EO, IEO, MEO, MIEO};
+use sefar::algos::eo::{BiEO, BiEOparams, EOparams, IEOparams, EO, IEO, MEO};
 use sefar::algos::pso::{PSOparams, PSO};
 use sefar::benchmarks::functions::{Sphere, SumAbsFunction, F2};
 use sefar::core::eoa::EOA;
@@ -10,7 +10,7 @@ use sefar::core::optimization_result::OptimizationResult;
 // use sefar::algos::apgsk::{APGSKparams, APGSK};
 
 use sefar::algos::go::{GOparams, GO};
-use sefar::algos::gsk::{para_gsk::ParaGSK, GSKparams, GSK};
+use sefar::algos::gsk::{GSKparams, GSK};
 
 //use sefar::algos::lshade_spacma::{LshadeSpacma, LshadeSpacmaParams};
 
@@ -188,36 +188,6 @@ fn gsk_f1_test1() {
     println!(
         "Last value in Convergence curve: {:?}",
         result.convergence_trend.unwrap().last()
-    );
-}
-
-// #[cfg(feature = "parallel")]
-#[allow(dead_code)]
-fn para_gsk_f1_test1() {
-    let mut settings: GSKparams = GSKparams::default();
-
-    settings.population_size = POP_SIZE;
-    settings.problem_dimension = DIM;
-    settings.max_iterations = KMAX;
-
-    let lb = vec![-100.0f64; DIM];
-    let ub = vec![100.0f64; DIM];
-
-    settings.lower_bounds = lb.as_slice();
-    settings.upper_bounds = ub.as_slice();
-
-    //settings.partition_size_p = 0.2;
-    settings.kr = 0.8;
-
-    let mut fo = Sphere {};
-
-    let mut algo: ParaGSK<Sphere> = ParaGSK::new(&settings, &mut fo);
-
-    let result: OptimizationResult = algo.run();
-
-    println!(
-        "Parallel Gaining-Sharing Knowledge optimizer (ParaGSK) : F1 (Sphere) test; Result: {:?}",
-        result.to_string()
     );
 }
 
@@ -519,35 +489,6 @@ fn para_meo_test1() {
 
     println!(
         "EO result : \n best fitness : {:?} \n best genome : {:?}",
-        result.best_fitness, result.best_genome
-    );
-    println!("Computation time : {:?}", result.computation_time);
-    println!("Err : {:?}", result.err_report);
-}
-
-#[allow(dead_code)]
-fn para_mieo_test1() {
-    let mut settings = MIEOparams::default();
-
-    settings.population_size = POP_SIZE;
-    settings.problem_dimension = DIM;
-    settings.max_iterations = KMAX;
-
-    //-------Number of threads ----------
-    let lb = vec![-100.0f64; DIM];
-    let ub = vec![100.0f64; DIM];
-
-    settings.lower_bounds = lb.as_slice();
-    settings.upper_bounds = ub.as_slice();
-
-    let mut fo = Sphere {};
-
-    let mut algo: MIEO<Sphere> = MIEO::new(&settings, &mut fo);
-
-    let result = algo.run();
-
-    println!(
-        "MIEO result : \n best fitness : {:?} \n best genome : {:?}",
         result.best_fitness, result.best_genome
     );
     println!("Computation time : {:?}", result.computation_time);

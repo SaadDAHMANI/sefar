@@ -12,11 +12,8 @@
 - [X] Equilibrium optimizer ([EO](https://doi.org/10.1016/j.knosys.2019.105190));
 - [X] Improved Equilibrium optimizer ([IEO](https://doi.org/10.3390/sym14061227));
 - [X] Binary Equilibrium Optimizer ([BiEO](https://doi.org/10.1016/j.enbuild.2022.112503));
-- [-] Modified Equilibrium optimizer ([MEO](https://doi.org/10.1016/j.asoc.2020.106542));
 - [X] Growth Optimizer ([GO](https://doi.org/10.1016/j.knosys.2022.110206));
 - [X] Gaining-Sharing Knowledge ([GSK](https://doi.org/10.1007/s13042-019-01053-x));
-- [-] Gaining-Sharing Knowledge Based Algorithm With Adaptive Parameters ([APGSK](https://doi:10.1109/ACCESS.2021.3076091));
-- [-] LSHADE_SPACMA([LSHADE_SPACMA](https://ieeexplore.ieee.org/document/7969307))
 - [X] Enzyme action optimizer ([EAO](https://link.springer.com/article/10.1007/s11227-025-07052-w))
 
 ## Binary optimization
