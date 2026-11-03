@@ -332,11 +332,41 @@ pub struct EOparams<'a> {
     pub gp: f64,
 
     /// Number of threads for parallel execution.
+    #[cfg(feature = "parallel")]
     pub num_threads: Option<usize>,
 }
 
 #[allow(dead_code)]
 impl<'a> EOparams<'a> {
+    #[cfg(not(feature = "parallel"))]
+    pub fn new(
+        p_size: usize,
+        dim: usize,
+        max_iter: usize,
+        lb: &'a [f64],
+        ub: &'a [f64],
+        a1: f64,
+        a2: f64,
+        gp: f64,
+    ) -> Result<EOparams<'a>, OptError> {
+        let params = EOparams {
+            population_size: p_size,
+            problem_dimension: dim,
+            max_iterations: max_iter,
+            lower_bounds: lb,
+            upper_bounds: ub,
+            a1,
+            a2,
+            gp,
+        };
+
+        match params.check() {
+            Err(error) => Err(error),
+            Ok(()) => Ok(params),
+        }
+    }
+
+    #[cfg(feature = "parallel")]
     pub fn new(
         p_size: usize,
         dim: usize,
@@ -419,7 +449,6 @@ impl<'a> Default for EOparams<'a> {
             a1: 2.0f64,
             a2: 1.0f64,
             gp: 0.5f64,
-            num_threads: Some(1),
         }
     }
 }
@@ -463,7 +492,6 @@ mod eo_params_tests {
             a1: 2.0f64,
             a2: 1.0f64,
             gp: 0.5f64,
-            num_threads: Some(1),
         };
 
         let sl_ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
@@ -485,18 +513,8 @@ mod eo_params_tests {
         let _ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
         let _lb = vec![-1.0f64, -2.0, -3.0, -4.0, -5.0];
 
-        let p = EOparams::new(
-            10,
-            10,
-            100,
-            _lb.as_slice(),
-            _ub.as_slice(),
-            0.5,
-            0.5,
-            0.5,
-            Some(1),
-        )
-        .unwrap_or_default();
+        let p = EOparams::new(10, 10, 100, _lb.as_slice(), _ub.as_slice(), 0.5, 0.5, 0.5)
+            .unwrap_or_default();
         assert_eq!(p.a1, 2.0f64);
         assert_eq!(p.a2, 1.0f64);
         assert_eq!(p.gp, 0.50f64);
@@ -507,18 +525,8 @@ mod eo_params_tests {
         let _ub = vec![1.0f64, 2.0, 3.0, 4.0, 5.0];
         let _lb = vec![-1.0f64, -2.0, -3.0, -4.0, -5.0];
 
-        let p = EOparams::new(
-            10,
-            5,
-            100,
-            _lb.as_slice(),
-            _ub.as_slice(),
-            0.5,
-            0.5,
-            0.5,
-            Some(1),
-        )
-        .unwrap_or_default();
+        let p = EOparams::new(10, 5, 100, _lb.as_slice(), _ub.as_slice(), 0.5, 0.5, 0.5)
+            .unwrap_or_default();
         assert_eq!(p.a1, 0.50f64);
         assert_eq!(p.a2, 0.50f64);
         assert_eq!(p.gp, 0.50f64);
