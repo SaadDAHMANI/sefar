@@ -19,6 +19,4 @@ rayon = "1.10.0"
 thiserror = "2.0.12"
 
 [features]
-#report = []
 parallel = []
-#deep_report = [report]
