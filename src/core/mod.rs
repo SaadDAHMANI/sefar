@@ -4,6 +4,12 @@ pub mod optimization_result;
 pub mod parameters;
 pub mod problem;
 
+pub use eoa::InitializationMode;
+pub use eoa::EOA;
+
+#[cfg(feature = "parallel")]
+pub use eoa::ThreadPoolSize;
+
 use optimization_result::OptimizationResult;
 use thiserror::*;
 

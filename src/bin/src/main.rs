@@ -19,45 +19,15 @@ const POP_SIZE: usize = 20;
 const KMAX: usize = 100;
 
 fn main() {
-    // lshade_spacma_test1();
+    #[cfg(not(feature = "parallel"))]
+    {
+        go_f1_test1();
+    }
 
-    //apgsk_f1_test1();
-
-    // #[cfg(not(feature = "parallel"))]
-
-    //--------------------------------------------------------------------
-    //println!("Evaluation with Max_Iter = {}", KMAX);
-
-    println!("______________________GO : F1______________________");
-    go_f1_test1();
-
-    /*
-     println!("______________________GO : F2______________________");
-     go_f2_test1();
-    */
-    //println!("_______________________QAGO : F1______________________");
-
-    //qago_f1_test1();
-
-    //pco_f1_test1();
-
-    // ieo_f1_test1();
-
-    // peo_f1_test1();
-
-    //meo_test1();
-    //bieo_f1_binary_test();
-
-    // println!("------------------GSK : F1---------------------");
-    //  gsk_f1_test1();
-
-    // println!("------------------MIEO : F1---------------------");
-
-    //  para_mieo_test1();
-
-    //  eao_f1_test1();
-
-    //  para_gsk_f1_test1();
+    #[cfg(feature = "parallel")]
+    {
+        eao_f1_parallel_test1();
+    }
 }
 
 #[allow(dead_code)]
@@ -89,6 +59,57 @@ fn eao_f1_test1() {
         "EAO: Last value in Convergence curve : {:?}",
         result.convergence_trend.unwrap().last()
     );
+}
+
+#[allow(dead_code)]
+#[cfg(feature = "parallel")]
+fn eao_f1_parallel_test1() {
+    let mut settings = EAOparams::default();
+    settings.population_size = POP_SIZE;
+    settings.problem_dimension = DIM;
+    settings.max_iterations = KMAX;
+
+    let lb = vec![-10.0f64; DIM];
+    let ub = vec![10.0f64; DIM];
+
+    settings.lower_bounds = lb.as_slice();
+    settings.upper_bounds = ub.as_slice();
+
+    settings.ec = 0.1;
+
+    // Define the problem here:
+    let mut fo: Sphere = Sphere {};
+
+    // Define the parallel thread number. Here 'ThreadPoolSize::Auto' to use all available cores.
+    let num_threads = sefar::core::ThreadPoolSize::Auto;
+
+    // or use fixed number of threads, for example, 4 threads will be used.
+    // let num_threads = sefar::core::ThreadPoolSize::Fixed(4);
+
+    let mut algo: EAO<Sphere> = EAO::new(&settings, &mut fo);
+
+    match algo.initialize_parallel(num_threads) {
+        Ok(actual_thread_count) => {
+            eprintln!(
+                "Run EAO with parallel thread pool with : {} threads",
+                actual_thread_count
+            );
+
+            // Run the algorithm here for parallel
+            let result = algo.run();
+
+            println!(
+                "EAO : F0 (SumAbsFunction) test; Result: {:?}",
+                result.to_string()
+            );
+
+            println!(
+                "EAO: Last value in Convergence curve : {:?}",
+                result.convergence_trend.unwrap().last()
+            );
+        }
+        Err(the_error) => eprintln!("Cannot run parallel optimization due to : {:?}", the_error),
+    }
 }
 
 #[allow(dead_code)]
