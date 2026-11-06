@@ -109,10 +109,18 @@ pub enum InitializationMode {
     RealUniform,
     BinaryUnifrom,
 }
-
+/// Use this enum to define number of worker threads for parallel run.
+///  
+/// # Example
+///
+/// ```
+/// let parallel_pool_size = ThreadNumber::Default;
+/// // or
+/// let parallel_pool_size = Thread
+/// ```
 #[cfg(feature = "parallel")]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum ThreadNumber {
+pub enum Threads {
     Default,
-    Count(usize),
+    Count(std::num::NonZeroUsize),
 }
