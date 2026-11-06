@@ -438,7 +438,7 @@ impl<'a> Default for EAOparams<'a> {
     ///
     /// ~~~
     ///
-    ///  use sefar::algos::go::*;
+    ///  use sefar::algos::eao::*;
     ///
     ///  EAOparams {
     ///     population_size : 20,
@@ -446,8 +446,8 @@ impl<'a> Default for EAOparams<'a> {
     ///     max_iterations : 100,
     ///     lower_bounds : &[100.0f64, 100.0, 100.0],
     ///     upper_bounds : &[-100.0f64, -100.0, -100.0],
-    /// ec : 0.1,
-    /// };
+    ///      ec : 0.1,
+    ///  };
     /// ~~~
     ///
     fn default() -> Self {
