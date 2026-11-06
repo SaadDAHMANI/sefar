@@ -330,15 +330,10 @@ pub struct EOparams<'a> {
     pub a2: f64,
     /// EO parameter
     pub gp: f64,
-
-    /// Number of threads for parallel execution.
-    #[cfg(feature = "parallel")]
-    pub num_threads: Option<usize>,
 }
 
 #[allow(dead_code)]
 impl<'a> EOparams<'a> {
-    #[cfg(not(feature = "parallel"))]
     pub fn new(
         p_size: usize,
         dim: usize,
@@ -358,36 +353,6 @@ impl<'a> EOparams<'a> {
             a1,
             a2,
             gp,
-        };
-
-        match params.check() {
-            Err(error) => Err(error),
-            Ok(()) => Ok(params),
-        }
-    }
-
-    #[cfg(feature = "parallel")]
-    pub fn new(
-        p_size: usize,
-        dim: usize,
-        max_iter: usize,
-        lb: &'a [f64],
-        ub: &'a [f64],
-        a1: f64,
-        a2: f64,
-        gp: f64,
-        num_threads: Option<usize>,
-    ) -> Result<EOparams<'a>, OptError> {
-        let params = EOparams {
-            population_size: p_size,
-            problem_dimension: dim,
-            max_iterations: max_iter,
-            lower_bounds: lb,
-            upper_bounds: ub,
-            a1,
-            a2,
-            gp,
-            num_threads,
         };
 
         match params.check() {

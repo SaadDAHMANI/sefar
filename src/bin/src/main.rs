@@ -91,33 +91,6 @@ fn eao_f1_test1() {
     );
 }
 
-/*
-#[allow(dead_code)]
-fn lshade_spacma_test1() {
-    let mut settings: LshadeSpacmaParams = LshadeSpacmaParams::default();
-    settings.population_size = POP_SIZE;
-    settings.problem_dimension = DIM;
-    settings.max_iterations = KMAX;
-    let lb = vec![-10.0f64; DIM];
-    let ub = vec![10.0f64; DIM];
-
-    settings.lower_bounds = lb.as_slice();
-    settings.upper_bounds = ub.as_slice();
-
-    let mut fo: SumAbsFunction = SumAbsFunction {};
-    let mut algo: LshadeSpacma<SumAbsFunction> = LshadeSpacma {
-        problem: &mut fo,
-        params: &settings,
-    };
-
-    let result = algo.run();
-    println!(
-        "LSHADE_SPACMA : F0 (SumAbsFunction) test; Result: {:?}",
-        result.to_string()
-    );
-}
-*/
-
 #[allow(dead_code)]
 fn apgsk_f1_test1() {
     let mut settings: GSKparams = GSKparams::default(); // APGSKparams = APGSKparams::default();
@@ -263,76 +236,6 @@ fn go_f2_test1() {
     );
 }
 
-/* #[allow(dead_code)]
-fn qago_f1_test1(){
-    let mut settings : QAGOparams = QAGOparams::default();
-
-    settings.population_size = POP_SIZE;
-    settings.dimensions = DIM ;
-    settings.max_iterations = KMAX;
-
-
-    let lb =vec![-100.0f64; DIM];
-    let ub =vec![100.0f64; DIM];
-
-    settings.lower_bounds = lb.as_slice();
-    settings.upper_bounds = ub.as_slice();
-
-    let mut fo = Sphere{};
-
-    let mut algo : QAGO<Sphere> = QAGO::new(&settings, &mut fo);
-
-    let result = algo.run();
-
-    /*match result.convergence_trend{
-        None => println!("QAGO: no convergence trend !!!"),
-        Some(cv) => println!("QAGO: Convergence trend :\n {:?}", cv),
-    };
-    */
-
-    /*match result.best_genome {
-        None => println!("QAGO: no best solution !"),
-        Some(bg)=> println!("QAGO: best-genome {:?}", bg),
-    };
-    */
-    println!("QAGO : F1 (Sphere) test; Result: {:?}", result.to_string());
-} */
-
-/* #[allow(dead_code)]
-fn qago_f2_test1(){
-    let mut settings : QAGOparams = QAGOparams::default();
-
-    settings.population_size = POP_SIZE;
-    settings.dimensions = DIM ;
-    settings.max_iterations = KMAX;
-
-    let lb =vec![-100.0f64; DIM];
-    let ub =vec![100.0f64; DIM];
-
-    settings.lower_bounds = lb.as_slice();
-    settings.upper_bounds = ub.as_slice();
-
-    let mut fo = F2{};
-
-    let mut algo : QAGO<F2> = QAGO::new(&settings, &mut fo);
-
-    let result = algo.run();
-
-    /*match result.convergence_trend{
-        None => println!("QAGO: no convergence trend !!!"),
-        Some(cv) => println!("QAGO: Convergence trend :\n {:?}", cv),
-    };
-    */
-
-    /*match result.best_genome {
-        None => println!("QAGO: no best solution !"),
-        Some(bg)=> println!("QAGO: best-genome {:?}", bg),
-    };
-    */
-
-    println!("QAGO : F2 test; Result: {:?}", result.to_string());
-}
- */
 #[allow(dead_code)]
 fn eo_f1_test1() {
     let mut settings: EOparams = EOparams::default();
