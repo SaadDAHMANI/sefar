@@ -128,24 +128,20 @@ impl Problem for F1 {
 ```
 
 ## Supported features
-[Sefar](https://github.com/SaadDAHMANI/sefar) supports *_report_* and *_parallel_* features.
+[Sefar](https://github.com/SaadDAHMANI/sefar) supports *_parallel_* feature.
 
-1. Run *_report_* feature:
+To use the parallel feature, import *sefar* to your project (in _Cargo.toml_ file) as followng:
 
-```bash
-# run report feature:
-cargo run --features report;
-
-# run parallel feature:
-cargo run --features parallel;
+```toml
+sefar = { version = "0.2.1", features = ["parallel"]}
 ```
 
-|Algorithm       | *_report_* feature | *_parallel_* feature |
-|----------------|--------------------| ---------------------|
-|*PSO*           | [x]                |                      |
-|*EO*            | [x]                | [x]                  |
-|*GO*            | [x]                | [x]                  |
-|*GSK*           | [x]                | [x]                  |
-|*LSHADE_SPACMA* |                    |                      |
-|*BiEO*          | [x]                |                      |
-|*IEO*           | [x]                | [x]                  |
+|Algorithm       | *_parallel_* feature |
+|----------------|----------------------|
+|*PSO*           |                      |
+|*EO*            | [x]                  |
+|*IEO*           | [x]                  |
+|*BiEO*          |                      |
+|*GO*            | [x]                  |
+|*GSK*           | [x]                  |
+|*EAO*           | [x]                  |
