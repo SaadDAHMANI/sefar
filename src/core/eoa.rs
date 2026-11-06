@@ -87,10 +87,10 @@ pub trait EOA {
     }
 
     #[cfg(feature = "parallel")]
-    fn initialize_parallel(&self, num_threads: ThreadNumber) -> Result<usize, OptError> {
+    fn initialize_parallel(&self, num_threads: ThreadPoolSize) -> Result<usize, OptError> {
         match num_threads {
-            ThreadNumber::Default => Ok(rayon::current_num_threads()),
-            ThreadNumber::Count(value) => {
+            ThreadPoolSize::Auto => Ok(rayon::current_num_threads()),
+            ThreadPoolSize::Fixed(value) => {
                 let nbr_threads = value.max(1).min(rayon::max_num_threads());
                 match rayon::ThreadPoolBuilder::new()
                     .num_threads(nbr_threads)
@@ -114,13 +114,13 @@ pub enum InitializationMode {
 /// # Example
 ///
 /// ```
-/// let parallel_pool_size = ThreadNumber::Default;
+/// let num_threads = ThreadPoolSize::Auto;
 /// // or
-/// let parallel_pool_size = Thread
+/// let num_threads = ThreadPoolSize::Fixed(2);
 /// ```
 #[cfg(feature = "parallel")]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Threads {
-    Default,
-    Count(std::num::NonZeroUsize),
+pub enum ThreadPoolSize {
+    Auto,
+    Fixed(usize),
 }
