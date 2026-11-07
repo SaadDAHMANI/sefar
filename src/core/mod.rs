@@ -6,11 +6,14 @@ pub mod problem;
 
 pub use eoa::InitializationMode;
 pub use eoa::EOA;
+pub use genome::Genome;
+pub use optimization_result::OptimizationResult;
+pub use parameters::Parameters;
+pub use problem::Problem;
 
 #[cfg(feature = "parallel")]
 pub use eoa::ThreadPoolSize;
 
-use optimization_result::OptimizationResult;
 use thiserror::*;
 
 pub trait EvolutionaryAlgo {
