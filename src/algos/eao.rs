@@ -6,11 +6,16 @@ use crate::core::genome::Genome;
 use crate::core::optimization_result::OptimizationResult;
 use crate::core::parameters::Parameters;
 use crate::core::problem::Problem;
+
+#[cfg(feature = "parallel")]
+use crate::core::parameters::ThreadPoolSize;
+
 // use rand::rngs::ThreadRng;
 // use rand_distr::num_traits::real::Real;
 use rand_distr::{Distribution, Uniform};
 #[cfg(feature = "parallel")]
 use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
+
 use std::fmt::Display;
 use std::time::Instant;
 
@@ -194,14 +199,18 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
                 //___________Parallel mode________________
                 #[cfg(feature = "parallel")]
                 {
-                    substrate_pool.par_iter_mut().for_each(|g| {
-                        g.fitness = Some(self.problem.objectivefunction(&mut g.genes))
-                    });
-                    for i in 0..enzyme_count {
-                        match substrate_pool[i].fitness {
-                            None => reaction_rate[i] = f64::MAX,
-                            Some(fit) => reaction_rate[i] = fit,
-                        };
+                    if let Ok(pool) = rayon::ThreadPoolBuilder::new().num_threads(4).build() {
+                        pool.install(|| {
+                            substrate_pool.par_iter_mut().for_each(|g| {
+                                g.fitness = Some(self.problem.objectivefunction(&mut g.genes))
+                            })
+                        });
+                        for i in 0..enzyme_count {
+                            match substrate_pool[i].fitness {
+                                None => reaction_rate[i] = f64::MAX,
+                                Some(fit) => reaction_rate[i] = fit,
+                            };
+                        }
                     }
                 }
                 //________________________________________
@@ -378,6 +387,9 @@ pub struct EAOparams<'a> {
 
     /// Enzyme Concentration EC. The default value = 0.1
     pub ec: f64,
+
+    #[cfg(feature = "parallel")]
+    pub num_threads: ThreadPoolSize,
 }
 
 impl<'a> EAOparams<'a> {
@@ -391,6 +403,7 @@ impl<'a> EAOparams<'a> {
     /// ec : Enzyme concentration, default value = 0.1.
 
     #[allow(dead_code)]
+    #[cfg(not(feature = "parallel"))]
     pub fn new(
         pop_size: usize,
         dim: usize,
@@ -406,6 +419,37 @@ impl<'a> EAOparams<'a> {
             lower_bounds: lb,
             upper_bounds: ub,
             ec,
+        }
+    }
+
+    ///
+    /// Create a new instance of EAO parameters:
+    /// pop_size : The number of search agents.
+    /// dim : The dimension of the optimization problem.
+    /// max_iter : The maximum number of iterations serves as the stopping criterion.
+    /// lb : The lower bounds of the search space.
+    /// ub : The upper bounds of the search space.
+    /// ec : Enzyme concentration, default value = 0.1.
+    /// num_threads: ThreadPoolSize, i.e., number of threads for parallel computation.
+    #[allow(dead_code)]
+    #[cfg(feature = "parallel")]
+    pub fn new(
+        pop_size: usize,
+        dim: usize,
+        max_iter: usize,
+        lb: &'a [f64],
+        ub: &'a [f64],
+        ec: f64,
+        num_threads: crate::core::parameters::ThreadPoolSize,
+    ) -> Self {
+        EAOparams {
+            population_size: pop_size,
+            problem_dimension: dim,
+            max_iterations: max_iter,
+            lower_bounds: lb,
+            upper_bounds: ub,
+            ec,
+            num_threads,
         }
     }
 }
@@ -458,6 +502,8 @@ impl<'a> Default for EAOparams<'a> {
             lower_bounds: &[-100.0f64, -100.0, -100.0],
             upper_bounds: &[100.0f64, 100.0, 100.0],
             ec: 0.1,
+            #[cfg(feature = "parallel")]
+            num_threads: ThreadPoolSize::Auto,
         }
     }
 }

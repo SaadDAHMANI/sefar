@@ -32,6 +32,11 @@ pub trait Parameters {
         ub
     }
 
+    #[cfg(feature = "parallel")]
+    fn get_num_threads(&self) -> ThreadPoolSize {
+        ThreadPoolSize::Auto
+    }
+
     fn check(&self) -> Result<(), OptError> {
         if self.get_population_size() == 0 {
             return Err(OptError::PopulationSizeIsNull);
@@ -76,4 +81,20 @@ pub trait Parameters {
 
         Ok(())
     }
+}
+
+/// Use this enum to define number of worker threads for parallel run.
+///  
+/// # Example
+///
+/// ```
+/// let num_threads = ThreadPoolSize::Auto;
+/// // or
+/// let num_threads = ThreadPoolSize::Fixed(2);
+/// ```
+#[cfg(feature = "parallel")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum ThreadPoolSize {
+    Auto,
+    Fixed(usize),
 }

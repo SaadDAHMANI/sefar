@@ -12,7 +12,7 @@ pub use parameters::Parameters;
 pub use problem::Problem;
 
 #[cfg(feature = "parallel")]
-pub use eoa::ThreadPoolSize;
+pub use parameters::ThreadPoolSize;
 
 use thiserror::*;
 

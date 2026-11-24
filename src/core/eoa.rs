@@ -2,18 +2,12 @@ use crate::core::genome::Genome;
 use crate::core::optimization_result::OptimizationResult;
 use crate::core::parameters::Parameters;
 use rand::distributions::{Distribution, Uniform};
-#[cfg(feature = "parallel")]
-use rayon::ThreadPool;
 
 #[cfg(feature = "parallel")]
 use crate::core::OptError;
 
 #[cfg(feature = "parallel")]
-use rayon::prelude::*;
-
-#[cfg(feature = "parallel")]
-use rayon::ThreadPoolBuilder;
-
+use crate::core::parameters::ThreadPoolSize;
 ///
 /// Public trait for Evolutionary Optimization Algorithms
 ///
@@ -111,44 +105,10 @@ pub trait EOA {
             }
         }
     }
-
-    #[cfg(feature = "parallel")]
-    fn initialize_parallel(&self, num_threads: ThreadPoolSize) -> Result<ThreadPool, OptError> {
-        use rayon::ThreadPoolBuilder;
-
-        match num_threads {
-            ThreadPoolSize::Auto => Ok(ThreadPoolBuilder::new().num_threads(4).build()),
-            ThreadPoolSize::Fixed(value) => {
-                let nbr_threads = value.max(1).min(rayon::max_num_threads());
-                match rayon::ThreadPoolBuilder::new()
-                    .num_threads(nbr_threads)
-                    .build_global()
-                {
-                    Ok(_) => Ok(rayon::current_num_threads()),
-                    Err(_) => Err(OptError::ThreadPoolBuildErr),
-                }
-            }
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum InitializationMode {
     RealUniform,
     BinaryUnifrom,
-}
-/// Use this enum to define number of worker threads for parallel run.
-///  
-/// # Example
-///
-/// ```
-/// let num_threads = ThreadPoolSize::Auto;
-/// // or
-/// let num_threads = ThreadPoolSize::Fixed(2);
-/// ```
-#[cfg(feature = "parallel")]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum ThreadPoolSize {
-    Auto,
-    Fixed(usize),
 }
