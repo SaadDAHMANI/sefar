@@ -30,7 +30,7 @@ mod tests {
 
         //let bestfit = result.best_fitness.unwrap();
 
-        assert_ne!(result.best_fitness, None);
+        assert_ne!(result.best_fitness(), None);
     }
 
     #[test]
@@ -47,6 +47,6 @@ mod tests {
 
         //let bestfit = result.best_fitness.unwrap();
 
-        assert_ne!(result.best_fitness, None);
+        assert_ne!(result.best_fitness(), None);
     }
 }

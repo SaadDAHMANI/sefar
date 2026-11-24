@@ -278,12 +278,23 @@ impl<'a, T: Problem> EOA for IEO<'a, T> {
                 let convergence_trend = Some(convergence_curve[0..iter].to_vec());
                 let computation_time = Some(duration);
 
+                #[cfg(not(feature = "parallel"))]
                 let result = OptimizationResult::new(
                     best_genome,
                     best_fitness,
                     convergence_trend,
                     computation_time,
                     None,
+                );
+
+                #[cfg(feature = "parallel")]
+                let result = OptimizationResult::new(
+                    best_genome,
+                    best_fitness,
+                    convergence_trend,
+                    computation_time,
+                    None,
+                    0,
                 );
                 return result;
             }

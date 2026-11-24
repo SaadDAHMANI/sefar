@@ -18,7 +18,7 @@ pub struct OptimizationResult {
 
     /// store the real number of parallel threads.
     #[cfg(feature = "parallel")]
-    used_num_threads: usize,
+    num_threads: usize,
 }
 
 #[allow(dead_code)]
@@ -120,12 +120,16 @@ impl OptimizationResult {
                 write!(writer, "Error-Report: {:?}\n", self.err_report)?;
             }
             Some(vector) => {
-                write!(writer, "Best-fitness: {:?}\n", self.best_fitness)?;
-                write!(writer, "Best-Solution: {:?}\n", self.best_genome)?;
-                write!(writer, "Computation-Time: {:?}\n", self.computation_time)?;
+                write!(writer, "Best-fitness: {:?}\n", self.best_fitness())?;
+                write!(writer, "Best-Solution: {:?}\n", self.best_genome())?;
+                write!(writer, "Computation-Time: {:?}\n", self.computation_time())?;
 
                 #[cfg(feature = "parallel")]
-                write!(writer, "Number of parallel threads: {}\n", self.num_threads)?;
+                write!(
+                    writer,
+                    "Number of parallel threads: {}\n",
+                    self.num_threads()
+                )?;
 
                 write!(writer, "Best-fitness history: \n")?;
                 for x in vector.iter() {
@@ -142,10 +146,26 @@ impl OptimizationResult {
 
 impl Display for OptimizationResult {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "Best-fitness : {:?}; Best-solution : {:?}; Time : {:?}; Err-report: {:?}",
-            self.best_fitness, self.best_genome, self.computation_time, self.err_report
-        )
+        #[cfg(not(feature = "parallel"))]
+        {
+            write!(
+                f,
+                "Best-fitness : {:?}; Best-solution : {:?}; Time : {:?}; Err-report: {:?}",
+                self.best_fitness(),
+                self.best_genome(),
+                self.computation_time(),
+                self.err_report()
+            )
+        }
+        // -- parallel
+
+        #[cfg(feature = "parallel")]
+        {
+            write!(
+                f,
+                "Best-fitness : {:?}; Best-solution : {:?}; Time : {:?}; Num_Threads: {};  Err-report: {:?}",
+                self.best_fitness(), self.best_genome(), self.computation_time(), self.num_threads(), self.err_report()
+            )
+        }
     }
 }

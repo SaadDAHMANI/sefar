@@ -105,7 +105,7 @@ fn eao_f1_parallel_test1() {
 
             println!(
                 "EAO: Last value in Convergence curve : {:?}",
-                result.convergence_trend.unwrap().last()
+                result.convergence_trend().unwrap().last()
             );
         }
         Err(the_error) => eprintln!("Cannot run parallel optimization due to : {:?}", the_error),

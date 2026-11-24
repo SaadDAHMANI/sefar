@@ -167,12 +167,23 @@ impl<'a, T: Problem> EOA for PSO<'a, T> {
                 let duration = chronos.elapsed();
                 let best_fitness = gbest_x.fitness;
 
+                #[cfg(not(feature = "parallel"))]
                 let result = OptimizationResult::new(
                     Some(gbest_x),
                     best_fitness,
                     Some(cgcurve[0..t].to_vec()),
                     Some(duration),
                     None,
+                );
+
+                #[cfg(feature = "parallel")]
+                let result = OptimizationResult::new(
+                    Some(gbest_x),
+                    best_fitness,
+                    Some(cgcurve[0..t].to_vec()),
+                    Some(duration),
+                    None,
+                    0,
                 );
                 // copy result to PSO struct
                 result

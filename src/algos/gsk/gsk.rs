@@ -739,7 +739,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                             Some(run_funcvals[0..g + 1].to_vec()),
                             Some(duration),
                             None,
-                            current_num_threads,
+                            0, // current_num_threads,
                         );
 
                         result

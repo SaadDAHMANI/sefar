@@ -355,12 +355,23 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
         // Save the best fitness for the best solution
         gbest_x.fitness = Some(gbestfitness);
 
+        #[cfg(not(feature = "parallel"))]
         let result: OptimizationResult = OptimizationResult::new(
             Some(gbest_x),
             Some(gbestfitness),
             Some(gbesthistory[0..iter].to_vec()),
             Some(duration),
             None,
+        );
+
+        #[cfg(feature = "parallel")]
+        let result: OptimizationResult = OptimizationResult::new(
+            Some(gbest_x),
+            Some(gbestfitness),
+            Some(gbesthistory[0..iter].to_vec()),
+            Some(duration),
+            None,
+            0,
         );
 
         result
