@@ -1029,7 +1029,14 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
 
         #[cfg(feature = "parallel")]
         {
-            self.run_parallel()
+            if let Ok(pool) = rayon::ThreadPoolBuilder::new()
+                .num_threads(self.params.num_threads.as_usize())
+                .build()
+            {
+                pool.install(|| self.run_parallel())
+            } else {
+                OptimizationResult::get_empty(Some(OptError::ThreadPoolBuildErr))
+            }
         }
     }
     /*

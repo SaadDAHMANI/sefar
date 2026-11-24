@@ -92,9 +92,17 @@ pub trait Parameters {
 /// // or
 /// let num_threads = ThreadPoolSize::Fixed(2);
 /// ```
-#[cfg(feature = "parallel")]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ThreadPoolSize {
     Auto,
     Fixed(usize),
+}
+
+impl ThreadPoolSize {
+    pub fn as_usize(&self) -> usize {
+        match self {
+            Self::Auto => 2,
+            Self::Fixed(n) => *n,
+        }
+    }
 }
