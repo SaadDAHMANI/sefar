@@ -202,9 +202,12 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
                 //___________Parallel mode________________
                 #[cfg(feature = "parallel")]
                 {
-                    if let Ok(pool) = rayon::ThreadPoolBuilder::new().num_threads(4).build() {
+                    if let Ok(pool) = rayon::ThreadPoolBuilder::new()
+                        .num_threads(self.params.num_threads.as_usize())
+                        .build()
+                    {
                         // save current thread pool size
-                        current_num_threads = rayon::current_num_threads();
+                        current_num_threads = pool.current_num_threads();
 
                         pool.install(|| {
                             substrate_pool.par_iter_mut().for_each(|g| {

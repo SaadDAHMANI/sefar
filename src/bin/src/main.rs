@@ -77,38 +77,27 @@ fn eao_f1_parallel_test1() {
 
     settings.ec = 0.1;
 
+    // Define the parallel thread number. Here 'ThreadPoolSize::Auto' to use all available cores.
+    // let nb_threads = sefar::core::ThreadPoolSize::Auto; // ThreadPoolSize::Fixed(6);
+    let nb_threads = sefar::core::ThreadPoolSize::Fixed(4);
+
+    settings.num_threads = nb_threads;
     // Define the problem here:
     let mut fo: Sphere = Sphere {};
-
-    // Define the parallel thread number. Here 'ThreadPoolSize::Auto' to use all available cores.
-    let num_threads = sefar::core::ThreadPoolSize::Auto;
 
     // or use fixed number of threads, for example, 4 threads will be used.
     // let num_threads = sefar::core::ThreadPoolSize::Fixed(4);
 
     let mut algo: EAO<Sphere> = EAO::new(&settings, &mut fo);
 
-    match algo.initialize_parallel_global(num_threads) {
-        Ok(actual_thread_count) => {
-            eprintln!(
-                "Run EAO with parallel thread pool with : {} threads",
-                actual_thread_count
-            );
+    let result = algo.run();
 
-            // Run the algorithm here for parallel
-            let result = algo.run();
-
-            println!(
-                "EAO : F0 (SumAbsFunction) test; Result: {:?}",
-                result.to_string()
-            );
-
-            println!(
-                "EAO: Last value in Convergence curve : {:?}",
-                result.convergence_trend().unwrap().last()
-            );
-        }
-        Err(the_error) => eprintln!("Cannot run parallel optimization due to : {:?}", the_error),
+    if let Some(fit) = result.best_fitness() {
+        eprintln!(
+            "num_threads : {:?}, best fit = {:?}",
+            result.num_threads(),
+            fit
+        );
     }
 }
 

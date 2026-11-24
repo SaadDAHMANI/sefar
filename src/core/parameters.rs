@@ -84,7 +84,8 @@ pub trait Parameters {
 }
 
 /// Use this enum to define number of worker threads for parallel run.
-///  
+/// Auto : use the maximum number of threads (all available cores)
+/// Fixed(n): use 'n' threads.  
 /// # Example
 ///
 /// ```
@@ -101,8 +102,11 @@ pub enum ThreadPoolSize {
 impl ThreadPoolSize {
     pub fn as_usize(&self) -> usize {
         match self {
-            Self::Auto => 2,
-            Self::Fixed(n) => *n,
+            Self::Auto => rayon::current_num_threads(),
+            Self::Fixed(n) => {
+                let nb_thr = *n;
+                nb_thr.min(rayon::current_num_threads())
+            }
         }
     }
 }
