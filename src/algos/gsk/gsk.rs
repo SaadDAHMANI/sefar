@@ -12,6 +12,9 @@ use rand_distr::{Distribution, Uniform};
 #[cfg(feature = "parallel")]
 use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
 
+#[cfg(feature = "parallel")]
+use crate::core::parameters::ThreadPoolSize;
+
 use std::fmt::Display;
 use std::time::Instant;
 
@@ -785,6 +788,9 @@ pub struct GSKparams<'a> {
 
     /// k is the knowedge rate (k>0). The default value is k=10.
     pub k: f64,
+
+    #[cfg(feature = "parallel")]
+    pub num_threads: ThreadPoolSize,
 }
 
 impl<'a> GSKparams<'a> {
@@ -798,6 +804,7 @@ impl<'a> GSKparams<'a> {
     /// kf : knowledge factor;
     /// kr : knowledge ratio;
     /// k : knowledge rate.
+    #[cfg(not(feature = "parallel"))]
     pub fn new(
         pop_size: usize,
         problem_size: usize,
@@ -819,6 +826,43 @@ impl<'a> GSKparams<'a> {
             kf,
             kr,
             k,
+        }
+    }
+
+    /// Build a new instance of GSKparams, where:
+    /// pop_size : population size, i.e., number of search agents;
+    /// problem_size : problem dimension, i.e., number of decision variables;
+    /// max_iter : maximum number of iterations (stopping criterion);
+    /// lb: search space lower bound;
+    /// ub: search space upper bound;
+    /// partition_size_p : partition size ratio;
+    /// kf : knowledge factor;
+    /// kr : knowledge ratio;
+    /// k : knowledge rate.
+    #[cfg(feature = "parallel")]
+    pub fn new(
+        pop_size: usize,
+        problem_size: usize,
+        max_iter: usize,
+        lb: &'a [f64],
+        ub: &'a [f64],
+        p: f64,
+        kf: f64,
+        kr: f64,
+        k: f64,
+        num_threads: ThreadPoolSize,
+    ) -> Self {
+        Self {
+            population_size: pop_size,
+            problem_dimension: problem_size,
+            max_iterations: max_iter,
+            lower_bounds: lb,
+            upper_bounds: ub,
+            partition_size_p: p,
+            kf,
+            kr,
+            k,
+            num_threads,
         }
     }
 
@@ -908,16 +952,34 @@ impl<'a> Default for GSKparams<'a> {
     /// ~~~
     ///
     fn default() -> Self {
-        GSKparams {
-            population_size: 12,
-            problem_dimension: 3,
-            max_iterations: 1,
-            lower_bounds: &[-100.0f64, -100.0, -100.0],
-            upper_bounds: &[100.0f64, 100.0, 100.0],
-            partition_size_p: 0.1,
-            kf: 0.5f64,
-            kr: 0.9f64,
-            k: 10.0f64,
+        #[cfg(not(feature = "parallel"))]
+        {
+            GSKparams {
+                population_size: 12,
+                problem_dimension: 3,
+                max_iterations: 1,
+                lower_bounds: &[-100.0f64, -100.0, -100.0],
+                upper_bounds: &[100.0f64, 100.0, 100.0],
+                partition_size_p: 0.1,
+                kf: 0.5f64,
+                kr: 0.9f64,
+                k: 10.0f64,
+            }
+        }
+        #[cfg(feature = "parallel")]
+        {
+            GSKparams {
+                population_size: 12,
+                problem_dimension: 3,
+                max_iterations: 1,
+                lower_bounds: &[-100.0f64, -100.0, -100.0],
+                upper_bounds: &[100.0f64, 100.0, 100.0],
+                partition_size_p: 0.1,
+                kf: 0.5f64,
+                kr: 0.9f64,
+                k: 10.0f64,
+                num_threads: ThreadPoolSize::Auto,
+            }
         }
     }
 }
