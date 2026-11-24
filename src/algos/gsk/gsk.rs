@@ -732,6 +732,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                             None,
                         );
 
+                        // Return result for parallel
                         #[cfg(feature = "parallel")]
                         let result: OptimizationResult = OptimizationResult::new(
                             Some(bsf_solution),
