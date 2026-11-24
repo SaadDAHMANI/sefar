@@ -65,7 +65,7 @@ pub trait EOA {
     /// Run algorithm until reach stopping criterion and return optiization result
     ///
     fn run_with_params(&mut self, _settings: &impl Parameters) -> OptimizationResult {
-        OptimizationResult::get_empty(None)
+        self.run()
     }
 
     fn randomize(randvect: &mut Vec<f64>) {

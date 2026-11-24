@@ -78,11 +78,8 @@ fn eao_f1_parallel_test1() {
     settings.ec = 0.1;
 
     // Define the parallel thread number. Here 'ThreadPoolSize::Auto' to use all available cores.
-    // let nb_threads = sefar::core::ThreadPoolSize::Auto; // ThreadPoolSize::Fixed(6);
-    let nb_threads = sefar::core::ThreadPoolSize::Fixed(4);
 
-    settings.num_threads = nb_threads;
-    // Define the problem here:
+    settings.num_threads = sefar::core::ThreadPoolSize::Auto; // Define the problem here:
     let mut fo: Sphere = Sphere {};
 
     // or use fixed number of threads, for example, 4 threads will be used.
@@ -98,7 +95,20 @@ fn eao_f1_parallel_test1() {
             result.num_threads(),
             fit
         );
-    }
+    };
+
+    let mut new_settings = settings.clone();
+    new_settings.num_threads = sefar::core::ThreadPoolSize::Fixed(6);
+
+    let result = algo.run_with_params(&new_settings);
+
+    if let Some(fit) = result.best_fitness() {
+        eprintln!(
+            "num_threads : {:?}, best fit = {:?}",
+            result.num_threads(),
+            fit
+        );
+    };
 }
 
 #[allow(dead_code)]
