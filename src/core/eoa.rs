@@ -2,9 +2,18 @@ use crate::core::genome::Genome;
 use crate::core::optimization_result::OptimizationResult;
 use crate::core::parameters::Parameters;
 use rand::distributions::{Distribution, Uniform};
+#[cfg(feature = "parallel")]
+use rayon::ThreadPool;
 
 #[cfg(feature = "parallel")]
 use crate::core::OptError;
+
+#[cfg(feature = "parallel")]
+use rayon::prelude::*;
+
+#[cfg(feature = "parallel")]
+use rayon::ThreadPoolBuilder;
+
 ///
 /// Public trait for Evolutionary Optimization Algorithms
 ///
@@ -90,6 +99,25 @@ pub trait EOA {
     fn initialize_parallel_global(&self, num_threads: ThreadPoolSize) -> Result<usize, OptError> {
         match num_threads {
             ThreadPoolSize::Auto => Ok(rayon::current_num_threads()),
+            ThreadPoolSize::Fixed(value) => {
+                let nbr_threads = value.max(1).min(rayon::max_num_threads());
+                match rayon::ThreadPoolBuilder::new()
+                    .num_threads(nbr_threads)
+                    .build_global()
+                {
+                    Ok(_) => Ok(rayon::current_num_threads()),
+                    Err(_) => Err(OptError::ThreadPoolBuildErr),
+                }
+            }
+        }
+    }
+
+    #[cfg(feature = "parallel")]
+    fn initialize_parallel(&self, num_threads: ThreadPoolSize) -> Result<ThreadPool, OptError> {
+        use rayon::ThreadPoolBuilder;
+
+        match num_threads {
+            ThreadPoolSize::Auto => Ok(ThreadPoolBuilder::new().num_threads(4).build()),
             ThreadPoolSize::Fixed(value) => {
                 let nbr_threads = value.max(1).min(rayon::max_num_threads());
                 match rayon::ThreadPoolBuilder::new()
