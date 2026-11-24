@@ -102,6 +102,633 @@ impl<'a, T: Problem> GSK<'a, T> {
         // --------------------------------------
     }
 
+    /// Run GSK optimizer:
+    /// Example :
+    /// ```rust
+    /// use sefar::algos::gsk::{GSKparams, GSK};
+    /// use sefar::benchmarks::functions::Sphere;
+    /// use sefar::core::eoa::EOA;
+    ///
+    /// let settings: GSKparams = GSKparams::default();
+    /// let mut fo = Sphere {};
+    /// let mut gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
+    /// let result = gsk.run();
+    /// ```
+    #[cfg(not(feature = "parallel"))]
+    fn run_sequential(&mut self) -> OptimizationResult {
+        match Parameters::check(self.params) {
+            Err(opt_error) => OptimizationResult::get_empty(Some(opt_error)),
+            Ok(()) => {
+                match self.params.check() {
+                    Err(eror) => OptimizationResult::get_empty(Some(eror)),
+                    Ok(()) => {
+                        let chronos = Instant::now();
+
+                        //-------------------------------------------------
+                        let pop_size: usize = self.params.get_population_size();
+                        let max_iter: usize = self.params.max_iterations;
+                        let problem_size: usize = self.params.problem_dimension;
+                        let mut break_process: bool = false;
+                        //let max_nfes: usize = pop_size * (max_iter + 1);
+                        //--------------------------------------------------
+                        //let mut nfes: usize = 0; // function evaluation counter.
+                        let mut bsf_fit_var: f64 = f64::MAX; // the best fitness value.
+                        let mut bsf_solution: Genome = Genome::new(pop_size + 1, problem_size); // the best solution
+                        let mut fitness: Vec<f64> = vec![0.0f64; pop_size];
+                        let mut children_fitness: Vec<f64> = vec![0.0f64; pop_size];
+                        let mut run_funcvals: Vec<f64> = vec![0.0f64; max_iter + 1];
+                        // ------------------------------------------------------------
+
+                        let mut gained_shared_junior = vec![vec![0.0f64; problem_size]; pop_size];
+                        let mut gained_shared_senior = vec![vec![0.0f64; problem_size]; pop_size];
+                        // ------------------------------------------------------------
+
+                        let g_max_f64: f64 = max_iter as f64;
+                        // Initialize the main population:
+                        // Initialize the old population
+                        //let mut popold = self.initialize(self.params, InitializationMode::RealUniform);
+                        let mut ui = self.initialize(self.params, InitializationMode::RealUniform);
+
+                        // Initialize the current population
+                        let mut pop = self.initialize(self.params, InitializationMode::RealUniform); //popold.clone();
+
+                        // let mut objfn_duration: Vec<f64> = vec![0.0; max_iter + 1];
+
+                        // let mut learning_duration: Vec<f64> = vec![0.0; max_iter];
+                        // let timer1 = Instant::now();
+                        ////  Objective function evaluation:
+                        self.evaluate_solutions(&mut pop, &mut fitness);
+                        // objfn_duration[0] = timer1.elapsed().as_secs_f64();
+
+                        // Save the best fitness value for convergence trend:
+                        for i in 0..pop_size {
+                            if fitness[i] < bsf_fit_var {
+                                bsf_fit_var = fitness[i];
+                                // save the best solution
+                                //copy_solution(&pop[i], &mut bsf_solution, problem_size);
+                            }
+                        }
+                        run_funcvals[0] = bsf_fit_var; //save history of convergence.
+
+                        //--------------------------------------------------
+                        let p: f64 = self.params.get_partition_size_p();
+                        let kf = self.params.kf; //Knowledge Factor.
+                        let kr = self.params.kr; //Knowledge Ratio.
+                        let k = self.params.k; //Knowledge rate.
+
+                        let mut g: usize = 0;
+
+                        let mut d_gained_shared_junior = vec![0.0f64; pop_size];
+                        let mut d_gained_shared_senior = vec![0.0f64; pop_size];
+
+                        let problem_size_f64: f64 = problem_size as f64;
+
+                        //THE MAIN LOOP
+
+                        while g < max_iter {
+                            g += 1;
+                            // D_Gained_Shared_Junior=ceil((problem_size)*(1-g/G_Max).^K);
+                            //   D_Gained_Shared_Senior=problem_size-D_Gained_Shared_Junior;
+
+                            let d_gained_shared_value =
+                                problem_size_f64 * ((g_max_f64 - g as f64) / g_max_f64).powf(k);
+                            for j in 0..pop_size {
+                                d_gained_shared_junior[j] = d_gained_shared_value;
+                                //println!("d_gained_shared_junior[{}] = {}",j, d_gained_shared_junior[j]);
+                                d_gained_shared_senior[j] =
+                                    problem_size_f64 - d_gained_shared_junior[j];
+                            }
+
+                            // clone the old_population to the current one
+                            // self.clone_population(&popold, &mut pop);
+                            /*
+                            // Objective function evaluation:
+                            for i in 0..pop_size {
+                                fitness[i] = self.problem.objectivefunction(&pop[i].genes);
+                                pop[i].fitness = Some(fitness[i]);
+                                //nfes += 1;
+                                //println!("fitness[{}] = {}", i, fitness[i]);
+                            }
+                            */
+                            //------------------------------------------------------------
+                            //Sorte and sorting indexes:
+                            let mut ind_best: Vec<usize> = (0..fitness.len()).collect();
+                            ind_best.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
+                            //println!("fit : {:?} \n sort indexes are : {:?}", fitness, ind_best);
+                            //------------------------------------------------------------
+
+                            //let (rg1, rg2, rg3) = self.gained_shared_junior_r1r2r3(&ind_best, pop_size);
+                            //println!("Rg3 : {:?}", rg3);
+                            //  let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best, p);
+
+                            // let learning_timer = Instant::now();
+
+                            #[cfg(not(feature = "parallel"))]
+                            {
+                                //println!("Rg3 : {:?}", rg3);
+                                // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE:
+                                // Gained_Shared_Junior=zeros(pop_size, problem_size);
+                                self.update_gained_shared_junior(
+                                    &mut gained_shared_junior,
+                                    &pop,
+                                    &fitness,
+                                    &ind_best,
+                                    kf,
+                                    pop_size,
+                                );
+
+                                // PSEUDO-CODE FOR SENIOR GAINING SHARING KNOWLEDGE PHASE:
+                                self.update_gained_shared_senior(
+                                    &mut gained_shared_senior,
+                                    &pop,
+                                    &fitness,
+                                    &ind_best,
+                                    p,
+                                    kf,
+                                    pop_size,
+                                );
+
+                                // check the lower and the upper bound.
+                                self.bound_constraint(&mut gained_shared_junior, &pop, pop_size);
+                                self.bound_constraint(&mut gained_shared_senior, &pop, pop_size);
+                            }
+
+                            //println!("gained_sharied_junior = {:?}", gained_shared_junior);
+                            //-------------------------------------------------------------------------------
+                            // D_Gained_Shared_Junior_mask=rand(pop_size, problem_size)<=(D_Gained_Shared_Junior(:, ones(1, problem_size))./problem_size);
+                            let d_gained_shared_junior_mask = self
+                                .generate_d_gained_shared_junior_mask(
+                                    &d_gained_shared_junior,
+                                    pop_size,
+                                );
+
+                            /*println!(
+                                "d_gained_shared_junior_mask = {:?}",
+                                d_gained_shared_junior_mask
+                            );*/
+
+                            //D_Gained_Shared_Senior_mask=~D_Gained_Shared_Junior_mask;
+                            let mut d_gained_shared_senior_mask: Vec<Vec<bool>> =
+                                vec![vec![false; problem_size]; pop_size];
+                            for i in 0..pop_size {
+                                for j in 0..problem_size {
+                                    d_gained_shared_senior_mask[i][j] =
+                                        !d_gained_shared_junior_mask[i][j];
+                                }
+                            }
+
+                            /*println!(
+                                "d_gained_shared_senior_mask = {:?}",
+                                d_gained_shared_senior_mask
+                            );*/
+
+                            let d_gained_shared_junior_rand_mask =
+                                self.generate_d_gained_shared_rand_mask(kr, pop_size);
+                            /* println!(
+                                "d_gained_shared_junior_rand_mask : {:?}",
+                                d_gained_shared_junior_rand_mask
+                            ); */
+
+                            let d_gained_shared_junior_mask = self.and_masks(
+                                &d_gained_shared_junior_mask,
+                                &d_gained_shared_junior_rand_mask,
+                                pop_size,
+                            );
+                            let d_gained_shared_senior_rand_mask =
+                                self.generate_d_gained_shared_rand_mask(kr, pop_size);
+
+                            // D_Gained_Shared_Senior_mask=and(D_Gained_Shared_Senior_mask,D_Gained_Shared_Senior_rand_mask);
+                            let d_gained_shared_senior_mask = self.and_masks(
+                                &d_gained_shared_senior_mask,
+                                &d_gained_shared_senior_rand_mask,
+                                pop_size,
+                            );
+                            //ui=pop;
+
+                            for i in 0..pop_size {
+                                copy_solution(&pop[i], &mut ui[i], problem_size);
+                            }
+
+                            //ui(D_Gained_Shared_Junior_mask) = Gained_Shared_Junior(D_Gained_Shared_Junior_mask);
+
+                            for i in 0..pop_size {
+                                for j in 0..problem_size {
+                                    if d_gained_shared_junior_mask[i][j] {
+                                        ui[i].genes[j] = gained_shared_junior[i][j];
+                                    }
+                                }
+                            }
+
+                            //ui(D_Gained_Shared_Senior_mask) = Gained_Shared_Senior(D_Gained_Shared_Senior_mask);
+                            for i in 0..pop_size {
+                                for j in 0..problem_size {
+                                    if d_gained_shared_senior_mask[i][j] {
+                                        ui[i].genes[j] = gained_shared_senior[i][j];
+                                    }
+                                }
+                            }
+
+                            // learning_duration[g - 1] = learning_timer.elapsed().as_secs_f64();
+
+                            //  children_fitness = feval(ui); %
+                            /* for i in 0..pop_size {
+                                children_fitness[i] = self.problem.objectivefunction(&ui[i].genes);
+                                ui[i].fitness = Some(children_fitness[i]);
+                                //nfes += 1;
+                            }*/
+                            // Objective function evaluation for childrens
+
+                            // let timer = Instant::now();
+
+                            self.evaluate_solutions(&mut ui, &mut children_fitness);
+
+                            // objfn_duration[g] = timer.elapsed().as_secs_f64();
+
+                            // SAVE THE BEST SOLUTION:
+                            // if children_fitness(i) < bsf_fit_var
+                            //    bsf_fit_var = children_fitness(i);
+                            //    bsf_solution = ui(i, :);
+                            // end
+                            for i in 0..pop_size {
+                                if children_fitness[i] < bsf_fit_var {
+                                    bsf_fit_var = children_fitness[i];
+                                    copy_solution(&ui[i], &mut bsf_solution, problem_size);
+                                }
+                            }
+                            /* println!(
+                                "iter : {} -- best_fit : {} -- best_sol:{:?}",
+                                g, bsf_fit_var, bsf_solution
+                            );*/
+
+                            //  #[cfg(feature = "report")]
+                            //  println!("Iter : {}, best-fitness : {}", g, bsf_fit_var);
+
+                            // UPDATE THE SEARCH POPULATION:
+                            for i in 0..pop_size {
+                                if children_fitness[i] < fitness[i] {
+                                    //  popold[i] = ui[i].clone();
+                                    // copy_solution(&ui[i], &mut popold[i], problem_size);
+
+                                    // COPY BETTER SOULTIONS TO THE SEARCH POPULATION:
+                                    copy_solution(&ui[i], &mut pop[i], problem_size);
+                                    // COPY THE FITNESS OF THE BETTER SOLUTION TOO:
+                                    fitness[i] = children_fitness[i];
+                                } /* else {
+                                      //popold[i] = pop[i].clone();
+                                      copy_solution(&pop[i], &mut popold[i], problem_size);
+                                  }*/
+                            }
+
+                            // SAVE THE BEST- FITNESS (convergence trend):
+                            //run_funcvals = [run_funcvals;bsf_fit_var];
+                            run_funcvals[g] = bsf_fit_var;
+
+                            bsf_solution.fitness = Some(bsf_fit_var);
+
+                            self.problem
+                                .iteration_increment(g, &bsf_solution, &mut break_process);
+                            if break_process {
+                                break;
+                            }
+                        } // THE MAIN LOOP
+
+                        let duration = chronos.elapsed();
+                        /*
+                              let objfn_time = objfn_duration.iter().fold(0.0, |sum, t| sum + t);
+                              println!("Obj.fun time (total) = {objfn_time} S.");
+                              let learn_time = learning_duration.iter().fold(0.0, |sum, t| sum + t);
+                              println!("Learning time (total) = {learn_time} S.");
+                        */
+                        let result: OptimizationResult = OptimizationResult::new(
+                            Some(bsf_solution),
+                            Some(bsf_fit_var),
+                            Some(run_funcvals[0..g + 1].to_vec()),
+                            Some(duration),
+                            None,
+                        );
+
+                        result
+                    }
+                }
+            }
+        }
+    }
+
+    /// Run GSK optimizer:
+    /// Example :
+    /// ```rust
+    /// use sefar::algos::gsk::{GSKparams, GSK};
+    /// use sefar::benchmarks::functions::Sphere;
+    /// use sefar::core::eoa::EOA;
+    ///
+    /// let settings: GSKparams = GSKparams::default();
+    /// let mut fo = Sphere {};
+    /// let mut gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
+    /// let result = gsk.run();
+    /// ```
+    #[cfg(feature = "parallel")]
+    fn run_parallel(&mut self) -> OptimizationResult {
+        match Parameters::check(self.params) {
+            Err(opt_error) => OptimizationResult::get_empty(Some(opt_error)),
+            Ok(()) => {
+                match self.params.check() {
+                    Err(eror) => OptimizationResult::get_empty(Some(eror)),
+                    Ok(()) => {
+                        let chronos = Instant::now();
+
+                        //-------------------------------------------------
+                        let pop_size: usize = self.params.get_population_size();
+                        let max_iter: usize = self.params.max_iterations;
+                        let problem_size: usize = self.params.problem_dimension;
+                        let mut break_process: bool = false;
+                        //let max_nfes: usize = pop_size * (max_iter + 1);
+                        //--------------------------------------------------
+                        //let mut nfes: usize = 0; // function evaluation counter.
+                        let mut bsf_fit_var: f64 = f64::MAX; // the best fitness value.
+                        let mut bsf_solution: Genome = Genome::new(pop_size + 1, problem_size); // the best solution
+                        let mut fitness: Vec<f64> = vec![0.0f64; pop_size];
+                        let mut children_fitness: Vec<f64> = vec![0.0f64; pop_size];
+                        let mut run_funcvals: Vec<f64> = vec![0.0f64; max_iter + 1];
+                        // ------------------------------------------------------------
+
+                        let mut gained_shared_junior = vec![vec![0.0f64; problem_size]; pop_size];
+                        let mut gained_shared_senior = vec![vec![0.0f64; problem_size]; pop_size];
+                        // ------------------------------------------------------------
+
+                        let g_max_f64: f64 = max_iter as f64;
+                        // Initialize the main population:
+                        // Initialize the old population
+                        //let mut popold = self.initialize(self.params, InitializationMode::RealUniform);
+                        let mut ui = self.initialize(self.params, InitializationMode::RealUniform);
+
+                        // Initialize the current population
+                        let mut pop = self.initialize(self.params, InitializationMode::RealUniform); //popold.clone();
+
+                        // let mut objfn_duration: Vec<f64> = vec![0.0; max_iter + 1];
+
+                        // let mut learning_duration: Vec<f64> = vec![0.0; max_iter];
+                        // let timer1 = Instant::now();
+                        ////  Objective function evaluation:
+                        self.evaluate_solutions(&mut pop, &mut fitness);
+                        // objfn_duration[0] = timer1.elapsed().as_secs_f64();
+
+                        // Save the best fitness value for convergence trend:
+                        for i in 0..pop_size {
+                            if fitness[i] < bsf_fit_var {
+                                bsf_fit_var = fitness[i];
+                                // save the best solution
+                                //copy_solution(&pop[i], &mut bsf_solution, problem_size);
+                            }
+                        }
+                        run_funcvals[0] = bsf_fit_var; //save history of convergence.
+
+                        //--------------------------------------------------
+                        let p: f64 = self.params.get_partition_size_p();
+                        let kf = self.params.kf; //Knowledge Factor.
+                        let kr = self.params.kr; //Knowledge Ratio.
+                        let k = self.params.k; //Knowledge rate.
+
+                        let mut g: usize = 0;
+
+                        let mut d_gained_shared_junior = vec![0.0f64; pop_size];
+                        let mut d_gained_shared_senior = vec![0.0f64; pop_size];
+
+                        let problem_size_f64: f64 = problem_size as f64;
+
+                        //THE MAIN LOOP
+
+                        while g < max_iter {
+                            g += 1;
+                            // D_Gained_Shared_Junior=ceil((problem_size)*(1-g/G_Max).^K);
+                            //   D_Gained_Shared_Senior=problem_size-D_Gained_Shared_Junior;
+
+                            let d_gained_shared_value =
+                                problem_size_f64 * ((g_max_f64 - g as f64) / g_max_f64).powf(k);
+                            for j in 0..pop_size {
+                                d_gained_shared_junior[j] = d_gained_shared_value;
+                                //println!("d_gained_shared_junior[{}] = {}",j, d_gained_shared_junior[j]);
+                                d_gained_shared_senior[j] =
+                                    problem_size_f64 - d_gained_shared_junior[j];
+                            }
+
+                            // clone the old_population to the current one
+                            // self.clone_population(&popold, &mut pop);
+                            /*
+                            // Objective function evaluation:
+                            for i in 0..pop_size {
+                                fitness[i] = self.problem.objectivefunction(&pop[i].genes);
+                                pop[i].fitness = Some(fitness[i]);
+                                //nfes += 1;
+                                //println!("fitness[{}] = {}", i, fitness[i]);
+                            }
+                            */
+                            //------------------------------------------------------------
+                            //Sorte and sorting indexes:
+                            let mut ind_best: Vec<usize> = (0..fitness.len()).collect();
+                            ind_best.sort_by(|&a, &b| fitness[a].total_cmp(&fitness[b]));
+                            //println!("fit : {:?} \n sort indexes are : {:?}", fitness, ind_best);
+                            //------------------------------------------------------------
+
+                            //let (rg1, rg2, rg3) = self.gained_shared_junior_r1r2r3(&ind_best, pop_size);
+                            //println!("Rg3 : {:?}", rg3);
+                            //  let (r1, r2, r3) = self.gained_shared_senior_r1r2r3(&ind_best, p);
+
+                            // let learning_timer = Instant::now();
+
+                            // #[cfg(feature = "parallel")]
+                            // {
+                            // let (rg1, rg2, rg3) =
+                            // self.gained_shared_junior_r1r2r3(&ind_best, pop_size);
+                            //println!("Rg3 : {:?}", rg3);
+
+                            // PSEUDO-CODE FOR JUNIOR GAINING SHARING KNOWLEDGE PHASE:
+                            // Gained_Shared_Junior=zeros(pop_size, problem_size);
+                            rayon::join(
+                                || {
+                                    self.update_gained_shared_junior(
+                                        &mut gained_shared_junior,
+                                        &pop,
+                                        &fitness,
+                                        &ind_best,
+                                        kf,
+                                        pop_size,
+                                    )
+                                },
+                                ||
+                                // PSEUDO-CODE FOR SENIOR GAINING SHARING KNOWLEDGE PHASE:
+                                self.update_gained_shared_senior(
+                                    &mut gained_shared_senior,
+                                    &pop,
+                                    &fitness,
+                                    &ind_best, p,
+                                    kf,
+                                    pop_size,
+                                ),
+                            );
+
+                            // check the lower and the upper bound.
+                            rayon::join(
+                                || self.bound_constraint(&mut gained_shared_junior, &pop, pop_size),
+                                || self.bound_constraint(&mut gained_shared_senior, &pop, pop_size),
+                            );
+                            // }
+                            //println!("gained_sharied_junior = {:?}", gained_shared_junior);
+                            //-------------------------------------------------------------------------------
+                            // D_Gained_Shared_Junior_mask=rand(pop_size, problem_size)<=(D_Gained_Shared_Junior(:, ones(1, problem_size))./problem_size);
+                            let d_gained_shared_junior_mask = self
+                                .generate_d_gained_shared_junior_mask(
+                                    &d_gained_shared_junior,
+                                    pop_size,
+                                );
+
+                            /*println!(
+                                "d_gained_shared_junior_mask = {:?}",
+                                d_gained_shared_junior_mask
+                            );*/
+
+                            //D_Gained_Shared_Senior_mask=~D_Gained_Shared_Junior_mask;
+                            let mut d_gained_shared_senior_mask: Vec<Vec<bool>> =
+                                vec![vec![false; problem_size]; pop_size];
+                            for i in 0..pop_size {
+                                for j in 0..problem_size {
+                                    d_gained_shared_senior_mask[i][j] =
+                                        !d_gained_shared_junior_mask[i][j];
+                                }
+                            }
+
+                            /*println!(
+                                "d_gained_shared_senior_mask = {:?}",
+                                d_gained_shared_senior_mask
+                            );*/
+
+                            let d_gained_shared_junior_rand_mask =
+                                self.generate_d_gained_shared_rand_mask(kr, pop_size);
+                            /* println!(
+                                "d_gained_shared_junior_rand_mask : {:?}",
+                                d_gained_shared_junior_rand_mask
+                            ); */
+
+                            let d_gained_shared_junior_mask = self.and_masks(
+                                &d_gained_shared_junior_mask,
+                                &d_gained_shared_junior_rand_mask,
+                                pop_size,
+                            );
+                            let d_gained_shared_senior_rand_mask =
+                                self.generate_d_gained_shared_rand_mask(kr, pop_size);
+
+                            // D_Gained_Shared_Senior_mask=and(D_Gained_Shared_Senior_mask,D_Gained_Shared_Senior_rand_mask);
+                            let d_gained_shared_senior_mask = self.and_masks(
+                                &d_gained_shared_senior_mask,
+                                &d_gained_shared_senior_rand_mask,
+                                pop_size,
+                            );
+                            //ui=pop;
+
+                            for i in 0..pop_size {
+                                copy_solution(&pop[i], &mut ui[i], problem_size);
+                            }
+
+                            //ui(D_Gained_Shared_Junior_mask) = Gained_Shared_Junior(D_Gained_Shared_Junior_mask);
+
+                            for i in 0..pop_size {
+                                for j in 0..problem_size {
+                                    if d_gained_shared_junior_mask[i][j] {
+                                        ui[i].genes[j] = gained_shared_junior[i][j];
+                                    }
+                                }
+                            }
+
+                            //ui(D_Gained_Shared_Senior_mask) = Gained_Shared_Senior(D_Gained_Shared_Senior_mask);
+                            for i in 0..pop_size {
+                                for j in 0..problem_size {
+                                    if d_gained_shared_senior_mask[i][j] {
+                                        ui[i].genes[j] = gained_shared_senior[i][j];
+                                    }
+                                }
+                            }
+
+                            // learning_duration[g - 1] = learning_timer.elapsed().as_secs_f64();
+
+                            //  children_fitness = feval(ui); %
+                            /* for i in 0..pop_size {
+                                children_fitness[i] = self.problem.objectivefunction(&ui[i].genes);
+                                ui[i].fitness = Some(children_fitness[i]);
+                                //nfes += 1;
+                            }*/
+                            // Objective function evaluation for childrens
+
+                            // let timer = Instant::now();
+
+                            self.evaluate_solutions(&mut ui, &mut children_fitness);
+
+                            // objfn_duration[g] = timer.elapsed().as_secs_f64();
+
+                            // SAVE THE BEST SOLUTION:
+                            // if children_fitness(i) < bsf_fit_var
+                            //    bsf_fit_var = children_fitness(i);
+                            //    bsf_solution = ui(i, :);
+                            // end
+                            for i in 0..pop_size {
+                                if children_fitness[i] < bsf_fit_var {
+                                    bsf_fit_var = children_fitness[i];
+                                    copy_solution(&ui[i], &mut bsf_solution, problem_size);
+                                }
+                            }
+                            /* println!(
+                                "iter : {} -- best_fit : {} -- best_sol:{:?}",
+                                g, bsf_fit_var, bsf_solution
+                            );*/
+
+                            //  #[cfg(feature = "report")]
+                            //  println!("Iter : {}, best-fitness : {}", g, bsf_fit_var);
+
+                            // UPDATE THE SEARCH POPULATION:
+                            for i in 0..pop_size {
+                                if children_fitness[i] < fitness[i] {
+                                    //  popold[i] = ui[i].clone();
+                                    // copy_solution(&ui[i], &mut popold[i], problem_size);
+
+                                    // COPY BETTER SOULTIONS TO THE SEARCH POPULATION:
+                                    copy_solution(&ui[i], &mut pop[i], problem_size);
+                                    // COPY THE FITNESS OF THE BETTER SOLUTION TOO:
+                                    fitness[i] = children_fitness[i];
+                                } /* else {
+                                      //popold[i] = pop[i].clone();
+                                      copy_solution(&pop[i], &mut popold[i], problem_size);
+                                  }*/
+                            }
+
+                            // SAVE THE BEST- FITNESS (convergence trend):
+                            //run_funcvals = [run_funcvals;bsf_fit_var];
+                            run_funcvals[g] = bsf_fit_var;
+
+                            bsf_solution.fitness = Some(bsf_fit_var);
+
+                            self.problem
+                                .iteration_increment(g, &bsf_solution, &mut break_process);
+                            if break_process {
+                                break;
+                            }
+                        } // THE MAIN LOOP
+
+                        let duration = chronos.elapsed();
+                        // Return result for parallel
+                        let result: OptimizationResult = OptimizationResult::new(
+                            Some(bsf_solution),
+                            Some(bsf_fit_var),
+                            Some(run_funcvals[0..g + 1].to_vec()),
+                            Some(duration),
+                            None,
+                            0, // current_num_threads,
+                        );
+
+                        result
+                    }
+                }
+            }
+        }
+    }
+
     fn find_indices(&self, x: &Vec<usize>, target: usize) -> usize {
         let y: Vec<usize> = x
             .iter()
@@ -393,6 +1020,19 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
     /// let mut gsk: GSK<Sphere> = GSK::new(&settings, &mut fo);
     /// let result = gsk.run();
     /// ```
+
+    fn run(&mut self) -> OptimizationResult {
+        #[cfg(not(feature = "parallel"))]
+        {
+            self.run_sequential()
+        }
+
+        #[cfg(feature = "parallel")]
+        {
+            self.run_parallel()
+        }
+    }
+    /*
     fn run(&mut self) -> OptimizationResult {
         match Parameters::check(self.params) {
             Err(opt_error) => OptimizationResult::get_empty(Some(opt_error)),
@@ -752,6 +1392,7 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
             }
         }
     }
+    */
 }
 
 ///
