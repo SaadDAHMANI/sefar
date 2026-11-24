@@ -184,6 +184,9 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
 
                 let mut _candidate_a_fitness: f64 = 0.0;
                 let mut _candidate_b_fitness: f64 = 0.0;
+
+                #[cfg(feature = "parallel")]
+                let mut current_num_threads: usize = 0;
                 // =============================================================
                 let mut substrate_pool =
                     self.initialize(self.params, InitializationMode::RealUniform);
@@ -200,6 +203,9 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
                 #[cfg(feature = "parallel")]
                 {
                     if let Ok(pool) = rayon::ThreadPoolBuilder::new().num_threads(4).build() {
+                        // save current thread pool size
+                        current_num_threads = rayon::current_num_threads();
+
                         pool.install(|| {
                             substrate_pool.par_iter_mut().for_each(|g| {
                                 g.fitness = Some(self.problem.objectivefunction(&mut g.genes))
@@ -352,13 +358,26 @@ impl<'a, T: Problem> EOA for EAO<'a, T> {
                     Some(self.problem.objectivefunction(&mut best_substrate.genes));
 
                 let duration = chronos.elapsed();
-                let result = OptimizationResult {
-                    best_genome: Some(best_substrate),
-                    best_fitness: Some(optimal_catalysis),
-                    convergence_trend: Some(convergence_curve[0..t].to_vec()),
-                    computation_time: Some(duration),
-                    err_report: None,
-                };
+
+                #[cfg(not(feature = "parallel"))]
+                let result = OptimizationResult::new(
+                    Some(best_substrate),
+                    Some(optimal_catalysis),
+                    Some(convergence_curve[0..t].to_vec()),
+                    Some(duration),
+                    None,
+                );
+
+                #[cfg(feature = "parallel")]
+                let result = OptimizationResult::new(
+                    Some(best_substrate),
+                    Some(optimal_catalysis),
+                    Some(convergence_curve[0..t].to_vec()),
+                    Some(duration),
+                    None,
+                    current_num_threads,
+                );
+
                 result
             }
         }

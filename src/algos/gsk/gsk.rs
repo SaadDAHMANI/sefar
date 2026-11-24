@@ -716,8 +716,6 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                             }
                         } // THE MAIN LOOP
 
-                        let mut result: OptimizationResult = OptimizationResult::get_empty(None);
-
                         let duration = chronos.elapsed();
                         /*
                               let objfn_time = objfn_duration.iter().fold(0.0, |sum, t| sum + t);
@@ -725,11 +723,25 @@ impl<'a, T: Problem> EOA for GSK<'a, T> {
                               let learn_time = learning_duration.iter().fold(0.0, |sum, t| sum + t);
                               println!("Learning time (total) = {learn_time} S.");
                         */
-                        result.best_genome = Some(bsf_solution);
-                        result.best_fitness = Some(bsf_fit_var);
-                        result.convergence_trend = Some(run_funcvals[0..g + 1].to_vec());
-                        result.computation_time = Some(duration);
-                        result.err_report = None;
+                        #[cfg(not(feature = "parallel"))]
+                        let result: OptimizationResult = OptimizationResult::new(
+                            Some(bsf_solution),
+                            Some(bsf_fit_var),
+                            Some(run_funcvals[0..g + 1].to_vec()),
+                            Some(duration),
+                            None,
+                        );
+
+                        #[cfg(feature = "parallel")]
+                        let result: OptimizationResult = OptimizationResult::new(
+                            Some(bsf_solution),
+                            Some(bsf_fit_var),
+                            Some(run_funcvals[0..g + 1].to_vec()),
+                            Some(duration),
+                            None,
+                            current_num_threads,
+                        );
+
                         result
                     }
                 }

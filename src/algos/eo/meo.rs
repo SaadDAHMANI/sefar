@@ -31,14 +31,7 @@ pub struct MEO<'a, T: Problem> {
 
 impl<'a, T: Problem> MEO<'a, T> {
     pub fn new(settings: &'a EOparams, problem: &'a mut T) -> Self {
-        let result = OptimizationResult {
-            best_genome: None,
-            best_fitness: None,
-            convergence_trend: None,
-            computation_time: None,
-            err_report: None,
-        };
-
+        let result = OptimizationResult::get_empty(None);
         MEO {
             problem,
             params: settings,
@@ -311,15 +304,19 @@ impl<'a, T: Problem> EOA for MEO<'a, T> {
 
                 //return results
                 let duration = chronos.elapsed();
-                let result = OptimizationResult {
-                    best_genome: Some(Genome::from(ceq1_index, &ceq1, ceq1_fit)),
-                    best_fitness: Some(ceq1_fit),
-                    convergence_trend: Some(convergence_curve[0..iter].to_vec()),
-                    computation_time: Some(duration),
-                    err_report: None,
-                };
-                // copy result to EO struct
-                self.optimization_result = result.clone();
+
+                let best_genome = Some(Genome::from(ceq1_index, &ceq1, ceq1_fit));
+                let best_fitness = Some(ceq1_fit);
+                let convergence_trend = Some(convergence_curve[0..iter].to_vec());
+                let computation_time = Some(duration);
+
+                let result = OptimizationResult::new(
+                    best_genome,
+                    best_fitness,
+                    convergence_trend,
+                    computation_time,
+                    None,
+                );
                 result
             }
         }

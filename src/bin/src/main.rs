@@ -57,7 +57,7 @@ fn eao_f1_test1() {
 
     println!(
         "EAO: Last value in Convergence curve : {:?}",
-        result.convergence_trend.unwrap().last()
+        result.convergence_trend().unwrap().last()
     );
 }
 
@@ -181,7 +181,7 @@ fn gsk_f1_test1() {
     );
     println!(
         "Last value in Convergence curve: {:?}",
-        result.convergence_trend.unwrap().last()
+        result.convergence_trend().unwrap().last()
     );
 }
 
@@ -207,7 +207,7 @@ fn go_f1_test1() {
     println!("The optimization results of GO : {}", result.to_string());
     println!(
         "The last value in CV : {:?}",
-        result.convergence_trend.unwrap().last()
+        result.convergence_trend().unwrap().last()
     );
     /*
     // Save the results:
@@ -281,7 +281,7 @@ fn eo_f1_test1() {
     println!("The optimization results of EO : {}", result.to_string());
     println!(
         "The last in convergence curve : {:?}",
-        result.convergence_trend.unwrap().last()
+        result.convergence_trend().unwrap().last()
     );
 }
 
@@ -309,7 +309,7 @@ fn ieo_f1_test1() {
     println!("The optimization results of EO : {}", result.to_string());
     println!(
         "The last in convergence curve : {:?}",
-        result.convergence_trend.unwrap().last()
+        result.convergence_trend().unwrap().last()
     );
 }
 
@@ -329,10 +329,11 @@ fn bieo_f1_binary_test() {
 
     println!(
         "Binary-EO result : \n best fitness : {:?} \n best genome : {:?}",
-        result.best_fitness, result.best_genome
+        result.best_fitness(),
+        result.best_genome()
     );
-    println!("Computation time : {:?}", result.computation_time);
-    println!("Err : {:?}", result.err_report);
+    println!("Computation time : {:?}", result.computation_time());
+    println!("Err : {:?}", result.err_report());
 }
 
 #[allow(dead_code)]
@@ -357,10 +358,11 @@ fn peo_f1_test1() {
 
     println!(
         "PSO result : \n best fitness : {:?} \n best genome : {:?}",
-        result.best_fitness, result.best_genome
+        result.best_fitness(),
+        result.best_genome()
     );
-    println!("Computation time : {:?}", result.computation_time);
-    println!("Err : {:?}", result.err_report);
+    println!("Computation time : {:?}", result.computation_time());
+    println!("Err : {:?}", result.err_report());
 }
 
 #[allow(dead_code)]
@@ -385,10 +387,11 @@ fn meo_test1() {
 
     println!(
         "EO result : \n best fitness : {:?} \n best genome : {:?}",
-        result.best_fitness, result.best_genome
+        result.best_fitness(),
+        result.best_genome()
     );
-    println!("Computation time : {:?}", result.computation_time);
-    println!("Err : {:?}", result.err_report);
+    println!("Computation time : {:?}", result.computation_time());
+    println!("Err : {:?}", result.err_report());
 }
 
 #[allow(dead_code)]
@@ -413,8 +416,9 @@ fn para_meo_test1() {
 
     println!(
         "EO result : \n best fitness : {:?} \n best genome : {:?}",
-        result.best_fitness, result.best_genome
+        result.best_fitness(),
+        result.best_genome()
     );
-    println!("Computation time : {:?}", result.computation_time);
-    println!("Err : {:?}", result.err_report);
+    println!("Computation time : {:?}", result.computation_time());
+    println!("Err : {:?}", result.err_report());
 }

@@ -272,13 +272,19 @@ impl<'a, T: Problem> EOA for IEO<'a, T> {
 
                 //return results
                 let duration = chronos.elapsed();
-                let result = OptimizationResult {
-                    best_genome: Some(ceq1),
-                    best_fitness: Some(ceq1_fit),
-                    convergence_trend: Some(convergence_curve[0..iter].to_vec()),
-                    computation_time: Some(duration),
-                    err_report: None,
-                };
+
+                let best_genome = Some(ceq1);
+                let best_fitness = Some(ceq1_fit);
+                let convergence_trend = Some(convergence_curve[0..iter].to_vec());
+                let computation_time = Some(duration);
+
+                let result = OptimizationResult::new(
+                    best_genome,
+                    best_fitness,
+                    convergence_trend,
+                    computation_time,
+                    None,
+                );
                 return result;
             }
         }

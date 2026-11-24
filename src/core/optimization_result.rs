@@ -10,11 +10,15 @@ use std::time::Duration;
 
 #[derive(Debug, Clone)]
 pub struct OptimizationResult {
-    pub best_genome: Option<Genome>,
-    pub best_fitness: Option<f64>,
-    pub convergence_trend: Option<Vec<f64>>,
-    pub computation_time: Option<Duration>,
-    pub err_report: Option<OptError>,
+    best_genome: Option<Genome>,
+    best_fitness: Option<f64>,
+    convergence_trend: Option<Vec<f64>>,
+    computation_time: Option<Duration>,
+    err_report: Option<OptError>,
+
+    /// store the real number of parallel threads.
+    #[cfg(feature = "parallel")]
+    used_num_threads: usize,
 }
 
 #[allow(dead_code)]
@@ -26,11 +30,76 @@ impl OptimizationResult {
             convergence_trend: None,
             computation_time: None,
             err_report: opt_error,
+
+            #[cfg(feature = "parallel")]
+            num_threads: 0,
         }
     }
 }
 
 impl OptimizationResult {
+    #[cfg(not(feature = "parallel"))]
+    pub fn new(
+        best_genome: Option<Genome>,
+        best_fitness: Option<f64>,
+        convergence_trend: Option<Vec<f64>>,
+        computation_time: Option<Duration>,
+        err_report: Option<OptError>,
+    ) -> Self {
+        Self {
+            best_genome,
+            best_fitness,
+            convergence_trend,
+            computation_time,
+            err_report,
+        }
+    }
+
+    #[cfg(feature = "parallel")]
+    pub fn new(
+        best_genome: Option<Genome>,
+        best_fitness: Option<f64>,
+        convergence_trend: Option<Vec<f64>>,
+        computation_time: Option<Duration>,
+        err_report: Option<OptError>,
+        num_threads: usize,
+    ) -> Self {
+        Self {
+            best_genome,
+            best_fitness,
+            convergence_trend,
+            computation_time,
+            err_report,
+            num_threads,
+        }
+    }
+
+    pub fn best_genome(&self) -> Option<&Genome> {
+        self.best_genome.as_ref()
+    }
+
+    pub fn best_fitness(&self) -> Option<f64> {
+        self.best_fitness
+    }
+
+    pub fn convergence_trend(&self) -> Option<&Vec<f64>> {
+        self.convergence_trend.as_ref()
+    }
+
+    pub fn computation_time(&self) -> Option<Duration> {
+        self.computation_time
+    }
+
+    pub fn err_report(&self) -> Option<&OptError> {
+        self.err_report.as_ref()
+    }
+
+    /// return the real number of parallel threads.
+    #[cfg(feature = "parallel")]
+    pub fn num_threads(&self) -> usize {
+        self.num_threads
+    }
+
     ///
     /// Save OptimizationResult instance in CSV file.
     ///
@@ -54,6 +123,10 @@ impl OptimizationResult {
                 write!(writer, "Best-fitness: {:?}\n", self.best_fitness)?;
                 write!(writer, "Best-Solution: {:?}\n", self.best_genome)?;
                 write!(writer, "Computation-Time: {:?}\n", self.computation_time)?;
+
+                #[cfg(feature = "parallel")]
+                write!(writer, "Number of parallel threads: {}\n", self.num_threads)?;
+
                 write!(writer, "Best-fitness history: \n")?;
                 for x in vector.iter() {
                     write!(writer, "{x}\n")?;

@@ -355,13 +355,13 @@ impl<'a, T: Problem> EOA for GO<'a, T> {
         // Save the best fitness for the best solution
         gbest_x.fitness = Some(gbestfitness);
 
-        let result: OptimizationResult = OptimizationResult {
-            best_genome: Some(gbest_x),
-            best_fitness: Some(gbestfitness),
-            convergence_trend: Some(gbesthistory[0..iter].to_vec()),
-            computation_time: Some(duration),
-            err_report: None,
-        };
+        let result: OptimizationResult = OptimizationResult::new(
+            Some(gbest_x),
+            Some(gbestfitness),
+            Some(gbesthistory[0..iter].to_vec()),
+            Some(duration),
+            None,
+        );
 
         result
     }

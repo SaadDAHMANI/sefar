@@ -165,13 +165,15 @@ impl<'a, T: Problem> EOA for PSO<'a, T> {
 
                 //return results
                 let duration = chronos.elapsed();
-                let result = OptimizationResult {
-                    best_fitness: gbest_x.fitness,
-                    best_genome: Some(gbest_x),
-                    convergence_trend: Some(cgcurve[0..t].to_vec()),
-                    computation_time: Some(duration),
-                    err_report: None,
-                };
+                let best_fitness = gbest_x.fitness;
+
+                let result = OptimizationResult::new(
+                    Some(gbest_x),
+                    best_fitness,
+                    Some(cgcurve[0..t].to_vec()),
+                    Some(duration),
+                    None,
+                );
                 // copy result to PSO struct
                 result
             }

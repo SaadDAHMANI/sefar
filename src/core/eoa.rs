@@ -58,26 +58,14 @@ pub trait EOA {
     /// Run algorithm until reach stopping criterion and return optiization result
     ///
     fn run(&mut self) -> OptimizationResult {
-        OptimizationResult {
-            best_genome: None,
-            best_fitness: None,
-            convergence_trend: None,
-            computation_time: None,
-            err_report: None,
-        }
+        OptimizationResult::get_empty(None)
     }
 
     ///
     /// Run algorithm until reach stopping criterion and return optiization result
     ///
     fn run_with_params(&mut self, _settings: &impl Parameters) -> OptimizationResult {
-        OptimizationResult {
-            best_genome: None,
-            best_fitness: None,
-            convergence_trend: None,
-            computation_time: None,
-            err_report: None,
-        }
+        OptimizationResult::get_empty(None)
     }
 
     fn randomize(randvect: &mut Vec<f64>) {
