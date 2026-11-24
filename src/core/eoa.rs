@@ -87,7 +87,7 @@ pub trait EOA {
     }
 
     #[cfg(feature = "parallel")]
-    fn initialize_parallel(&self, num_threads: ThreadPoolSize) -> Result<usize, OptError> {
+    fn initialize_parallel_global(&self, num_threads: ThreadPoolSize) -> Result<usize, OptError> {
         match num_threads {
             ThreadPoolSize::Auto => Ok(rayon::current_num_threads()),
             ThreadPoolSize::Fixed(value) => {

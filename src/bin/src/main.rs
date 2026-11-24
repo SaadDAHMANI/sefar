@@ -88,7 +88,7 @@ fn eao_f1_parallel_test1() {
 
     let mut algo: EAO<Sphere> = EAO::new(&settings, &mut fo);
 
-    match algo.initialize_parallel(num_threads) {
+    match algo.initialize_parallel_global(num_threads) {
         Ok(actual_thread_count) => {
             eprintln!(
                 "Run EAO with parallel thread pool with : {} threads",
