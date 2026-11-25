@@ -102,10 +102,15 @@ pub enum ThreadPoolSize {
 impl ThreadPoolSize {
     pub fn as_usize(&self) -> usize {
         match self {
-            Self::Auto => rayon::current_num_threads(),
+            Self::Auto => std::thread::available_parallelism()
+                .map(|n| n.get())
+                .unwrap_or(1),
             Self::Fixed(n) => {
-                let nb_thr = *n;
-                nb_thr.min(rayon::current_num_threads())
+                let nb_threads = *n;
+                let available_threads = std::thread::available_parallelism()
+                    .map(|n| n.get())
+                    .unwrap_or(1);
+                nb_threads.min(available_threads)
             }
         }
     }
