@@ -37,6 +37,13 @@ impl<'a, T: Problem> EO<'a, T> {
             params: settings,
         }
     }
+    pub fn run_sequential(&mut self){
+        
+    }
+    pub fn run_parallel(&mut self){
+        
+    }
+    
 }
 
 impl<'a, T: Problem> EOA for EO<'a, T> {
